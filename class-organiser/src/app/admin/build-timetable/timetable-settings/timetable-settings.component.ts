@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { SingleCourse, Timetable } from 'src/app/services/timetable.service';
 
 @Component({
@@ -15,17 +16,22 @@ export class TimetableSettingsComponent implements OnChanges {
 
   loadedTimetable: Timetable = null!;
 
-  selectTimetable(input: any): void {
-    let value: number = +input.target.value;
-    this.loadedTimetable = this.timetables[value];
-    this.selectedTimetable.emit(value);
-  }
+  constructor(
+    private databaseService: DatabaseService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
       if(changes['timetables'].currentValue.length > 0) {
         this.loadedTimetable = this.timetables[0];
       }
   }
+
+  selectTimetable(input: any): void {
+    let value: number = +input.target.value;
+    this.loadedTimetable = this.timetables[value];
+    this.selectedTimetable.emit(value);
+  }
+
 
   addCourse(): void {
     let newCourse: SingleCourse = { id: this.loadedTimetable.courses.length, name: '', requirement: { required: true, times: 1 }};
@@ -48,5 +54,14 @@ export class TimetableSettingsComponent implements OnChanges {
     console.log(this.loadedTimetable);
     this.currentTimetableChange.emit(this.loadedTimetable);
     this.triggerSave.emit(true);
+  }
+
+  runTimetable(): void {
+    this.databaseService.processTimetable(this.loadedTimetable).subscribe({
+      next: (result: DatabaseReturn) => {
+        console.log(result);
+      },
+      error: (e: any) => { console.log(e.message); }
+    })
   }
 }

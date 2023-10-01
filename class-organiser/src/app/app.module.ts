@@ -8,6 +8,7 @@ import { BuildScheduleComponent } from './admin/build-schedule/build-schedule.co
 import { TimetableSettingsComponent } from './admin/build-timetable/timetable-settings/timetable-settings.component';
 import { TimetableBuilderComponent } from './testing/timetable-builder/timetable-builder.component';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -15,12 +16,13 @@ import { FormsModule } from '@angular/forms';
     BuildTimetableComponent,
     BuildScheduleComponent,
     TimetableSettingsComponent,
-    TimetableBuilderComponent
+    TimetableBuilderComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
