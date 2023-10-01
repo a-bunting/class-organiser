@@ -1,0 +1,34 @@
+<div class="ttsettings">
+  <div class="ttsettings__title">Settings</div>
+
+  <div class="ttsettings__select">
+    <div class="ttsettings__text">Timetable</div>
+    <select class="input__select" (change)="selectTimetable($event)">
+      <option value="" disabled selected>Select Timetable</option>
+      <option value="{{ timetable.id }}" *ngFor="let timetable of timetables">{{ timetable.name }}</option>
+    </select>
+  </div>
+
+  <div class="ttsettings__select" *ngIf="loadedTimetable">
+    <div class="ttsettings__text">All Courses</div>
+
+    <div class="ttsettings__course" *ngFor="let course of loadedTimetable.courses" >
+      <input type="text" class="input__text input__length--medium" [(ngModel)]="course.name" placeholder="Name of Course" (blur)="editCourse(true)" (keyup)="editCourse(false, $event)">
+
+      <div class="ttsettings__course--required">
+        <input type="checkbox" [(ngModel)]="course.requirement.required">
+        <p>Required</p>
+      </div>
+
+      <div class="ttsettings__course--requiredTimes" *ngIf="course.requirement.required">
+        <input type="text" class="input__text input__length--short" [(ngModel)]="course.requirement.times">
+        <p>Times</p>
+      </div>
+    </div>
+    <button class="input__button" (click)="addCourse()">Add Course</button>
+  </div>
+
+  <div class="ttsettings__select">
+    <button class="input__button input__length--medium" (click)="saveTimetable()">Save</button>
+  </div>
+</div>

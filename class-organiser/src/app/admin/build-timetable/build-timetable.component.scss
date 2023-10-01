@@ -1,0 +1,161 @@
+.buildtt {
+  display: flex;
+  height: 100%;
+
+  &__settings {
+    flex-basis: 30rem;
+    background-color: blue;
+    position: sticky;
+    left: 0;
+    z-index: 1000;
+  }
+
+  &__display {
+    flex: 1;
+    background-color: greenyellow;
+    padding: 1rem 2rem;
+  }
+
+  &__tt {
+    position: relative;
+    display: flex;
+    column-gap: .5rem;
+    height: 100%;
+  }
+
+  &__col {
+    display: flex;
+    flex-direction: column;
+    row-gap: .5rem;
+
+    &--narrow {
+      flex: 0 0 12rem;
+    }
+
+    &--normal { flex: 1; }
+  }
+
+  &__block {
+    position: relative;
+    background-color: lightgray;
+    border-radius: .5rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: .2rem 0 .4rem rgba(black, .4);
+
+    &--title {
+      min-width: 1rem;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      text-align: center;
+      padding: .5rem 1rem;
+    }
+
+    &--textInput {
+
+      display: flex;
+      // justify-content: space-between;
+      align-items: center;
+      font-size: 1.2rem;
+
+      &--text {
+        font-weight: bold;
+      }
+
+      &--input {
+        margin-left: 1rem;
+      }
+    }
+
+    &--block {
+      min-width: 30rem;
+    }
+
+    &--short {
+      flex: 0 0 3rem;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    &--normal {
+      flex: 1;
+    }
+
+    &--name, &--room {
+      padding: .5rem 1rem;
+    }
+
+    &--name {
+      position: sticky;
+      top: 0;
+      background-color: maroon;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    &--room {
+      background-color: lightblue;
+      font-size: 1rem;
+      font-style: italic;
+    }
+
+    &--courses {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    &--restriction {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &--course {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      background-color: rgba(lightgray, .4);
+      border-radius: .5rem;
+      padding: .3rem .5rem;
+
+      &:not(:last-of-type) {
+        cursor: pointer;
+      }
+
+      &--name {
+        font-size: 1rem;
+        margin-right: auto;
+      }
+    }
+
+    &--buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &--button {
+      padding: .3rem .5rem;
+      width: 10rem;
+      border-radius: .5rem;
+      transition: all .2s;
+      text-align: center;
+      background-color: rgba(gray, .5);
+
+      &--selected {
+        background-color: rgba(coral, .5);
+      }
+
+      &:hover {
+        cursor: pointer;
+        filter: brightness(1.2);
+      }
+    }
+  }
+}

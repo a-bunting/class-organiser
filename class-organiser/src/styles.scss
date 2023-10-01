@@ -1,0 +1,53 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+  font-family: 'Onest', sans-serif;
+}
+
+body {
+  overflow: hidden;
+}
+
+.input {
+
+  &__text {
+    letter-spacing: .15rem;
+    padding: .3rem .6rem;
+    border-radius: .5rem;
+    width: 20rem;
+    text-align: right;
+    font-size: 1rem;
+  }
+
+  &__select {
+    letter-spacing: .15rem;
+    padding: .3rem .6rem;
+    border-radius: .5rem;
+    width: 10rem;
+    text-align: right;
+    font-size: 1rem;
+  }
+
+  &__button {
+    letter-spacing: .15rem;
+    padding: .3rem .6rem;
+    border-radius: .5rem;
+    width: 10rem;
+    text-align: center;
+    margin: auto 0;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  &__length {
+    &--veryshort { width: 2.5rem; }
+    &--short { width: 5rem; }
+    &--medium { width: 12rem; }
+    &--long { width: 20rem; }
+  }
+}

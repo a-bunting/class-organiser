@@ -1,0 +1,57 @@
+.structure {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background-color: yellow;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  header {
+    flex-basis: 5rem;
+    background-color: red;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0 2rem 0 2rem;
+
+    nav {
+      a {
+        padding: 1rem 2rem;
+        font-size: 1.4rem;
+        background-color: lightcoral;
+        border-radius: 1rem;
+        transition: all .2s;
+
+        &:not(:last-of-type) {
+          margin-right: 1rem;
+        }
+
+        &:hover {
+          background-color: lightblue;
+        }
+      }
+    }
+
+    .dashboard__logo {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+  }
+
+  main {
+    flex: 1;
+    background-color: pink;
+    overflow-y: scroll;
+    overflow-x: auto;
+  }
+
+  footer {
+    flex-basis: 4rem;
+    justify-self: flex-end;
+    background-color: green;
+  }
+}
