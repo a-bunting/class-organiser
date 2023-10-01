@@ -20,12 +20,14 @@
         <p>Required</p>
       </div>
 
-      <div class="ttsettings__course--requiredTimes" *ngIf="course.requirement.required">
+      <div class="ttsettings__course--requiredTimes">
         <input type="text" class="input__text input__length--short" [(ngModel)]="course.requirement.times">
         <p>Times</p>
       </div>
     </div>
     <button class="input__button" (click)="addCourse()">Add Course</button>
+
+    <div class="ttsettings__currentCourses">You currently have students taking {{ calculateBlocksRequired() }} / {{ loadedTimetable.schedule.blocks.length }} blocks.</div>
   </div>
 
   <div class="ttsettings__select">

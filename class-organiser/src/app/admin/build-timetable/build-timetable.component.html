@@ -1,13 +1,13 @@
 <div class="buildtt">
   <div class="buildtt__settings">
-    <app-timetable-settings [timetables]="timetables" (triggerSave)="save()" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings>
+    <app-timetable-settings [timetables]="timetables" (triggerRun)="run()" (triggerSave)="save()" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings>
   </div>
   <div class="buildtt__display">
 
     <div class="buildtt__tt" *ngIf="loadedTimetable">
 
       <div class="buildtt__col buildtt__col--narrow">
-        <div class="buildtt__block buildtt__block--short" style="background-color: transparent;"></div>
+        <div class="buildtt__block buildtt__block--short buildtt__switch" (click)="toggleStudentView()">{{ studentView ? 'Student Mode' : 'Edit Mode' }}</div>
         <div class="buildtt__block buildtt__block--title buildtt__block--normal" *ngFor="let class of loadedTimetable.classes">
           {{ class.teacher }}
         </div>
@@ -21,11 +21,12 @@
         <div class="buildtt__block buildtt__block--block buildtt__block--normal" *ngFor="let block of timeBlock.blocks">
           <div class="buildtt__block--name">{{ block.name }}</div>
           <div class="buildtt__block--room">{{ block.room }}</div>
-          <div class="buildtt__block--buttons">
+
+          <div class="buildtt__block--buttons" *ngIf="!studentView">
             <div class="buildtt__block--button" [class.buildtt__block--button--selected]="block.classOnly" (click)="setClassOnly(block.id)">All students of {{ getTeacherFromClassID(block.classId) }}</div>
           </div>
 
-          <div *ngIf="!block.classOnly">
+          <div *ngIf="!block.classOnly && !studentView">
 
             <div class="buildtt__block--textInput">
               <div class="buildtt__block--textInput--text">Maximum Students</div>
@@ -60,6 +61,11 @@
                 <button class="input__button input__length--veryshort" (click)="removeRestrictionFromBlock(block.id, restriction.restrictionId)">X</button>
               </div>
             </div>
+
+          </div>
+
+          <div class="buildtt__block--students" *ngIf="studentView">
+            <div class="buildtt__block--student" *ngFor="let student of block.students">{{ getStudentNameFromId(student) }} ({{ student }})</div>
           </div>
       </div>
 

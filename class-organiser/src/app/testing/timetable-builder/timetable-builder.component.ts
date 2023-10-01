@@ -31,7 +31,7 @@ export class TimetableBuilderComponent implements OnInit {
 
   ngOnInit(): void {
       this.setNumberOfTimeBlocks(null, 8);
-      this.changeClassNumber(null, 4);
+      this.changeClassNumber(null, 6);
   }
 
 
@@ -64,6 +64,8 @@ export class TimetableBuilderComponent implements OnInit {
 
   generateBlocks(): SingleBlock[] {
     let blocks: SingleBlock[] = [];
+
+    console.log(this.timeTable.classes.length);
 
     // number of blocks per time section is equal to the number of classes running
     for(let i = 0 ; i < this.timeTable.classes.length ; i++) {
@@ -114,6 +116,8 @@ export class TimetableBuilderComponent implements OnInit {
     } else {
       this.timeTable.classes = this.timeTable.classes.slice(0, diff);
     }
+    // redot the ids
+    this.timeTable.classes.map((a: SingleClass, i: number) => a.id = i);
   }
 
   selectClassSize(input: any, index: number, val?: number): void {
@@ -123,7 +127,7 @@ export class TimetableBuilderComponent implements OnInit {
 
     for(let i = 0 ; i < value ; i++) {
       let newStudent: SingleStudent = {
-        id: i, classId: index, name:this.generateRandomName(), data: []
+        id: i, classId: index, name: this.generateRandomName(), data: []
       }
       // this.timeTable.classes[index].students.push(newStudent);
       this.timeTable.students.push(newStudent);
@@ -145,10 +149,10 @@ export class TimetableBuilderComponent implements OnInit {
     let currentBlockCount: number = 0;
 
     // make sure the ids are all unique
-    // for(let i = 0 ; i < this.timeTable.classes.length ; i++) {
-    //   let cClass: SingleClass = this.timeTable.classes[i];
-    //   cClass.id = i;
-
+    for(let i = 0 ; i < this.timeTable.classes.length ; i++) {
+      let cClass: SingleClass = this.timeTable.classes[i];
+      cClass.id = i;
+    }
     //   for(let o = 0 ; o < cClass.students.length ; o++) {
     //     cClass.students[o].id = currentStudentId;
     //     currentStudentId++;
@@ -202,6 +206,7 @@ export class TimetableBuilderComponent implements OnInit {
 
     for(let i = 0 ; i < this.timeTable.students.length ; i++) {
       let student: SingleStudent = this.timeTable.students[i];
+      student.data = [];
 
       // now iterate over all the restrictions and add random values for each to all students.
       for(let r = 0 ; r < this.timeTable.restrictions.length ; r++) {

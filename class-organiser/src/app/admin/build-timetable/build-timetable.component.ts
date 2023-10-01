@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
+import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
+import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
 @Component({
   selector: 'app-build-timetable',
@@ -10,9 +11,11 @@ export class BuildTimetableComponent implements OnInit {
 
   timetables: Timetable[] = [];
   loadedTimetable: Timetable = null!;
+  studentView: boolean = false;
 
   constructor(
-    private timetableService: TimetableService
+    private timetableService: TimetableService,
+    private databaseService: DatabaseService
   ) {}
 
   ngOnInit(): void {
@@ -31,6 +34,21 @@ export class BuildTimetableComponent implements OnInit {
   save(): void {
     this.timetableService.addTimeTable(this.loadedTimetable);
   }
+
+  run(): void {
+
+    console.log(this.loadedTimetable);
+
+    this.databaseService.processTimetable(this.loadedTimetable).subscribe({
+      next: (result: DatabaseReturn) => {
+        this.loadedTimetable = result.data;
+        this.studentView = true;
+      },
+      error: (e: any) => { console.log(e.message); }
+    })
+  }
+
+  toggleStudentView(): void { this.studentView = !this.studentView; }
 
   timetableSettingsChange(timetable: Timetable): void {
     // let newId: number = timetable.id;
@@ -122,6 +140,11 @@ export class BuildTimetableComponent implements OnInit {
 
   getRestrictionNameFromId(restrictionId: number): string {
     return this.loadedTimetable.restrictions.find((a: Restriction) => +a.id === +restrictionId)!.name;
+  }
+
+  getStudentNameFromId(id: number): string {
+    const student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === id)!;
+    return `${student.name.forename} ${student.name.surname}`;
   }
 
 }

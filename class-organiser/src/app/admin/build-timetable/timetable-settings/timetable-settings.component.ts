@@ -12,18 +12,20 @@ export class TimetableSettingsComponent implements OnChanges {
   @Input() timetables: Timetable[] = [];
   @Output() selectedTimetable: EventEmitter<number> = new EventEmitter<number>;
   @Output() currentTimetableChange: EventEmitter<Timetable> = new EventEmitter<Timetable>;
-  @Output() triggerSave: EventEmitter<boolean> = new EventEmitter<boolean>
+  @Output() triggerSave: EventEmitter<boolean> = new EventEmitter<boolean>;
+  @Output() triggerRun: EventEmitter<boolean> = new EventEmitter<boolean>;
+
 
   loadedTimetable: Timetable = null!;
 
   constructor(
-    private databaseService: DatabaseService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
       if(changes['timetables'].currentValue.length > 0) {
         this.loadedTimetable = this.timetables[0];
       }
+
   }
 
   selectTimetable(input: any): void {
@@ -50,6 +52,17 @@ export class TimetableSettingsComponent implements OnChanges {
     }
   }
 
+  calculateBlocksRequired(): number {
+    let total: number = 0;
+
+    for(let i = 0 ; i < this.loadedTimetable.courses.length ; i++) {
+      let course: SingleCourse = this.loadedTimetable.courses[i];
+      total += (course.requirement.times ? +course.requirement.times : +0);
+    }
+
+    return total;
+  }
+
   saveTimetable(): void {
     console.log(this.loadedTimetable);
     this.currentTimetableChange.emit(this.loadedTimetable);
@@ -57,11 +70,6 @@ export class TimetableSettingsComponent implements OnChanges {
   }
 
   runTimetable(): void {
-    this.databaseService.processTimetable(this.loadedTimetable).subscribe({
-      next: (result: DatabaseReturn) => {
-        console.log(result);
-      },
-      error: (e: any) => { console.log(e.message); }
-    })
+    this.triggerRun.emit(true);
   }
 }
