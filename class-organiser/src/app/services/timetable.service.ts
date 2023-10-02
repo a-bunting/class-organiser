@@ -45,6 +45,7 @@ export interface Restriction {
   name: string;
   description: string;
   optionsAreClasses: boolean;
+  priority: number;
   options: { id: number, value: string }[];
 }
 

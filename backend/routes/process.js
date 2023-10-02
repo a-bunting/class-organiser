@@ -29,14 +29,24 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 1;
+        const MAX_ITERATIONS = 1000;
         const MUTATION_FACTOR = 0.1;
         const generatedSchedules = [];
-        const studentList = [...timetable.students];
+        
+        // this is what should be appended to each student. It is what is required of them by the organiser and takes no optional things into account.
+        let requiredCourses = timetable.courses.map(a => { 
+            if(a.requirement.required) { 
+                return { id: +a.id, times: +a.requirement.times } 
+            } 
+        }).filter(a => a !== undefined);
+        
+        const studentList = [...timetable.students.map(a => { return { ...a, requiredCourses }})];
 
+        console.time(`run timer`);
         for(let a = 0 ; a < MAX_ITERATIONS ; a++) {
             // for each iteration generate a new list of students, rnadomly sorted.
             let iterationStudentList = [...studentList].sort((a, b) => Math.random() - 0.5);
+            // console.time(`iteration timer`);
 
             // EVERY TIME BLOCK
 
@@ -46,15 +56,21 @@ function geneticProcessor(timetable) {
                 let studentList = [...iterationStudentList.map(a => { return {...a, placed: false, score: []}})];
 
                 // EVERY BLOCK
+
+                // this just assigns a course to a block and renames it. Must be done before its populated by students
+                // and is randomly assigned any of the course options available.
                 for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
                     const block = timeBlock.blocks[o];
                     
                     if(block.courses.length > 0) {
                         // assign the block a random one of the options.
                         const courseId = block.courses[Math.floor(Math.random() * block.courses.length)];
+                        // trim the other courses as they are no longer required this iteration;
+                        block.courses = block.courses.filter(a => +a.id === +courseId);
+                        // then rename the block by the course
                         block.name = timetable.courses.find(a => +a.id === +courseId).name;
                     } else {
-                        block.name = 'No Course Block';
+                        block.name = 'Free Block';
                     }
                 }
 
@@ -158,7 +174,10 @@ function geneticProcessor(timetable) {
                 // at the end of the block replace the student object with student ids.
                 timeBlock.blocks.map(a => { a.students = a.students.map(b => { return +b.id }); })
             }
+            
+            // console.timeEnd(`iteration timer`);
         }
+        console.timeEnd(`run timer`);
 
         // then measure how well each one fits the timetable
 

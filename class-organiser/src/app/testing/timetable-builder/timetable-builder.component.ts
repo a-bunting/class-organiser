@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataValues, Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
+import { __values } from 'tslib';
 
 @Component({
   selector: 'app-timetable-builder',
@@ -16,12 +17,16 @@ export class TimetableBuilderComponent implements OnInit {
     schedule: { blocks: [] },
     students: [],
     restrictions: [
-      { id: 0, name: "Gender", optionsAreClasses: false, description: "Do you identify as Male, Female or Other?", options: [ { id: 0, value: "Male" }, { id: 1, value: "Female" }, { id: 2, value: "Other" }, ]},
-      { id: 1, name: "First Priority", optionsAreClasses: true, description: "Which class is the one you want to do the most?", options: [ { id: 0, value: "Table Tennis" }, { id: 1, value: "Squash" }, { id: 2, value: "Badminton" } ]},
-      { id: 2, name: "Second Priority", optionsAreClasses: true, description: "Which class is the one you want to do the secondmost?", options: [ { id: 0, value: "Table Tennis" }, { id: 1, value: "Squash" }, { id: 2, value: "Badminton" } ]},
-      { id: 3, name: "Third Priority", optionsAreClasses: true, description: "Which class is the one you want to do the least?", options: [ { id: 0, value: "Table Tennis" }, { id: 1, value: "Squash" }, { id: 2, value: "Badminton" } ]},
-      { id: 4, name: "Fasting", optionsAreClasses: false, description: "During Ramadan do you fast?", options: [ { id: 0, value: "Yes, I fast" }, { id: 1, value: "No, I do not fast" }]},
-      { id: 5, name: "Single Sex Swimming", optionsAreClasses: false, description: "Do you require single sex swimming?", options: [ { id: 0, value: "Yes, I require single sex swimming" }, { id: 1, value: "No, I do not require single sex swimming" }]}
+      { id: 0, name: "Gender",              optionsAreClasses: false, priority: 0, description: "Do you identify as Male, Female or Other?", options: [ { id: 0, value: "Male" }, { id: 1, value: "Female" }, { id: 2, value: "Other" }, ]},
+      { id: 1, name: "First Priority",      optionsAreClasses: true, priority: 1, description: "Which class is the one you want to do the most?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" } ]},
+      { id: 2, name: "Second Priority",     optionsAreClasses: true, priority: 2, description: "Which class is the one you want to do second?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" } ]},
+      { id: 3, name: "Third Priority",      optionsAreClasses: true, priority: 3, description: "Which class is the one you want to do the third?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" } ]},
+      { id: 4, name: "Fourth Priority",     optionsAreClasses: true, priority: 4, description: "Which class is the one you want to do the fourth?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" } ]},
+      { id: 5, name: "Fifth Priority",      optionsAreClasses: true, priority: 5, description: "Which class is the one you want to do the fifth?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" } ]},
+      { id: 6, name: "Sixth Priority",      optionsAreClasses: true, priority: 6, description: "Which class is the one you want to do the sixth?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" } ]},
+      { id: 7, name: "Seventh Priority",    optionsAreClasses: true, priority: 7, description: "Which class is the one you want to do the least?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" } ]},
+      { id: 8, name: "Fasting",             optionsAreClasses: false, priority: 1, description: "During Ramadan do you fast?", options: [ { id: 0, value: "Yes, I fast" }, { id: 1, value: "No, I do not fast" }]},
+      { id: 9, name: "Single Sex Swimming", optionsAreClasses: false, priority: 0, description: "Do you require single sex swimming?", options: [ { id: 0, value: "Yes, I require single sex swimming" }, { id: 1, value: "No, I do not require single sex swimming" }]}
     ]
   }
 
@@ -31,7 +36,7 @@ export class TimetableBuilderComponent implements OnInit {
 
   ngOnInit(): void {
       this.setNumberOfTimeBlocks(null, 8);
-      this.changeClassNumber(null, 6);
+      this.changeClassNumber(null, 4);
   }
 
 
@@ -83,12 +88,16 @@ export class TimetableBuilderComponent implements OnInit {
    * restrcitions
    */
   addNewRestriction(): void {
-    let newRestriction: Restriction = { id: this.timeTable.restrictions.length, name: "", optionsAreClasses: true, description: "", options: [] };
+    let newRestriction: Restriction = { id: this.timeTable.restrictions.length, name: "", optionsAreClasses: true, priority: 1, description: "", options: [] };
     this.timeTable.restrictions.push(newRestriction);
   }
 
   deleteRestriction(index: number): void {
     this.timeTable.restrictions.splice(index, 1);
+  }
+
+  selectPrioity(index: number, input: any): void {
+    this.timeTable.restrictions[index].priority = +input.target.value;
   }
 
   addOption(restrictionIndex: number): void {

@@ -3,7 +3,7 @@
   height: 100%;
 
   &__settings {
-    flex-basis: 30rem;
+    flex-basis: max-content;
     background-color: blue;
     position: sticky;
     left: 0;
@@ -41,7 +41,7 @@
     border-radius: .5rem;
     overflow-y: auto;
     overflow-x: hidden;
-    box-shadow: .2rem 0 .4rem rgba(black, .4);
+    // box-shadow: .2rem 0 .4rem rgba(black, .4);
 
     &--title {
       min-width: 1rem;
@@ -108,7 +108,9 @@
 
     &--courses {
       display: flex;
-      justify-content: flex-start;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     &--restriction {
@@ -118,7 +120,7 @@
 
     &--course {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       background-color: rgba(lightgray, .4);
       border-radius: .5rem;
@@ -130,7 +132,7 @@
 
       &--name {
         font-size: 1rem;
-        margin-right: auto;
+        margin-right: .5rem;
       }
     }
 
@@ -138,11 +140,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: .4rem .3rem;
     }
 
     &--button {
       padding: .3rem .5rem;
-      width: 10rem;
+      width: auto;
       border-radius: .5rem;
       transition: all .2s;
       text-align: center;
@@ -156,6 +159,10 @@
         cursor: pointer;
         filter: brightness(1.2);
       }
+    }
+
+    &--data {
+      padding: .2rem .3rem;
     }
   }
 

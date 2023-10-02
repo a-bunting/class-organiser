@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
-import { SingleCourse, Timetable } from 'src/app/services/timetable.service';
+import { SingleBlock, SingleCourse, Timetable } from 'src/app/services/timetable.service';
 
 @Component({
   selector: 'app-timetable-settings',
@@ -36,7 +36,7 @@ export class TimetableSettingsComponent implements OnChanges {
 
 
   addCourse(): void {
-    let newCourse: SingleCourse = { id: this.loadedTimetable.courses.length, name: '', requirement: { required: true, times: 1 }};
+    let newCourse: SingleCourse = { id: this.loadedTimetable.courses[this.loadedTimetable.courses.length - 1].id + 1, name: '', requirement: { required: true, times: 1 }};
     this.loadedTimetable.courses.push(newCourse);
     this.currentTimetableChange.emit(this.loadedTimetable);
   }
@@ -50,6 +50,16 @@ export class TimetableSettingsComponent implements OnChanges {
     if(input.keyCode === 13) {
       this.currentTimetableChange.emit(this.loadedTimetable);
     }
+  }
+
+  deleteCourse(courseId: number): void {
+    this.loadedTimetable.courses = this.loadedTimetable.courses.filter((a: SingleCourse) => a.id !== courseId);
+
+    for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
+      this.loadedTimetable.schedule.blocks[i].blocks = this.loadedTimetable.schedule.blocks[i].blocks.map((a: SingleBlock) => { return { ...a, courses: a.courses.filter((a: number) => +a !== +courseId )}});
+    }
+
+    this.saveTimetable();
   }
 
   calculateBlocksRequired(): number {

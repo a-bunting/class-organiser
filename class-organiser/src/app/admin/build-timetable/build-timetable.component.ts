@@ -82,10 +82,25 @@ export class BuildTimetableComponent implements OnInit {
   }
 
   /**
+   * select for concatenation of dropdowns
+   */
+  selectBlockProperty(blockId: number, input: any) : void {
+
+    const data: string[] = input.target.value.split(',').map((a: string) => +a );
+    console.log(data);
+
+    if(+data[0] === 0) {
+      this.selectCourse(blockId, null, +data[1]);
+    } else {
+      this.selectRestriction(blockId, null, +data[1]);
+    }
+  }
+
+  /**
    * courses and blocks
    */
-  selectCourse(blockId: number, input: any): void {
-    let courseId: number = input.target.value;
+  selectCourse(blockId: number, input: any, val?: number): void {
+    let courseId: number = val ?? input.target.value;
     // let block: SingleBlock = this.loadedTimetable.schedule.blocks.find((a: SingleTimeBlock) => !!a.blocks.find((a: SingleBlock) => a.id === blockId))!.blocks.filter((a: SingleBlock) => a.id === blockId)[0];
     let block: SingleBlock = this.findBlockFromId(blockId);
     block.courses.push(courseId);
@@ -108,9 +123,9 @@ export class BuildTimetableComponent implements OnInit {
   /**
    * Restrictions and blocks
    */
-  selectRestriction(blockId: number, input: any): void {
+  selectRestriction(blockId: number, input: any, val?: number): void {
     let block: SingleBlock = this.findBlockFromId(blockId);
-    let restrictionId: number = +input.target.value;
+    let restrictionId: number = val ?? input.target.value;
     let restriction: Restriction = this.loadedTimetable.restrictions.find((a: Restriction) => a.id === restrictionId)!;
     block.restrictions.push({ restrictionId: restrictionId, optionId: restriction.options[0].id })
   }

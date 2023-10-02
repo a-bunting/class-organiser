@@ -3,34 +3,42 @@
 
   <div class="ttsettings__select">
     <div class="ttsettings__text">Timetable</div>
-    <select class="input__select" (change)="selectTimetable($event)">
-      <option value="" disabled selected>Select Timetable</option>
-      <option value="{{ timetable.id }}" *ngFor="let timetable of timetables">{{ timetable.name }}</option>
-    </select>
+    <div class="ttsettings__timetable">
+      <select class="input__select input__length--long" (change)="selectTimetable($event)">
+        <option value="" disabled selected>Select Timetable</option>
+        <option value="{{ timetable.id }}" *ngFor="let timetable of timetables">{{ timetable.name }}</option>
+      </select>
+    </div>
   </div>
 
   <div class="ttsettings__select" *ngIf="loadedTimetable">
-    <div class="ttsettings__text">All Courses</div>
+    <div class="ttsettings__text">Courses</div>
 
-    <div class="ttsettings__course" *ngFor="let course of loadedTimetable.courses" >
-      <input type="text" class="input__text input__length--medium" [(ngModel)]="course.name" placeholder="Name of Course" (blur)="editCourse(true)" (keyup)="editCourse(false, $event)">
+    <table class="ttsettings__courses">
+      <tr>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Times</th>
+        <th>Delete</th>
+      </tr>
+      <tr *ngFor="let course of loadedTimetable.courses">
+        <td><input type="text" class="input__text input__length--medium" [(ngModel)]="course.name" placeholder="Name of Course" (blur)="editCourse(true)" (keyup)="editCourse(false, $event)"></td>
+        <td><input type="checkbox" [(ngModel)]="course.requirement.required"></td>
+        <td><input type="text" class="input__text input__length--short" [(ngModel)]="course.requirement.times"></td>
+        <td><button class="input__button input__length--veryshort" (click)="deleteCourse(course.id)">X</button></td>
+      </tr>
+    </table>
 
-      <div class="ttsettings__course--required">
-        <input type="checkbox" [(ngModel)]="course.requirement.required">
-        <p>Required</p>
-      </div>
-
-      <div class="ttsettings__course--requiredTimes">
-        <input type="text" class="input__text input__length--short" [(ngModel)]="course.requirement.times">
-        <p>Times</p>
-      </div>
+    <div class="ttsettings__courses--buttons">
+      <button class="input__button" (click)="addCourse()">Add Course</button>
     </div>
-    <button class="input__button" (click)="addCourse()">Add Course</button>
 
-    <div class="ttsettings__currentCourses">You currently have students taking {{ calculateBlocksRequired() }} / {{ loadedTimetable.schedule.blocks.length }} blocks.</div>
+    <div class="ttsettings__courses--info">
+      <div class="ttsettings__currentCourses">You currently have students taking {{ calculateBlocksRequired() }} / {{ loadedTimetable.schedule.blocks.length }} blocks.</div>
+    </div>
   </div>
 
-  <div class="ttsettings__select">
+  <div class="ttsettings__select ttsettings__buttons">
     <button class="input__button input__length--medium" (click)="saveTimetable()">Save</button>
     <button class="input__button input__length--medium" (click)="runTimetable()">Run</button>
   </div>

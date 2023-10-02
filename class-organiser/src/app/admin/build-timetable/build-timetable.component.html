@@ -24,21 +24,35 @@
 
           <div class="buildtt__block--buttons" *ngIf="!studentView">
             <div class="buildtt__block--button" [class.buildtt__block--button--selected]="block.classOnly" (click)="setClassOnly(block.id)">All students of {{ getTeacherFromClassID(block.classId) }}</div>
-          </div>
-
-          <div *ngIf="!block.classOnly && !studentView">
 
             <div class="buildtt__block--textInput">
-              <div class="buildtt__block--textInput--text">Maximum Students</div>
+              <div class="buildtt__block--textInput--text">Max Pupils</div>
               <div class="buildtt__block--textInput--input">
                 <input class="input__text input__length--short" [(ngModel)]="block.maxStudents">
               </div>
             </div>
+          </div>
 
-            <select class="input__select input__length--medium" (change)="selectCourse(block.id, $event)">
+          <div class="buildtt__block--data" *ngIf="!block.classOnly && !studentView">
+
+
+            <select class="input__select input__length--full" (change)="selectBlockProperty(block.id, $event)">
+              <option value="" disabled selected>Build Course Requirements</option>
+              <option value="" disabled>Add Courses</option>
+              <option value="0,{{ course.id }}" *ngFor="let course of loadedTimetable.courses">{{ course.name }}</option>
+              <option value="" disabled>Add Restrictions to this block</option>
+              <option value="1,{{ restriction.id }}" *ngFor="let restriction of loadedTimetable.restrictions">{{ restriction.name }}</option>
+            </select>
+<!--
+            <select class="input__select input__length--long" (change)="selectCourse(block.id, $event)">
               <option value="" disabled selected>Add Courses</option>
               <option value="{{ course.id }}" *ngFor="let course of loadedTimetable.courses">{{ course.name }}</option>
             </select>
+
+            <select class="input__select input__length--long" (change)="selectRestriction(block.id, $event)">
+              <option value="" disabled selected>Add Restrictions to this block</option>
+              <option value="{{ restriction.id }}" *ngFor="let restriction of loadedTimetable.restrictions">{{ restriction.name }}</option>
+            </select> -->
 
             <div class="buildtt__block--courses">
               <div class="buildtt__block--course" *ngFor="let course of block.courses">
@@ -46,11 +60,6 @@
                 <button class="input__button input__length--veryshort" (click)="removeCourseFromBlock(block.id, course)">X</button>
               </div>
             </div>
-
-            <select class="input__select input__length--long" (change)="selectRestriction(block.id, $event)">
-              <option value="" disabled selected>Add Restrictions to this block</option>
-              <option value="{{ restriction.id }}" *ngFor="let restriction of loadedTimetable.restrictions">{{ restriction.name }}</option>
-            </select>
 
             <div class="buildtt__block--restrictions">
               <div class="buildtt__block--course" *ngFor="let restriction of block.restrictions">

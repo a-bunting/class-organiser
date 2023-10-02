@@ -1,40 +1,86 @@
 .ttsettings {
 
   padding: .5rem 1rem;
+  width: max-content;
 
   &__title {
     font-size: 1.4rem;
     font-weight: bold;
   }
 
+  &__text {
+    color: white;
+    margin-bottom: 1rem;
+    background-color: maroon;
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  &__timetable {
+    padding: .5rem 1rem;
+    margin-top: -1rem;
+    margin-bottom: .5rem;
+
+    select {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
   &__select {
 
-    padding: .5rem 1rem;
     border-radius: .5rem;
     background-color: rgba(lightgray, .5);
+    overflow: hidden;
 
     &:not(:last-of-type) {
       margin-bottom: .5rem;
     }
   }
 
-  &__text {
-    font-size: 1.2rem;
+  &__buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1rem 2rem;
   }
 
-  &__course {
+  &__courses {
+    border: none;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    padding: 1rem 2rem;
 
-    background-color: rgba(lightcoral, .8);
-    border-radius: .5rem;
-    margin-bottom: .5rem;
-    padding: .5rem;
+    tr {
+      margin-bottom: .5rem;
 
-    &--required, &--requiredTimes {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: .3rem;
-      margin-bottom: .3rem;
+      td, th {
+        padding: .3rem .5rem;
+        text-align: center;
+      }
+
+      th {
+        font-size: 1.2rem;
+      }
+
+      td {
+        font-size: 1rem;
+      }
     }
+
+    &--buttons, &--info {
+      padding: .5rem 1rem;
+    }
+
+    &--info {
+      font-size: 1.2rem;
+    }
+
   }
+
+
 }
