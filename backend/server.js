@@ -2,6 +2,7 @@ require('dotenv').config({ path: `${__dirname}/process.env` });
 const app = require("./app");
 const http = require("http");
 
+console.clear();
 
 const normalizePort = val => {
   var port = parseInt(val, 10);

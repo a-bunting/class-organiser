@@ -61,6 +61,8 @@ export interface SingleStudent {
   classId: number;
   name: { forename: string; surname: string; };
   data: DataValues[];
+  coursePriorities: { courseId: number, priority: number }[];
+  schedule?: { classId: number, blockId: number }
 }
 
 export interface DataValues {
@@ -103,3 +105,45 @@ export class TimetableService {
     return fromLocal;
   }
 }
+
+/**
+ *
+ *
+ * every studentList student
+ *
+ * Listening on port 3002
+{
+  id: 0,
+  classId: 0,
+  name: { forename: 'Katherine', surname: 'Worf' },
+  data: [
+    { restrictionId: 0, value: 0 },
+    { restrictionId: 8, value: 0 },
+    { restrictionId: 9, value: 1 }
+  ],
+  coursePriorities: [
+    { courseId: 3, priority: 1 },
+    { courseId: 0, priority: 0 },
+    { courseId: 2, priority: 2 },
+    { courseId: 1, priority: 0 },
+    { courseId: 5, priority: 3 },
+    { courseId: 6, priority: 4 },
+    { courseId: 7, priority: 5 },
+    { courseId: 4, priority: 6 },
+    { courseId: 8, priority: 7 }
+  ],
+  requiredCourses: [
+    { id: 0, timesLeft: 1, required: true },
+    { id: 3, timesLeft: 1, required: false },
+    { id: 8, timesLeft: 1, required: false },
+    { id: 1, timesLeft: 1, required: true },
+    { id: 6, timesLeft: 1, required: false },
+    { id: 7, timesLeft: 1, required: false },
+    { id: 5, timesLeft: 1, required: false },
+    { id: 2, timesLeft: 1, required: false },
+    { id: 4, timesLeft: 1, required: false }
+  ]
+}
+run timer: 6.348ms
+
+ */

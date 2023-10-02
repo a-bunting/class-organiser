@@ -139,7 +139,7 @@ export class TimetableBuilderComponent implements OnInit {
 
     for(let i = 0 ; i < value ; i++) {
       let newStudent: SingleStudent = {
-        id: i, classId: index, name: this.generateRandomName(), data: []
+        id: i, classId: index, name: this.generateRandomName(), data: [], coursePriorities: []
       }
       // this.timeTable.classes[index].students.push(newStudent);
       this.timeTable.students.push(newStudent);
@@ -199,34 +199,27 @@ export class TimetableBuilderComponent implements OnInit {
   }
 
   processRestrictions(): void {
-    this.reorderIds();
-
-    // for(let i = 0 ; i < this.timeTable.classes.length ; i++) {
-    //   let cClass: SingleClass = this.timeTable.classes[i];
-
-    //   for(let o = 0 ; o < cClass.students.length ; o++) {
-    //     let student: SingleStudent = cClass.students[o];
-
-    //     // now iterate over all the restrictions and add random values for each to all students.
-    //     for(let r = 0 ; r < this.timeTable.restrictions.length ; r++) {
-    //       let restriction: Restriction = this.timeTable.restrictions[r];
-    //       let newValue: DataValues = { restrictionId: restriction.id, value: restriction.options[Math.floor(Math.random() * restriction.options.length)].id }
-    //       student.data.push(newValue);
-    //     }
-    //   }
-    // }
-
     for(let i = 0 ; i < this.timeTable.students.length ; i++) {
       let student: SingleStudent = this.timeTable.students[i];
+
+      // take out all the class options, leave things like gender etc.
+      let restrictionsFiltered: Restriction[] = this.timeTable.restrictions.filter((a: Restriction) => !a.optionsAreClasses )
       student.data = [];
 
       // now iterate over all the restrictions and add random values for each to all students.
-      for(let r = 0 ; r < this.timeTable.restrictions.length ; r++) {
-        let restriction: Restriction = this.timeTable.restrictions[r];
+      for(let r = 0 ; r < restrictionsFiltered.length ; r++) {
+        let restriction: Restriction = restrictionsFiltered[r];
         let newValue: DataValues = { restrictionId: restriction.id, value: restriction.options[Math.floor(Math.random() * restriction.options.length)].id  }
         student.data.push(newValue);
       }
     }
+
+    // filter out the restrictions which are just courses.
+    this.timeTable.restrictions = this.timeTable.restrictions.filter((a: Restriction) => !a.optionsAreClasses);
+
+    //
+    // for the final get rid of thE OPTIONSARECLASSES altogether!
+    //
   }
 
   addBlocksToTimeBlocks(): void {
@@ -273,10 +266,28 @@ export class TimetableBuilderComponent implements OnInit {
 
   }
 
+  generateStudentCourseChoices(): void {
+    for(let i = 0 ; i < this.timeTable.students.length ; i++) {
+      let student: SingleStudent = this.timeTable.students[i];
+      this.timeTable.courses.sort((a: SingleCourse, b: SingleCourse) => Math.random() - 0.5);
+      let priority: number = 1;
+
+      for(let o = 0 ; o < this.timeTable.courses.length ; o++) {
+        let course: SingleCourse = this.timeTable.courses[o];
+        let newChoice: { courseId: number, priority: number } = { courseId: course.id, priority: course.requirement.required ? 0 : priority };
+        student.coursePriorities.push(newChoice);
+
+        if(!course.requirement.required) priority++;
+      }
+    }
+  }
+
   save(): void {
     this.addBlocksToTimeBlocks();
-    this.processRestrictions();
+    this.reorderIds();
     this.generateCoursesFromRestrictions();
+    this.processRestrictions();
+    this.generateStudentCourseChoices();
 
     console.log(this.timeTable);
 
