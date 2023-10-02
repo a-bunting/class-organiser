@@ -187,4 +187,16 @@ export class BuildTimetableComponent implements OnInit {
     return `${student.name.forename} ${student.name.surname}`;
   }
 
+  getStudentData(blockId: number): SingleStudent[] {
+    let block: SingleBlock = this.findBlockFromId(blockId);
+    let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!block.students.find((b: number) => b === a.id));
+    return students;
+  }
+
+  getTopPriorityClass(studentId: number): string {
+    let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => +a.id === studentId)!;
+    let topPriorityId: number = student.coursePriorities.filter((a: { courseId: number, priority: number }) => a.priority !== 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
+    return this.loadedTimetable.courses.find((a: SingleCourse) => a.id === topPriorityId)!.name;
+  }
+
 }
