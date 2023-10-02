@@ -29,18 +29,41 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 1000;
+        const MAX_ITERATIONS = 1;
         const MUTATION_FACTOR = 0.1;
         const generatedSchedules = [];
         
         // this is what should be appended to each student. It is what is required of them by the organiser and takes no optional things into account.
         let requiredCourses = timetable.courses.map(a => { 
-            if(a.requirement.required) { 
-                return { id: +a.id, times: +a.requirement.times } 
-            } 
+                return { id: +a.id, timesLeft: +a.requirement.times, required: a.requirement.required, priority: 1 } 
         }).filter(a => a !== undefined);
         
         const studentList = [...timetable.students.map(a => { return { ...a, requiredCourses }})];
+        const restrictionPriorityList = timetable.restrictions.filter(c => c.optionsAreClasses === true).sort((a, b) => a.priority - b.priority);
+
+        console.log(restrictionPriorityList);
+
+        // YAK! SOME THINGS WITH IDS THAT FEEL VERY POOR HERE!
+        // NOT SURE THIS WORKS BUT IT WILL DO FOR NOW!
+        studentList.map(a => {
+          restrictionPriorityList.forEach(c => {
+            // or each course int eh restriction list, get the prioity of the restriction id
+            let restPrio = c.priority;
+            let restId = c.id;
+            
+            // find the restriction on the student
+            let sData = a.data.find(b => b.restrictionId === restId);
+
+            // get the priority for that course
+            let studentPrio = sData.value === 0 ? 1 : sData.value;
+
+            // then append to the students course list
+            a.requiredCourses.find(d => +d.id === restId).priority = studentPrio;
+          });  
+        })
+
+
+        console.log(studentList[0])
 
         console.time(`run timer`);
         for(let a = 0 ; a < MAX_ITERATIONS ; a++) {
@@ -82,12 +105,13 @@ function geneticProcessor(timetable) {
                     if(block.classOnly) {
                         block.students = studentList.filter(a => +a.classId === +block.classId);
                         studentList = studentList.filter(a => +a.classId !== +block.classId);
-                        block.title = `${timetable.classes.find(a => a.id === block.classId).teacher}'s class`
+                        block.name = `${timetable.classes.find(a => a.id === block.classId).teacher}'s class`
                         continue; // no need to do the rest of this!
                     }
                 }
                 
                 // then the ones that need a bit of selection...
+                // this is where priorities and required courses get sorted, as well as other things like generder selected etc.
                 for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
                     const block = timeBlock.blocks[o];
 
@@ -95,34 +119,36 @@ function geneticProcessor(timetable) {
                     studentList.sort((a, b) => Math.random() - 0.5);
         
                     // if this is a 'class only' block then everyone should already be in, move on!
-                    if(block.classOnly) {
-                        continue; // no need to do the rest of this!
-                    }
+                    if(block.classOnly) { continue; }
 
                     // if the block is full, continue - this is only superceded by members of the class
                     if(block.maxStudents === block.students.length) continue;
 
-                    
-                    // if this block has no restrictions then place the first x number of student in it.
-                    if(block.restrictions.length === 0) {
-                        // console.log(`test` );
+                    // if this block has no restrictions or assigned courses then place the first x number of students in it.
+                    if(block.restrictions.length === 0 && block.courses.length === 0) {
                         let spaces = block.maxStudents - block.students.length;
                         let students = studentList.filter((a, i) => i < spaces); // take out the first x
                         studentList = studentList.filter((a, i) => i >= spaces); // remove them from the rest of the students array
                         block.students = block.students.concat(students);
-                        // console.log(spaces, students.length, studentList.length, block.students.length);
                         continue;
                     }
                     
+                    // if the block has multiple course options, select one.
+
+
+
+
+
                     // now go through the student list and fit everyone in who fits, first come first served from the array, so to speak
                     // otherwise we now go through the list of students and see who fits in places
                     for(let p = 0 ; p < studentList.length ; p++) {
                         let student = studentList[p];
                         let restrictions = block.restrictions;
-                        let maxScore = block.restrictions.length;
+                        let courses = block.courses;
+                        let maxScore = block.restrictions.length + 2; // +1 is for required or prioty
                         let score = 0;
 
-                        // simply, if they meet the requirements, put them there!
+                        // build a score from the restrictions and the courses.
                         for(let r = 0 ; r < restrictions.length ; r++) {
                             let studentRestriction = student.data.find(a => +a.restrictionId === +restrictions[r].restrictionId);
                             
@@ -131,10 +157,36 @@ function geneticProcessor(timetable) {
                             }
                         }
 
+
+                        // NEW COURSES.
+                        // this is a for but should only be run once, one course per block.
+                        for(let r = 0 ; r < courses.length ; r++) {
+                          let courseId = +courses[r];
+
+                          // if the course is not required by the student then this student does not need this course
+                          let studentCourseRequirement = student.requiredCourses.find(a => +a.id === +courseId);
+
+                          if(studentCourseRequirement.timesLeft === 0) {
+                            score = 0;
+                            continue;
+                          }
+
+                          // give it some extra score for being required and ignore priority
+                          // this helps just get students into required courses.
+                          if(studentCourseRequirement.required) {
+                            score++;
+                          } else {
+                            // add 1 if this is top priority and less and less if it is not highest priority
+                            // heavily favours placing students in their first priority
+                            score += (1 / studentCourseRequirement.priority);
+                          }
+
+                        }
+
                         let scorePercentage = +score / +maxScore;
 
                         // if its a perfect match then place them!
-                        if(scorePercentage === 1) {
+                        if(scorePercentage >= 1) {
                             student.placed = true;
                             block.students.push(student);
                             // remove form the overall array
@@ -147,6 +199,10 @@ function geneticProcessor(timetable) {
                             student.score.push({ blockId: block.id, score: scorePercentage }); 
                         }
                     }
+
+
+
+
 
                     // now go through the list of students and see who isnt placed.
                     // if they arent placed find the place that was BEST for them and if there is space, put them there!

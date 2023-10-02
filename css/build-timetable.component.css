@@ -1,0 +1,194 @@
+.buildtt {
+  display: flex;
+  height: 100%;
+}
+.buildtt__settings {
+  flex-basis: max-content;
+  background-color: blue;
+  position: sticky;
+  left: 0;
+  z-index: 1000;
+}
+.buildtt__info {
+  position: fixed;
+  top: 5rem;
+  left: 50%;
+  width: 35rem;
+  height: -moz-max-content;
+  height: max-content;
+  padding: 1rem 2rem;
+  background-color: white;
+  border: 0.3rem solid red;
+  z-index: 10000;
+  font-size: 2rem;
+  text-align: center;
+  box-shadow: 0.2rem 0 0.4rem rgba(0, 0, 0, 0.5);
+}
+.buildtt__display {
+  flex: 1;
+  background-color: greenyellow;
+  padding: 1rem 2rem;
+}
+.buildtt__tt {
+  position: relative;
+  display: flex;
+  -moz-column-gap: 0.5rem;
+       column-gap: 0.5rem;
+  height: 100%;
+}
+.buildtt__col {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.5rem;
+}
+.buildtt__col--narrow {
+  flex: 0 0 12rem;
+}
+.buildtt__col--normal {
+  flex: 1;
+}
+.buildtt__paste {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(128, 128, 128, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.buildtt__paste img {
+  width: 5rem;
+  height: 5rem;
+  filter: invert(100%) sepia(1%) saturate(2%) hue-rotate(334deg) brightness(112%) contrast(101%);
+  transition: all 0.2s;
+}
+.buildtt__paste img:hover {
+  cursor: pointer;
+  transform: scale(1.4);
+}
+.buildtt__block {
+  position: relative;
+  background-color: lightgray;
+  border-radius: 0.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.buildtt__block--title {
+  min-width: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+}
+.buildtt__block--textInput {
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+}
+.buildtt__block--textInput--text {
+  font-weight: bold;
+}
+.buildtt__block--textInput--input {
+  margin-left: 1rem;
+}
+.buildtt__block--block {
+  min-width: 30rem;
+}
+.buildtt__block--short {
+  flex: 0 0 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+.buildtt__block--normal {
+  flex: 1;
+}
+.buildtt__block--name, .buildtt__block--room {
+  padding: 0.5rem 1rem;
+}
+.buildtt__block--name {
+  position: sticky;
+  top: 0;
+  background-color: maroon;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.buildtt__block--name img {
+  height: 1rem;
+  width: 1rem;
+  filter: invert(100%) sepia(1%) saturate(2%) hue-rotate(334deg) brightness(112%) contrast(101%);
+  transition: all 0.2s;
+}
+.buildtt__block--name img:hover {
+  cursor: pointer;
+  transform: scale(1.2);
+}
+.buildtt__block--room {
+  background-color: lightblue;
+  font-size: 1rem;
+  font-style: italic;
+}
+.buildtt__block--courses {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.buildtt__block--restriction {
+  display: flex;
+  flex-direction: column;
+}
+.buildtt__block--course {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(211, 211, 211, 0.4);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.5rem;
+}
+.buildtt__block--course:not(:last-of-type) {
+  cursor: pointer;
+}
+.buildtt__block--course--name {
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+.buildtt__block--buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.3rem;
+}
+.buildtt__block--button {
+  padding: 0.3rem 0.5rem;
+  width: auto;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  text-align: center;
+  background-color: rgba(128, 128, 128, 0.5);
+}
+.buildtt__block--button--selected {
+  background-color: rgba(255, 127, 80, 0.5);
+}
+.buildtt__block--button:hover {
+  cursor: pointer;
+  filter: brightness(1.2);
+}
+.buildtt__block--data {
+  padding: 0.2rem 0.3rem;
+}
+.buildtt__switch {
+  font-size: 1.2rem;
+}
+.buildtt__switch:hover {
+  cursor: pointer;
+}

@@ -4,6 +4,10 @@
   </div>
   <div class="buildtt__display">
 
+    <div class="buildtt__info" *ngIf="copyData">
+      <p *ngIf="copyData">Press ESCAPE to quit copy mode</p>
+    </div>
+
     <div class="buildtt__tt" *ngIf="loadedTimetable">
 
       <div class="buildtt__col buildtt__col--narrow">
@@ -19,7 +23,15 @@
         <div class="buildtt__block buildtt__block--short">{{ timeBlock.name }}</div>
         <!-- blocks -->
         <div class="buildtt__block buildtt__block--block buildtt__block--normal" *ngFor="let block of timeBlock.blocks">
-          <div class="buildtt__block--name">{{ block.name }}</div>
+          
+          <div class="buildtt__paste" *ngIf="copyData">
+            <img src="../../../assets/icons/paste.png" alt="Paste the data here" (click)="pasteData(block.id)">
+          </div>
+          
+          <div class="buildtt__block--name">
+            <p>{{ block.name }}</p>
+            <img src="../../../assets/icons/copy.png" alt="Copy this blocks data" (click)="toggleCopyDataOn(block.id)">
+          </div>
           <div class="buildtt__block--room">{{ block.room }}</div>
 
           <div class="buildtt__block--buttons" *ngIf="!studentView">

@@ -16,7 +16,9 @@ export class BuildTimetableComponent implements OnInit {
   constructor(
     private timetableService: TimetableService,
     private databaseService: DatabaseService
-  ) {}
+  ) {
+    this.setToggleCopyDataCancel = this.setToggleCopyDataCancel.bind(this);
+  }
 
   ngOnInit(): void {
       this.timetables = this.timetableService.getFromLocalStorage();
@@ -46,6 +48,29 @@ export class BuildTimetableComponent implements OnInit {
       },
       error: (e: any) => { console.log(e.message); }
     })
+  }
+
+  copyData: SingleBlock = null!;
+
+  toggleCopyDataOn(blockId: number): void {
+    this.copyData = this.findBlockFromId(blockId);
+
+    document.addEventListener('keydown', this.setToggleCopyDataCancel, true);
+  }
+
+  setToggleCopyDataCancel(event: any): void {
+    if(event.key === "Escape") {
+      this.copyData = null!;
+      document.removeEventListener('keydown', this.setToggleCopyDataCancel, true);
+    }
+  }
+
+  pasteData(toBlock: number): void {
+    let pasteBlock: SingleBlock = this.findBlockFromId(toBlock);
+    pasteBlock.courses = [...this.copyData.courses];
+    pasteBlock.restrictions = [...this.copyData.restrictions];
+    pasteBlock.classOnly = this.copyData.classOnly;
+    pasteBlock.maxStudents = this.copyData.maxStudents;
   }
 
   toggleStudentView(): void { this.studentView = !this.studentView; }

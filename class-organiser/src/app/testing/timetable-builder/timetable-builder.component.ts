@@ -13,7 +13,10 @@ export class TimetableBuilderComponent implements OnInit {
     id: 0,
     name: "Test Timetable",
     classes: [],
-    courses: [],
+    courses: [
+      { id: 0, name: "Athletics", requirement: { required: true, times: 1 }},
+      { id: 1, name: "Swimming", requirement: { required: true, times: 1 }}
+    ],
     schedule: { blocks: [] },
     students: [],
     restrictions: [
@@ -220,7 +223,7 @@ export class TimetableBuilderComponent implements OnInit {
       // now iterate over all the restrictions and add random values for each to all students.
       for(let r = 0 ; r < this.timeTable.restrictions.length ; r++) {
         let restriction: Restriction = this.timeTable.restrictions[r];
-        let newValue: DataValues = { restrictionId: restriction.id, value: restriction.options[Math.floor(Math.random() * restriction.options.length)].id }
+        let newValue: DataValues = { restrictionId: restriction.id, value: restriction.options[Math.floor(Math.random() * restriction.options.length)].id  }
         student.data.push(newValue);
       }
     }
@@ -247,6 +250,7 @@ export class TimetableBuilderComponent implements OnInit {
 
   generateCoursesFromRestrictions(): void {
     let courses: string[] = [];
+    let startingId: number = this.timeTable.courses[this.timeTable.courses.length - 1].id;
 
     for(let i = 0 ; i < this.timeTable.restrictions.length ; i++) {
       let restriction: Restriction = this.timeTable.restrictions[i];
@@ -262,8 +266,11 @@ export class TimetableBuilderComponent implements OnInit {
     let uniqueCourses: Set<string> = new Set(courses);
 
     // now add to an array with proper ids:
-    let newCourses: SingleCourse[] = Array.from(uniqueCourses).map((a: string, i: number) => { return { id: i, name: a, requirement: { required: true, times: 1 } }});
-    this.timeTable.courses = newCourses;
+    let newCourses: SingleCourse[] = Array.from(uniqueCourses).map((a: string, i: number) => { return { id: i, name: a, requirement: { required: false, times: 1 } }});
+    this.timeTable.courses = [...this.timeTable.courses, ...newCourses];
+    //regenerate the ids to be in order.
+    this.timeTable.courses.map((a: SingleCourse, i: number) =>  a.id = i );
+
   }
 
   save(): void {
