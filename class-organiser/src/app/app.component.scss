@@ -50,8 +50,18 @@
   }
 
   footer {
+    display: flex;
     flex-basis: 4rem;
     justify-self: flex-end;
-    background-color: green;
+    align-items: center;
+    background-color: rgba(darkgray, .9);
+
+    .footer {
+      text-align: right;
+      width: 100%;
+      margin-right: 2rem;
+      font-size: 1.2rem;
+      color: white;
+    }
   }
 }

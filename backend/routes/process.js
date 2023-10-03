@@ -44,7 +44,7 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 100;
+        const MAX_ITERATIONS = 1000;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
         const MUTATION_FACTOR = 0.1;
@@ -353,7 +353,9 @@ function processTimetable(timetable, iterationStudentList) {
           }
         }
 
-        // console.log(unplacedStudents.filter(a => a.placed === false));
+        unplacedStudents = unplacedStudents.filter(a => !a.placed);
+
+        timeBlock.missingStudents = unplacedStudents.map(a => a.id);
         
         // at the end of the block replace the student object with student ids.
         timeBlock.blocks.map(a => { a.students = a.students.map(b => { return +b.id }); })

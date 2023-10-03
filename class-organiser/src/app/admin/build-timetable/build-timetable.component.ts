@@ -14,6 +14,7 @@ export class BuildTimetableComponent implements OnInit {
   timetables: Timetable[] = [];
   loadedTimetable: Timetable = null!;
   studentView: boolean = false;
+  loading: boolean = false;
 
   constructor(
     private timetableService: TimetableService,
@@ -49,16 +50,21 @@ export class BuildTimetableComponent implements OnInit {
     // save the unedited version
     if(this.lastTimetableUnRun === null) this.lastTimetableUnRun = JSON.parse(JSON.stringify(this.loadedTimetable));
 
+    this.loading = true;
+
     // run the last unedited version if available - when saved this disappears.
     this.databaseService.processTimetable(this.lastTimetableUnRun ?? this.loadedTimetable).subscribe({
       next: (result: DatabaseReturn) => {
         // this.loadedTimetable = result.data;
         // this.studentView = true;
         console.log(result.data);
+        this.loading = false;
         this.timetableSelectionScreen = true;
         this.timetableSelectionData = result.data;
       },
-      error: (e: any) => { console.log(e.message); }
+      error: (e: any) => { console.log(e.message); },
+      complete: () => { this.loading = false; },
+
     })
   }
 
@@ -67,6 +73,7 @@ export class BuildTimetableComponent implements OnInit {
       next: (result: DatabaseReturn) => {
         this.loadedTimetable = result.data;
         this.studentView = true;
+        console.log(result);
       },
       error: (e: any) => { console.log(e.message); }
     })
@@ -220,6 +227,13 @@ export class BuildTimetableComponent implements OnInit {
   getStudentData(blockId: number): SingleStudent[] {
     let block: SingleBlock = this.findBlockFromId(blockId);
     let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!block.students.find((b: number) => b === a.id));
+    return students;
+  }
+
+  getMissingStudentData(timeBlockOrder: number): SingleStudent[] {
+    let timeBlock: SingleTimeBlock = this.loadedTimetable.schedule.blocks.find((a: SingleTimeBlock) => a.order === timeBlockOrder)!;
+    if(!timeBlock.missingStudents) return [];
+    let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!timeBlock.missingStudents!.find((b: number) => b === a.id));
     return students;
   }
 

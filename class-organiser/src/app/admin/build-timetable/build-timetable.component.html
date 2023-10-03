@@ -1,4 +1,7 @@
 <div class="buildtt">
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
   <div class="buildtt__settings">
     <app-timetable-settings [timetables]="timetables" [selectionData]="timetableSelectionData" (triggerOptions)="timetableSelectionScreenToggle()" (triggerRun)="run()" (triggerSave)="save()" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings>
   </div>
@@ -56,7 +59,9 @@
       <div class="buildtt__col buildtt__col--normal" *ngFor="let timeBlock of loadedTimetable.schedule.blocks; let g = index">
         <!-- title -->
         <div class="buildtt__block buildtt__block--short">{{ timeBlock.name }} ({{ getStudentsInTimeBlock(g) }})</div>
-        <div class="buildtt__block buildtt__block--short">Missing students here</div>
+        <div class="buildtt__block buildtt__block--short buildtt__block--students">
+          <div class="buildtt__block--student" *ngFor="let student of getMissingStudentData(timeBlock.order)">{{ student.name.forename }} {{ student.name.surname }}</div>
+        </div>
         <!-- blocks -->
         <div class="buildtt__block buildtt__block--block buildtt__block--normal" *ngFor="let block of timeBlock.blocks">
 
@@ -122,7 +127,7 @@
           </div>
 
           <div class="buildtt__block--students" *ngIf="studentView">
-            <div class="buildtt__block--student" *ngFor="let student of getStudentData(block.id)">{{ student.name.forename }} {{ student.name.surname }} ({{ student.id }}) - ({{ getTopPriorityClass(student.id) }})</div>
+            <div class="buildtt__block--student" *ngFor="let student of getStudentData(block.id)">{{ student.name.forename }} {{ student.name.surname }}</div><!-- ({{ student.id }}) - ({{ getTopPriorityClass(student.id) }})</div> -->
           </div>
       </div>
 

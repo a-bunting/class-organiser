@@ -9,6 +9,7 @@ import { TimetableSettingsComponent } from './admin/build-timetable/timetable-se
 import { TimetableBuilderComponent } from './testing/timetable-builder/timetable-builder.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { LoadingSpinnerComponent } from './utilities/loading-spinner/loading-spinner.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { HttpClientModule } from '@angular/common/http';
     BuildScheduleComponent,
     TimetableSettingsComponent,
     TimetableBuilderComponent,
+    LoadingSpinnerComponent,
   ],
   imports: [
     BrowserModule,

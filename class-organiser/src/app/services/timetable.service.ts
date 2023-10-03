@@ -26,6 +26,7 @@ export interface SingleTimeBlock {
   teachers: number[]; // the ids of the teachers who are on this timeblock
   order: number;
   blocks: SingleBlock[];
+  missingStudents?: number[];
 }
 
 export interface SingleBlock {
