@@ -19,12 +19,14 @@
         <th>Name</th>
         <th>Required</th>
         <th>Times</th>
+        <th>Max Class Size</th>
         <th>Delete</th>
       </tr>
       <tr *ngFor="let course of loadedTimetable.courses">
         <td><input type="text" class="input__text input__length--medium" [(ngModel)]="course.name" placeholder="Name of Course" (blur)="editCourse(true)" (keyup)="editCourse(false, $event)"></td>
         <td><input type="checkbox" [(ngModel)]="course.requirement.required"></td>
         <td><input type="text" class="input__text input__length--short" [(ngModel)]="course.requirement.times"></td>
+        <td><input type="text" class="input__text input__length--short" [(ngModel)]="course.classSize"></td>
         <td><button class="input__button input__length--veryshort" (click)="deleteCourse(course.id)">X</button></td>
       </tr>
     </table>

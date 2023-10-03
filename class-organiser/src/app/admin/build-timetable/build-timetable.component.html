@@ -37,12 +37,12 @@
           <div class="buildtt__block--buttons" *ngIf="!studentView">
             <div class="buildtt__block--button" [class.buildtt__block--button--selected]="block.classOnly" (click)="setClassOnly(block.id)">All students of {{ getTeacherFromClassID(block.classId) }}</div>
 
-            <div class="buildtt__block--textInput">
+            <!-- <div class="buildtt__block--textInput">
               <div class="buildtt__block--textInput--text">Max Pupils</div>
               <div class="buildtt__block--textInput--input">
                 <input class="input__text input__length--short" [(ngModel)]="block.maxStudents">
               </div>
-            </div>
+            </div> -->
           </div>
 
           <div class="buildtt__block--data" *ngIf="!block.classOnly && !studentView">

@@ -14,7 +14,7 @@ export class TimetableBuilderComponent implements OnInit {
     name: "Test Timetable",
     classes: [],
     courses: [
-      { id: 0, name: "Swimming", requirement: { required: true, times: 1 }}
+      { id: 0, name: "Swimming", classSize: 24, requirement: { required: true, times: 1 }}
     ],
     schedule: { blocks: [] },
     students: [],
@@ -258,7 +258,7 @@ export class TimetableBuilderComponent implements OnInit {
     let uniqueCourses: Set<string> = new Set(courses);
 
     // now add to an array with proper ids:
-    let newCourses: SingleCourse[] = Array.from(uniqueCourses).map((a: string, i: number) => { return { id: i, name: a, requirement: { required: false, times: 1 } }});
+    let newCourses: SingleCourse[] = Array.from(uniqueCourses).map((a: string, i: number) => { return { id: i, name: a, classSize: 25, requirement: { required: false, times: 1 } }});
     this.timeTable.courses = [...this.timeTable.courses, ...newCourses];
     //regenerate the ids to be in order.
     this.timeTable.courses.map((a: SingleCourse, i: number) =>  a.id = i );

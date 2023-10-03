@@ -13,7 +13,7 @@ export interface Timetable {
 }
 
 export interface SingleCourse {
-  id: number; name: string; requirement: { required: boolean, times?: number }
+  id: number; name: string; classSize: number; requirement: { required: boolean, times?: number }
 }
 
 // schedule data

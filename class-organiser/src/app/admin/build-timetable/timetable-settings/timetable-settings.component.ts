@@ -36,7 +36,7 @@ export class TimetableSettingsComponent implements OnChanges {
 
 
   addCourse(): void {
-    let newCourse: SingleCourse = { id: this.loadedTimetable.courses[this.loadedTimetable.courses.length - 1].id + 1, name: '', requirement: { required: true, times: 1 }};
+    let newCourse: SingleCourse = { id: this.loadedTimetable.courses[this.loadedTimetable.courses.length - 1].id + 1, name: '', classSize: 25,  requirement: { required: true, times: 1 }};
     this.loadedTimetable.courses.push(newCourse);
     this.currentTimetableChange.emit(this.loadedTimetable);
   }

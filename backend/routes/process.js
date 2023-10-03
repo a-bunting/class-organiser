@@ -29,7 +29,7 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 1000;
+        const MAX_ITERATIONS = 50;
         const PRIORITY_SCORING = [100, 50, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
         const MUTATION_FACTOR = 0.1;
@@ -66,17 +66,24 @@ function geneticProcessor(timetable) {
             } else {
                 generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
             }
-            // mutate some low percetnage of them and recalculate the scores of those
-
+            
             // then cull the worst half
-
+            
             // rinse and repeat until you have one left 
+        }
+
+        while(generatedSchedules.length > 3) {
+          // sort by how good the timetable scores are and then cull the bottom half
+          generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a, i) => i < generatedSchedules.length * 0.5);
+          
+          // make some baby timetables! *hug*
+          // (not exactly like their parents)
+          let bredTimetables = breedAndMutate(generatedSchedules.map(a => { return a.blocks }));
         }
 
         // end
         console.timeEnd(`run timer`);
 
-        generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score);
         
         const bestTimetable = generatedSchedules[0];
         bestTimetable.blocks.map(a => { return a.blocks.sort((a, b) => +a.id - +b.id ) });
@@ -122,7 +129,10 @@ function processTimetable(timetable, iterationStudentList) {
                 // trim the other courses as they are no longer required this iteration;
                 block.courses = [courseId];
                 // then rename the block by the course
-                block.name = timetable.courses.find(a => +a.id === +courseId).name;
+                let foundCourse = timetable.courses.find(a => +a.id === +courseId);
+                block.name = foundCourse.name;
+                // and set the max students in that block
+                block.maxStudents = +foundCourse.classSize;
             } else {
                 block.name = 'Free Block';
                 block.courses = []
@@ -138,6 +148,7 @@ function processTimetable(timetable, iterationStudentList) {
                 block.students = studentList.filter(a => +a.classId === +block.classId);
                 studentList = studentList.filter(a => +a.classId !== +block.classId);
                 block.name = `${timetable.classes.find(a => a.id === block.classId).teacher}'s class`
+                block.maxStudents = +block.students.length; //no need prob but to keep it defined
                 continue; // no need to do the rest of this!
             }
         }
@@ -146,6 +157,13 @@ function processTimetable(timetable, iterationStudentList) {
         // this is where priorities and required courses get sorted, as well as other things like generder selected etc.
         for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
             const block = timeBlock.blocks[o];
+
+            // if this is a 'class only' block then everyone should already be in, move on!
+            if(block.classOnly) { continue; }
+            // if the block is full, continue - this is only superceded by members of the class
+            if(+block.maxStudents === block.students.length) { continue; }
+
+            // now for the rest
             let restrictions = block.restrictions;
             let courseId = block.courses.length === 0 ? -1 : block.courses[0];
             let maxScore = block.restrictions.length + 1; // +1 is for required or prioty
@@ -153,12 +171,6 @@ function processTimetable(timetable, iterationStudentList) {
             // rerandomise the students left
             studentList.sort((a, b) => Math.random() - 0.5);
 
-            // if this is a 'class only' block then everyone should already be in, move on!
-            if(block.classOnly) { continue; }
-            
-            // if the block is full, continue - this is only superceded by members of the class
-            if(block.maxStudents === block.students.length) continue;
-            
             // if this block has no restrictions or assigned courses then place the first x number of students in it.
             if(block.restrictions.length === 0 && block.courses.length === 0) {
                 let spaces = block.maxStudents - block.students.length;
@@ -189,6 +201,7 @@ function processTimetable(timetable, iterationStudentList) {
                 //         score++; // yay, they match, the restriction is passed.
                 //     }
                 // }
+
                 // failing a restriction eliminates you from this block.
                 for(let r = 0 ; r < restrictions.length ; r++) {
                     let studentRestriction = student.data.find(a => +a.restrictionId === +restrictions[r].restrictionId);
@@ -211,6 +224,9 @@ function processTimetable(timetable, iterationStudentList) {
                     // remove form the overall array
                     let studentIndex = studentList.findIndex(a => +a.id === +student.id);
                     studentList.splice(studentIndex, 1);
+                    
+                    // if the block is full, break the loop - no new students can be added
+                    if(+block.maxStudents === block.students.length) { break; }
                     continue;                
                 } else {
                     // add 1 if this is top priority and less and less if it is not highest priority
@@ -227,13 +243,17 @@ function processTimetable(timetable, iterationStudentList) {
                     // remove form the overall array
                     let studentIndex = studentList.findIndex(a => +a.id === +student.id);
                     studentList.splice(studentIndex, 1);
+
+                    // if the block is full, break the loop - no new students can be added
+                    if(+block.maxStudents === block.students.length) { break; }
                     continue;
-                } else {
+                  } else {
                     // Now assign the score to the student and it will be reiterated over at the end.
                     student.placed = false;
                     student.score.push({ blockId: block.id, score: scorePercentage }); 
                     continue;
                 }
+
             }  
         }
 
@@ -249,9 +269,10 @@ function processTimetable(timetable, iterationStudentList) {
             
             for(let m = 0 ; m < scoreList.length ; m++) {
                 let bestScore = scoreList[m];
-                let block = timeBlock.blocks.find(a => a.id === bestScore.blockId);
+                let block = timeBlock.blocks.find(a => a.id === +bestScore.blockId);
 
-                if(block.students.length < block.maxStudents) {
+                // if the class is not full then put the student in it
+                if(block.students.length < +block.maxStudents) {
                     unplacedStudents[p].placed = true;
                     block.students.push(unplacedStudents[p]);
 
@@ -263,6 +284,32 @@ function processTimetable(timetable, iterationStudentList) {
             }
         }
 
+        // filter out those put placed...
+        unplacedStudents = unplacedStudents.filter(a => !a.placed);
+
+        // finally, just PUT STUDENTS SOMEWHERE they need, they meet criteria for, and there is space.
+        for(let p = 0 ; p < unplacedStudents.length ; p++) {
+          
+          for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
+            let block = timeBlock.blocks[o];
+            let courseId = block.courses.length === 0 ? -1 : block.courses[0];
+            let studentCourseRequirement = unplacedStudents[p].requiredCourses.find(a => +a.id === +courseId);
+
+            // if its full move onto the next block
+            if(+block.maxStudents >= +block.students.length) { continue; }
+              
+            // keep going if they dont need this course
+            if(studentCourseRequirement.timesLeft === 0) { continue; }
+
+            // pass all tests they go in this block!
+            unplacedStudents[p].placed = true;
+            block.students.push(unplacedStudents[p]);
+            studentCourseRequirement.timesLeft = +(studentCourseRequirement.timesLeft - (+1));
+            break;
+          }
+        }
+
+        // console.log(unplacedStudents.map(a => { return { id: a.id, score: JSON.stringify(a.score) } }));
         
         // at the end of the block replace the student object with student ids.
         timeBlock.blocks.map(a => { a.students = a.students.map(b => { return +b.id }); })
@@ -324,5 +371,64 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
 
     return { score: totalScore, prioritySatisfied };
 }
+
+function breedAndMutate(parentTimetables) {
+
+  let availableTimetables = parentTimetables.map((a, i) => { return +i });
+  let parentPairs = [];
+
+  // make some parent timetables
+  while(availableTimetables.length >= 2) {
+    let parent1 = availableTimetables.splice(Math.floor(Math.random() * availableTimetables.length), 1);
+    let parent2 = availableTimetables.splice(Math.floor(Math.random() * availableTimetables.length), 1);
+
+    // do we allow inbreeding? An intersting extra maybe!
+    if(parent1 && parent2) {
+      parentPairs.push({ parent1: parentTimetables[parent1[0]], parent2: parentTimetables[parent2[0]]});
+    }
+  }
+
+  console.log(parentPairs);
+
+  // find the ids of the timeblocks which have random stuff going on in them
+  let testTimetable = JSON.parse(JSON.stringify(parentTimetables[0]));
+  let allowableBlocksToBreed = [];
+
+
+  for(let i = 0 ; i < testTimetable.length ; i++) {
+    let timeBlock = testTimetable[i];
+    let blockScore = 0;
+
+    for(let o = 0 ; o < timeBlock.length ; o++) {
+      let block = timeBlock[o];
+
+      // score system just to easily change this later
+      if(block.classOnly) blockScore--;
+    }
+
+    if(blockScore >= 0) allowableBlocksToBreed.push(i);
+  }
+
+  let children = [];
+
+  // now we breed them, by mixing up some of the timeblocks which have optional stuff in them
+  for(let i = 0 ; i < parentPairs.length ; i++) {
+    // how many to switch
+    const howManyToSwitch = Math.floor(Math.random() * allowableBlocksToBreed.length);
+    // randomise the order
+    allowableBlocksToBreed = allowableBlocksToBreed.sort((a, b) => Math.random());
+    
+    for(let p = 0 ; p < howManyToSwitch ; p++) {
+      parentPairs[i].parent1[allowableBlocksToBreed[p]] = parentPairs[i].parent2[allowableBlocksToBreed[p]];
+    }
+
+    let child = JSON.parse(JSON.stringify(parentPairs[i].parent1));
+    children.push(child);
+  }
+
+  return children;
+
+}
+
 
 module.exports = router;
