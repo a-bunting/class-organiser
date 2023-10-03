@@ -10,6 +10,7 @@ import { TimetableBuilderComponent } from './testing/timetable-builder/timetable
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { LoadingSpinnerComponent } from './utilities/loading-spinner/loading-spinner.component';
+import { AddCsvDataComponent } from './testing/add-csv-data/add-csv-data.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { LoadingSpinnerComponent } from './utilities/loading-spinner/loading-spi
     TimetableSettingsComponent,
     TimetableBuilderComponent,
     LoadingSpinnerComponent,
+    AddCsvDataComponent,
   ],
   imports: [
     BrowserModule,
