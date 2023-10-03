@@ -21,4 +21,8 @@ export class DatabaseService {
   processTimetable(timetable: Timetable): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/process/timetable`, { timetable }).pipe(take(1));
   }
+
+  retrieveSelectedTimetable(code: string, selectionId: number): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/process/selectSavedItem`, { code, selectionId }).pipe(take(1));
+  }
 }

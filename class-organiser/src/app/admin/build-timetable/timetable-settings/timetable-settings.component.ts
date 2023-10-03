@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { SingleBlock, SingleCourse, Timetable } from 'src/app/services/timetable.service';
+import { SelectionData } from '../build-timetable.component';
 
 @Component({
   selector: 'app-timetable-settings',
@@ -10,10 +11,12 @@ import { SingleBlock, SingleCourse, Timetable } from 'src/app/services/timetable
 export class TimetableSettingsComponent implements OnChanges {
 
   @Input() timetables: Timetable[] = [];
+  @Input() selectionData: SelectionData = null!;
   @Output() selectedTimetable: EventEmitter<number> = new EventEmitter<number>;
   @Output() currentTimetableChange: EventEmitter<Timetable> = new EventEmitter<Timetable>;
   @Output() triggerSave: EventEmitter<boolean> = new EventEmitter<boolean>;
   @Output() triggerRun: EventEmitter<boolean> = new EventEmitter<boolean>;
+  @Output() triggerOptions: EventEmitter<boolean> = new EventEmitter<boolean>;
 
 
   loadedTimetable: Timetable = null!;
@@ -81,5 +84,9 @@ export class TimetableSettingsComponent implements OnChanges {
 
   runTimetable(): void {
     this.triggerRun.emit(true);
+  }
+
+  showOptions(): void {
+    this.triggerOptions.emit(true);
   }
 }

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
+export interface SelectionData { code: string, statistics: { index: number, stats: { missed: number, oneTwo: number, one: number, two: number, three: number, four: number }}[] }
+
 @Component({
   selector: 'app-build-timetable',
   templateUrl: './build-timetable.component.html',
@@ -50,6 +52,19 @@ export class BuildTimetableComponent implements OnInit {
     // run the last unedited version if available - when saved this disappears.
     this.databaseService.processTimetable(this.lastTimetableUnRun ?? this.loadedTimetable).subscribe({
       next: (result: DatabaseReturn) => {
+        // this.loadedTimetable = result.data;
+        // this.studentView = true;
+        console.log(result.data);
+        this.timetableSelectionScreen = true;
+        this.timetableSelectionData = result.data;
+      },
+      error: (e: any) => { console.log(e.message); }
+    })
+  }
+
+  chooseTimetable(index: number): void {
+    this.databaseService.retrieveSelectedTimetable(this.timetableSelectionData.code, index).subscribe({
+      next: (result: DatabaseReturn) => {
         this.loadedTimetable = result.data;
         this.studentView = true;
       },
@@ -57,7 +72,15 @@ export class BuildTimetableComponent implements OnInit {
     })
   }
 
+  timetableSelectionScreen: boolean = false;
+  timetableSelectionData: SelectionData = null!;
+
+  timetableSelectionScreenToggle(): void {
+    this.timetableSelectionScreen = !this.timetableSelectionScreen;
+  }
+
   copyData: SingleBlock = null!;
+
 
   toggleCopyDataOn(blockId: number): void {
     this.copyData = this.findBlockFromId(blockId);

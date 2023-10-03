@@ -13,10 +13,25 @@ const userMethods = require('../methods/user');
  * ADD CHECK AUTH WHEN ALL IS DONE!
  * 
  */
+//savedData.push({ code, index: i, data: { ...timetable, schedule: a }});
+let savedData = [];
 
 router.post('/timetable', (req, res, next) => {
     const timetable = req.body.timetable;
     process(timetable, res);
+});
+
+router.post('/selectSavedItem', (req, res, next) => {
+    const selectionId = req.body.selectionId;
+    const code = req.body.code;
+
+    let data = savedData.find(a => a.code === code && a.index === selectionId);
+    
+    if(data) {
+        res.status(200).json({ error: false, message: '', data: data.data })
+    } else {
+        res.status(400).json({ error: true, message: 'Couldnt find your saved data', data: {} })
+    }
 });
 
 async function process(timetable, res) {
@@ -29,9 +44,9 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 50;
-        const PRIORITY_SCORING = [100, 50, 25, 20, 15, 10, 5, 4, 3, 2, 1];
-        const MAX_THEORETICAL_SCORE = PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
+        const MAX_ITERATIONS = 100;
+        const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
+        const MAX_THEORETICAL_SCORE = timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
         const MUTATION_FACTOR = 0.1;
 
         let generatedSchedules = [];
@@ -66,47 +81,76 @@ function geneticProcessor(timetable) {
             } else {
                 generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
             }
-            
-            // then cull the worst half
-            
-            // rinse and repeat until you have one left 
+
+            // every 500 iterations reduce the generated schedules to the top 500
+            if(a % 500 === 0) {
+                generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a,i) => i < 5);
+            }
         }
 
-        while(generatedSchedules.length > 3) {
-          // sort by how good the timetable scores are and then cull the bottom half
-          generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a, i) => i < generatedSchedules.length * 0.5);
+        let generations = 0;
+
+        // this bit makes it worse :) but works! but makes it worse soooo
+
+        // while(generatedSchedules.length > 10) {
+        //     generations++;
+        //   // sort by how good the timetable scores are and then cull the bottom half
+        //   generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a, i) => i < generatedSchedules.length * 0.5);
           
-          // make some baby timetables! *hug*
-          // (not exactly like their parents)
-          let bredTimetables = breedAndMutate(generatedSchedules.map(a => { return a.blocks }));
-        }
+        //   // make some baby timetables! *hug*
+        //   // (not exactly like their parents)
+        //   let bredTimetables = breedAndMutate(generatedSchedules.map(a => { return a.blocks }));
+
+        //   let fullBredTimetable = bredTimetables.map(a => {
+        //     let newTimetable = JSON.parse(JSON.stringify(timetable));
+        //     newTimetable.schedule.blocks = a;
+        //     return newTimetable;
+        //   });
+
+        //   generatedSchedules = [];
+
+        //   fullBredTimetable.map(a => { 
+        //     let scores = getFitnessRating(a, PRIORITY_SCORING);
+        //     generatedSchedules.push({ scores , blocks: a.schedule.blocks });
+        //   });
+        // }
 
         // end
         console.timeEnd(`run timer`);
 
-        
+        generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a, i) => i < 5);
+
         const bestTimetable = generatedSchedules[0];
         bestTimetable.blocks.map(a => { return a.blocks.sort((a, b) => +a.id - +b.id ) });
         bestTimetable.blocks.sort((a, b) => +a.order - +b.order);
 
+        const code = stringMethods.generateRandomString();
+        let statistics = []
+
         // print out the best three
         generatedSchedules.forEach((a, i) => {
-            if(i < 3) { console.log(`(${i}) Total score: ${a.scores.score} - 1st Prio (${((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100}%), 2nd Prio (${((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100}%), 3rd Prio (${((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100}%), 4th Prio (${((a.scores.prioritySatisfied[3] / studentList.length)).toFixed(2) * 100}%)`); }
+            // do the stats
+            let stats = { missed: a.scores.nonOneOrTwo.length, oneTwo: ((a.scores.priorityOneOrTwo / studentList.length)).toFixed(2) * 100, one: ((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100, two: ((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100, three: ((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100, four: ((a.scores.prioritySatisfied[3] / studentList.length)).toFixed(2) * 100}
+            // sort the blocks properly as intended
+            a.blocks.map(a => { return a.blocks.sort((a, b) => +a.id - +b.id ) });
+            a.blocks.sort((a, b) => +a.order - +b.order);
+            // save the data to be retrieved
+            statistics.push({ index: i, stats });
+            savedData.push({ code, index: i, data: { ...timetable, schedule: a }});
+            // log to node console
+            console.log(`(${i+1}) Total score: ${a.scores.score} - 1st or 2nd (${((a.scores.priorityOneOrTwo / studentList.length)).toFixed(2) * 100}%, ${a.scores.nonOneOrTwo.length} missed out), 1st Prio (${((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100}%), 2nd Prio (${((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100}%), 3rd Prio (${((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100}%), 4th Prio (${((a.scores.prioritySatisfied[3] / studentList.length)).toFixed(2) * 100}%)`);
         })
 
         console.log(`Max score: ${MAX_THEORETICAL_SCORE}`);
+        console.log(`Generations: ${generations}`);
         
-        // console.log(bestTimetable.blocks);
-
-        
-        resolve({ ...timetable, schedule: bestTimetable }); //finished properly
+        resolve({ code, statistics }); //finished properly
         // resolve(false); // did not finish
     })
 }
 
-function processTimetable(timetable, iterationStudentList) {
 
-    let numberOfStudents = iterationStudentList.length;
+function processTimetable(timetable, iterationStudentList) {
 
     for(let i = 0 ; i < timetable.schedule.blocks.length ; i++) {
 
@@ -309,7 +353,7 @@ function processTimetable(timetable, iterationStudentList) {
           }
         }
 
-        // console.log(unplacedStudents.map(a => { return { id: a.id, score: JSON.stringify(a.score) } }));
+        // console.log(unplacedStudents.filter(a => a.placed === false));
         
         // at the end of the block replace the student object with student ids.
         timeBlock.blocks.map(a => { a.students = a.students.map(b => { return +b.id }); })
@@ -324,15 +368,29 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
     // score is based on priorities being matched.
     totalScore = 0;
     prioritySatisfied = [...Array(timetable.students[0].coursePriorities.length).keys()].map(a => {return 0});
+    priorityOneOrTwo = 0;
+    nonOneOrTwo = [];
 
     // get a list of all the blocks...
     const blocks = [].concat(...timetable.schedule.blocks.map(a => { return a.blocks.map(b => { return b }) }));
+
+    // give additional point sfor full timeblocks
+    for(let i = 0 ; i < timetable.schedule.blocks.length ; i++) {
+        let totalStudents = 0;
+
+        for(let o = 0 ; o < timetable.schedule.blocks[i].blocks.length ; o++) {
+            totalStudents += timetable.schedule.blocks[i].blocks[o].students.length;
+        }
+
+        if(totalStudents === timetable.students.length) totalScore += 500;
+    }
 
     for(let i = 0 ; i < timetable.students.length ; i++) {
         // get non zero priorities
         let student = timetable.students[i];
         let studentPriorities = student.coursePriorities.filter(a => a.priority !== 0);
         let studentScore = 0;
+        let firstOrSecond = false;
 
         for(let o = 0 ; o < studentPriorities.length ; o++) {
             let priority = studentPriorities[o];
@@ -361,23 +419,38 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
                         default: break;
                     }
 
+                    if(priority.priority <= 2) { firstOrSecond = true; };
+
                     break; // no nneed to check the other blocks with this course.
                 }
             }
         }
 
+        if(firstOrSecond) {
+            priorityOneOrTwo++;
+        } else {
+            nonOneOrTwo.push(student.id);
+        }
+
         totalScore += studentScore;
     }
 
-    return { score: totalScore, prioritySatisfied };
+    return { score: totalScore, prioritySatisfied, priorityOneOrTwo, nonOneOrTwo };
 }
 
+
+
+
+
+
 function breedAndMutate(parentTimetables) {
+
+  const BREEDING_RATIO = 0.3;
 
   let availableTimetables = parentTimetables.map((a, i) => { return +i });
   let parentPairs = [];
 
-  // make some parent timetables
+  // make some parent timetable pairs
   while(availableTimetables.length >= 2) {
     let parent1 = availableTimetables.splice(Math.floor(Math.random() * availableTimetables.length), 1);
     let parent2 = availableTimetables.splice(Math.floor(Math.random() * availableTimetables.length), 1);
@@ -388,45 +461,80 @@ function breedAndMutate(parentTimetables) {
     }
   }
 
-  console.log(parentPairs);
-
   // find the ids of the timeblocks which have random stuff going on in them
-  let testTimetable = JSON.parse(JSON.stringify(parentTimetables[0]));
   let allowableBlocksToBreed = [];
-
-
-  for(let i = 0 ; i < testTimetable.length ; i++) {
-    let timeBlock = testTimetable[i];
-    let blockScore = 0;
-
-    for(let o = 0 ; o < timeBlock.length ; o++) {
-      let block = timeBlock[o];
-
-      // score system just to easily change this later
-      if(block.classOnly) blockScore--;
-    }
-
-    if(blockScore >= 0) allowableBlocksToBreed.push(i);
-  }
-
   let children = [];
 
   // now we breed them, by mixing up some of the timeblocks which have optional stuff in them
-  for(let i = 0 ; i < parentPairs.length ; i++) {
+  for(let i = 0 ; i < parentPairs.length - 1 ; i++) {
+    let p1Switch = [];
+    let p2Switch = [];
+
+    if(Math.random() > BREEDING_RATIO) {
+        // add the adults back and continue onto the next pair
+        children.push(parentPairs[i].parent1);
+        children.push(parentPairs[i].parent2);
+        continue; 
+    }// no offspring for these
+    
+    for(let o = 0 ; o < parentPairs[i].parent1.length ; o++) {
+        // assumption is they are the same lenght! Can a cat breed with a frog?
+        let timeBlockP1 = parentPairs[i].parent1.map((a,i) => { 
+            let blockNumber = a.blocks.filter(b => b.courses.length > 0 && !b.classOnly).length;
+
+            if(blockNumber > 0) return i;
+        }).filter(a => a !== undefined).sort((a, b) => Math.random() - 0.5);
+
+        let timeBlockP2 = parentPairs[i].parent2.map((a,i) => { 
+            let blockNumber = a.blocks.filter(b => b.courses.length > 0 && !b.classOnly).length;
+
+            if(blockNumber > 0) return i;
+        }).filter(a => a !== undefined).sort((a, b) => Math.random() - 0.5);
+
+        
+        allowableBlocksToBreed = timeBlockP1.map((a, i) => { return [a, timeBlockP2[i]] })
+        // console.log(timeBlockP1 + `can switch with ` + timeBlockP2 + ` so: ` + allowableBlocksToBreed);
+    }
+
     // how many to switch
     const howManyToSwitch = Math.floor(Math.random() * allowableBlocksToBreed.length);
     // randomise the order
     allowableBlocksToBreed = allowableBlocksToBreed.sort((a, b) => Math.random());
+    // make a child start as a copy of parent1
+    let child = JSON.parse(JSON.stringify(parentPairs[i].parent1));
     
+    // then switch in elements of parent2
     for(let p = 0 ; p < howManyToSwitch ; p++) {
-      parentPairs[i].parent1[allowableBlocksToBreed[p]] = parentPairs[i].parent2[allowableBlocksToBreed[p]];
+        // console.log(`0: ${allowableBlocksToBreed[p][0]}, 1: ${allowableBlocksToBreed[p][1]}`)
+        child[+allowableBlocksToBreed[p][0]] = { ...parentPairs[i].parent2[+allowableBlocksToBreed[p][1]] };
+        // console.log(child[allowableBlocksToBreed[p][0]]);
     }
 
-    let child = JSON.parse(JSON.stringify(parentPairs[i].parent1));
+    child = mutateChild(child);
     children.push(child);
   }
 
   return children;
+
+}
+
+function mutateChild(child) {
+
+    const MUTATION_FACTOR = 0.1;
+    let randomNumber = Math.random();
+
+    // only mutate a certain percent
+    if(randomNumber > MUTATION_FACTOR) return child;
+
+    // mutate depending upon the value
+    // just two for now, try more later!
+    if(randomNumber < 0.5) {
+
+    } else {
+
+    }
+
+    return child;
 
 }
 

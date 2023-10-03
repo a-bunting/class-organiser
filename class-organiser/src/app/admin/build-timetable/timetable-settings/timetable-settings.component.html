@@ -42,6 +42,7 @@
 
   <div class="ttsettings__select ttsettings__buttons">
     <button class="input__button input__length--medium" (click)="saveTimetable()">Save</button>
-    <button class="input__button input__length--medium" (click)="runTimetable()">Run</button>
+    <button class="input__button input__length--medium" (click)="runTimetable()">{{ !selectionData ? 'Run' : 'Rerun' }}</button>
+    <button class="input__button input__length--medium" (click)="showOptions()" *ngIf="selectionData">Options</button>
   </div>
 </div>
