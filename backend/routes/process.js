@@ -31,8 +31,8 @@ function geneticProcessor(timetable) {
         // first make a bunch of different versions of the schedule, shuffling the students each time.
         const MAX_ITERATIONS = 1000;
         const PRIORITY_SCORING = [100, 50, 25, 20, 15, 10, 5, 4, 3, 2, 1];
-        const MUTATION_FACTOR = 0.1;
         const MAX_THEORETICAL_SCORE = PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
+        const MUTATION_FACTOR = 0.1;
 
         let generatedSchedules = [];
         
@@ -43,61 +43,68 @@ function geneticProcessor(timetable) {
         
         const studentList = [...timetable.students.map(a => { return { ...a, requiredCourses }})];
 
+        // set a timer - comment here rather than have this look odd on its own.
         console.time(`run timer`);
 
         for(let a = 0 ; a < MAX_ITERATIONS ; a++) {
-            // for each iteration generate a new list of students, rnadomly sorted.
-            let iterationStudentList = [...studentList].sort((a, b) => Math.random() - 0.5);
-            // console.time(`iteration timer`);
+            // for each iteration generate a new timetable and a new list of students, rnadomly sorted.
+            let iterationStudentList = JSON.parse(JSON.stringify(studentList)).sort((a, b) => Math.random() - 0.5);
+            let iterationTimetable = JSON.parse(JSON.stringify(timetable));
+
+            // randomise the blocks
+            iterationTimetable.schedule.blocks.sort((a, b) => Math.random() - 0.5);
 
             // now iterate over each time block, in which each student needs to appear
-            let timetableProcessed = processTimetable(JSON.parse(JSON.stringify(timetable)), iterationStudentList);
+            let timetableProcessed = processTimetable(iterationTimetable, iterationStudentList);
 
-            // then measure how well each one fits the timetable
-            // returns { score: totalScore, prioritySatisfied };
+            // then measure how well each one fits the timetable, returns { score: totalScore, prioritySatisfied };
             let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING);
 
             // test to see if there is a perfect fit, if so end
             if((scores.score / MAX_THEORETICAL_SCORE) >= 1) {
                 resolve({ timetable: timetableProcessed, scores })
             } else {
-                // console.log(`Score: ${score}`);
-                generatedSchedules.push({ scores, blocks: timetableProcessed.schedule.blocks });
+                generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
             }
             // mutate some low percetnage of them and recalculate the scores of those
 
             // then cull the worst half
 
             // rinse and repeat until you have one left 
-                // console.timeEnd(`iteration timer`);
         }
+
+        // end
         console.timeEnd(`run timer`);
 
-        generatedSchedules.sort((a, b) => +a.score - +b.score);
+        generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score);
+        
         const bestTimetable = generatedSchedules[0];
+        bestTimetable.blocks.map(a => { return a.blocks.sort((a, b) => +a.id - +b.id ) });
+        bestTimetable.blocks.sort((a, b) => +a.order - +b.order);
 
+        // print out the best three
         generatedSchedules.forEach((a, i) => {
-            // console.log(a.scores.score);
-            if(+a.scores.score > 11000) {
-                console.log(`(${i}) Total score: ${a.scores.score} - 1st Prio (${((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100}%), 2nd Prio (${((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100}%), 3rd Prio (${((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100}%)`);
-                // console.log(`1st Priority Satisfied: ${((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100}%`)
-                // console.log(`2nd Priority Satisfied: ${((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100}%`)
-                // console.log(`3rd Priority Satisfied: ${((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100}%`)
-            }
+            if(i < 3) { console.log(`(${i}) Total score: ${a.scores.score} - 1st Prio (${((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100}%), 2nd Prio (${((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100}%), 3rd Prio (${((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100}%), 4th Prio (${((a.scores.prioritySatisfied[3] / studentList.length)).toFixed(2) * 100}%)`); }
         })
 
         console.log(`Max score: ${MAX_THEORETICAL_SCORE}`);
         
-        resolve({ ...timetable, schedule: { blocks: bestTimetable.blocks }}); //finished properly
+        // console.log(bestTimetable.blocks);
+
+        
+        resolve({ ...timetable, schedule: bestTimetable }); //finished properly
         // resolve(false); // did not finish
     })
 }
 
 function processTimetable(timetable, iterationStudentList) {
+
+    let numberOfStudents = iterationStudentList.length;
+
     for(let i = 0 ; i < timetable.schedule.blocks.length ; i++) {
 
         // rerandomise the order of the blocks
-        // timetable.schedule.blocks[i].blocks.sort((a, b) => Math.random() - 0.5);
+        timetable.schedule.blocks[i].blocks.sort((a, b) => Math.random() - 0.5);
 
         const timeBlock = timetable.schedule.blocks[i];
         let studentList = [...iterationStudentList.map(a => { return {...a, placed: false, score: []}})];
@@ -192,20 +199,8 @@ function processTimetable(timetable, iterationStudentList) {
                     }
                 }
 
-
-
-
-
-
-
-                if(Math.random() < 0.000001) console.log(studentCourseRequirement);
-
                 // they are already in this course somewhere so skip this student
                 if(studentCourseRequirement.timesLeft === 0) { continue; }
-
-
-
-
 
                 // just place students if its a required course or 1st or 2nd prioity and they need it
                 if(studentPriorities.priority <= 2) {
@@ -268,8 +263,10 @@ function processTimetable(timetable, iterationStudentList) {
             }
         }
 
+        
         // at the end of the block replace the student object with student ids.
         timeBlock.blocks.map(a => { a.students = a.students.map(b => { return +b.id }); })
+        // console.log(`unplaced students: ${numberOfStudents - timeBlock.blocks.reduce((conc, a) => +conc + a.students.length, 0)}`);
     }
 
     return timetable;

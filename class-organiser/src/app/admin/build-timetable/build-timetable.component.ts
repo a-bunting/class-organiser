@@ -34,14 +34,21 @@ export class BuildTimetableComponent implements OnInit {
   }
 
   save(): void {
+    this.lastTimetableUnRun = null!;
     this.timetableService.addTimeTable(this.loadedTimetable);
   }
+
+  lastTimetableUnRun: Timetable = null!;
 
   run(): void {
 
     console.log(this.loadedTimetable);
 
-    this.databaseService.processTimetable(this.loadedTimetable).subscribe({
+    // save the unedited version
+    if(this.lastTimetableUnRun === null) this.lastTimetableUnRun = JSON.parse(JSON.stringify(this.loadedTimetable));
+
+    // run the last unedited version if available - when saved this disappears.
+    this.databaseService.processTimetable(this.lastTimetableUnRun ?? this.loadedTimetable).subscribe({
       next: (result: DatabaseReturn) => {
         this.loadedTimetable = result.data;
         this.studentView = true;
@@ -197,6 +204,10 @@ export class BuildTimetableComponent implements OnInit {
     let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => +a.id === studentId)!;
     let topPriorityId: number = student.coursePriorities.filter((a: { courseId: number, priority: number }) => a.priority !== 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
     return this.loadedTimetable.courses.find((a: SingleCourse) => a.id === topPriorityId)!.name;
+  }
+
+  getStudentsInTimeBlock(index: number): number {
+    return this.loadedTimetable.schedule.blocks[index].blocks.reduce((total: number, block: SingleBlock) => total + block.students.length, 0);
   }
 
 }

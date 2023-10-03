@@ -18,9 +18,9 @@
       </div>
 
       <!-- and then the blocks -->
-      <div class="buildtt__col buildtt__col--normal" *ngFor="let timeBlock of loadedTimetable.schedule.blocks">
+      <div class="buildtt__col buildtt__col--normal" *ngFor="let timeBlock of loadedTimetable.schedule.blocks; let g = index">
         <!-- title -->
-        <div class="buildtt__block buildtt__block--short">{{ timeBlock.name }}</div>
+        <div class="buildtt__block buildtt__block--short">{{ timeBlock.name }} ({{ getStudentsInTimeBlock(g) }})</div>
         <!-- blocks -->
         <div class="buildtt__block buildtt__block--block buildtt__block--normal" *ngFor="let block of timeBlock.blocks">
 
@@ -29,7 +29,7 @@
           </div>
 
           <div class="buildtt__block--name">
-            <p>{{ block.name }}</p>
+            <p>{{ block.name }} ({{ block.students.length }})</p>
             <img src="../../../assets/icons/copy.png" alt="Copy this blocks data" (click)="toggleCopyDataOn(block.id)">
           </div>
           <div class="buildtt__block--room">{{ block.room }}</div>
@@ -86,7 +86,7 @@
           </div>
 
           <div class="buildtt__block--students" *ngIf="studentView">
-            <div class="buildtt__block--student" *ngFor="let student of getStudentData(block.id)">{{ student.name.forename }} {{ student.name.surname }} ({{ student.id }}) - Prio {{ getTopPriorityClass(student.id) }}</div>
+            <div class="buildtt__block--student" *ngFor="let student of getStudentData(block.id)">{{ student.name.forename }} {{ student.name.surname }} ({{ student.id }}) - ({{ getTopPriorityClass(student.id) }})</div>
           </div>
       </div>
 
