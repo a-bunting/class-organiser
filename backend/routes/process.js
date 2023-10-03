@@ -44,7 +44,7 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 1000;
+        const MAX_ITERATIONS = 5000;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
         const MUTATION_FACTOR = 0.1;
@@ -236,16 +236,6 @@ function processTimetable(timetable, iterationStudentList) {
                 // // if the course is not required by the student then this student does not need this course
                 let studentCourseRequirement = student.requiredCourses.find(a => +a.id === +courseId);
 
-                // build a score from the restrictions and the courses.
-                // commented out is score based restriction - but this maybe isnt heavy enough?
-                // for(let r = 0 ; r < restrictions.length ; r++) {
-                //     let studentRestriction = student.data.find(a => +a.restrictionId === +restrictions[r].restrictionId);
-                    
-                //     if(studentRestriction.value === restrictions[r].optionId) {
-                //         score++; // yay, they match, the restriction is passed.
-                //     }
-                // }
-
                 // failing a restriction eliminates you from this block.
                 for(let r = 0 ; r < restrictions.length ; r++) {
                     let studentRestriction = student.data.find(a => +a.restrictionId === +restrictions[r].restrictionId);
@@ -340,7 +330,7 @@ function processTimetable(timetable, iterationStudentList) {
             let studentCourseRequirement = unplacedStudents[p].requiredCourses.find(a => +a.id === +courseId);
 
             // if its full move onto the next block
-            if(+block.maxStudents >= +block.students.length) { continue; }
+            if(+block.students.length >= +block.maxStudents) { continue; }
               
             // keep going if they dont need this course
             if(studentCourseRequirement.timesLeft === 0) { continue; }
