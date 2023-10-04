@@ -12,7 +12,7 @@
     </div>
 
     <div class="buildtt__chooseTimetable" *ngIf="timetableSelectionScreen">
-      <div class="buildtt__chooseTimetable--backdrop"></div>
+      <div class="buildtt__chooseTimetable--backdrop" (click)="timetableSelectionScreenToggle()"></div>
       <div class="buildtt__chooseTimetable--data">
         <div class="buildtt__chooseTimetable--title">
           <div class="buildtt__chooseTimetable--text">Choose your timetable from the choices below:</div>
@@ -24,6 +24,7 @@
             <th colspan="4">Students who got their nth choice (%)</th>
             <th rowspan="2">Students who got their 1st or 2nd choice (%)</th>
             <th rowspan="2">Students who missed out on their 1st <b>and</b> 2nd choice</th>
+            <th rowspan="2">Students missing a block</th>
             <th rowspan="2">Select</th>
           </tr>
           <tr>
@@ -39,6 +40,7 @@
             <td>{{ data.stats.four | number:'0.0-0' }} %</td>
             <td>{{ data.stats.oneTwo | number:'0.0-0' }} %</td>
             <td>{{ data.stats.missed | number:'0.0-0' }}</td>
+            <td>{{ data.stats.unplaced | number:'0.0-0' }}</td>
             <td><button class="input__button" (click)="chooseTimetable(data.index)">Choose This</button></td>
           </tr>
         </table>
@@ -60,7 +62,7 @@
         <!-- title -->
         <div class="buildtt__block buildtt__block--short">{{ timeBlock.name }} ({{ getStudentsInTimeBlock(g) }})</div>
         <div class="buildtt__block buildtt__block--short buildtt__block--students">
-          <div class="buildtt__block--student" *ngFor="let student of getMissingStudentData(timeBlock.order)">{{ student.name.forename }} {{ student.name.surname }}</div>
+          <div class="buildtt__block--student" *ngFor="let student of getMissingStudentData(timeBlock.order)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" (click)="highlightStudent(student.id)">{{ student.name.forename }} {{ student.name.surname }}</div>
         </div>
         <!-- blocks -->
         <div class="buildtt__block buildtt__block--block buildtt__block--normal" *ngFor="let block of timeBlock.blocks">
@@ -127,7 +129,7 @@
           </div>
 
           <div class="buildtt__block--students" *ngIf="studentView">
-            <div class="buildtt__block--student" *ngFor="let student of getStudentData(block.id)">{{ student.name.forename }} {{ student.name.surname }}</div><!-- ({{ student.id }}) - ({{ getTopPriorityClass(student.id) }})</div> -->
+            <div class="buildtt__block--student" *ngFor="let student of getStudentData(block.id)" [class.buildtt__block--student--prio]="block.courses[0] === getStudentPriority(student.id)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" (click)="highlightStudent(student.id)">{{ student.name.forename }} {{ student.name.surname }}</div><!-- ({{ student.id }}) - ({{ getTopPriorityClass(student.id) }})</div> -->
           </div>
       </div>
 

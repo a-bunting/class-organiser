@@ -233,11 +233,14 @@
       background-color: lightcoral;
       border-radius: .5rem;
       padding: .2rem .3rem;
-      border: .1rem dashed transparent;
+      border: .2rem dashed transparent;
+
+      &--highlight { background-color: yellow; }
+      &--prio { border: .2rem solid red; background-color: white;}
 
       &:hover {
         cursor: grab;
-        border: .1rem dashed rgba(black, .5);
+        border: .2rem dashed rgba(black, .5);
       }
 
       &:active {

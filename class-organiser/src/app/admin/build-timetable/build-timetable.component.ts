@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
-export interface SelectionData { code: string, statistics: { index: number, stats: { missed: number, oneTwo: number, one: number, two: number, three: number, four: number }}[] }
+export interface SelectionData { code: string, statistics: { index: number, stats: { missed: number, oneTwo: number, one: number, two: number, three: number, four: number, unplaced: number }}[] }
 
 @Component({
   selector: 'app-build-timetable',
@@ -226,14 +226,14 @@ export class BuildTimetableComponent implements OnInit {
 
   getStudentData(blockId: number): SingleStudent[] {
     let block: SingleBlock = this.findBlockFromId(blockId);
-    let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!block.students.find((b: number) => b === a.id));
+    let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!block.students.includes(a.id));
     return students;
   }
 
   getMissingStudentData(timeBlockOrder: number): SingleStudent[] {
     let timeBlock: SingleTimeBlock = this.loadedTimetable.schedule.blocks.find((a: SingleTimeBlock) => a.order === timeBlockOrder)!;
     if(!timeBlock.missingStudents) return [];
-    let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!timeBlock.missingStudents!.find((b: number) => b === a.id));
+    let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!timeBlock.missingStudents!.includes(a.id));
     return students;
   }
 
@@ -247,4 +247,12 @@ export class BuildTimetableComponent implements OnInit {
     return this.loadedTimetable.schedule.blocks[index].blocks.reduce((total: number, block: SingleBlock) => total + block.students.length, 0);
   }
 
+  highlightedStudent: number = -1;
+
+  highlightStudent(studentId: number): void { this.highlightedStudent = studentId; }
+  getStudentPriority(studentId: number): number {
+    let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === studentId)!;
+    let topPriority: number = student.coursePriorities.filter((a: { courseId: number, priority: number }) => a.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
+    return topPriority;
+  }
 }
