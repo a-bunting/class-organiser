@@ -258,6 +258,7 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
 
     // now iterate over the lists, going with the first priority first, then second etc.
     for(let i = 0 ; i < priorityListed.length ; i++) {
+
         priorityListed[i].list = priorityListed[i].list.sort((a, b) => Math.random() - 0.5); // { student: singslistudent object, courseid: courseid }
         
         for(let o = 0 ; o < priorityListed[i].list.length ; o++) {

@@ -18,6 +18,12 @@ export class TimetableBuilderComponent implements OnInit {
     ],
     schedule: { blocks: [] },
     students: [],
+    rooms: [
+      { id: 0, name: this.generateRandomRoom() },
+      { id: 1, name: this.generateRandomRoom() },
+      { id: 2, name: this.generateRandomRoom() },
+      { id: 3, name: this.generateRandomRoom() }
+    ],
     restrictions: [
       { id: 0, name: "Gender",              optionsAreClasses: false, priority: 0, description: "Do you identify as Male, Female or Other?", options: [ { id: 0, value: "Male" }, { id: 1, value: "Female" }, { id: 2, value: "Other" }, ]},
       { id: 1, name: "First Priority",      optionsAreClasses: true, priority: 1, description: "Which class is the one you want to do the most?", options: [ { id: 0, value: "Invasion" }, { id: 1, value: "Track and Field" }, { id: 2, value: "Striking (Tball)" }, { id: 3, value: "Combatatives" }, { id: 4, value: "Nets" }, { id: 5, value: "Mindful Movement" }, { id: 6, value: "Fitness Bootcamp" },  { id: 7, value: "Athletics" } ]},
@@ -77,7 +83,7 @@ export class TimetableBuilderComponent implements OnInit {
     // number of blocks per time section is equal to the number of classes running
     for(let i = 0 ; i < this.timeTable.classes.length ; i++) {
       let singleBlock: SingleBlock = {
-        id: i, name: `Section ${i+1}`, classId: this.timeTable.classes[i].id, maxStudents: 25, classOnly: false, courses: [], room: this.timeTable.classes[i].room, students: [], restrictions: []
+        id: i, name: `Section ${i+1}`, classId: this.timeTable.classes[i].id, maxStudents: 25, classOnly: false, courses: [], room: 1, students: [], restrictions: []
       }
 
       blocks.push(singleBlock);
@@ -119,7 +125,7 @@ export class TimetableBuilderComponent implements OnInit {
 
     if(diff > 0) {
       for(let i = 0 ; i < diff ; i++) {
-        let newSingleClass: SingleClass = { id: i, teacher: this.generateRandomNameString(), room: this.generateRandomRoom() }
+        let newSingleClass: SingleClass = { id: i, teacher: this.generateRandomNameString() }
         this.timeTable.classes.push(newSingleClass);
         // populate with students
         this.selectClassSize(null, this.timeTable.classes.length - 1, 15 + Math.floor(Math.random() * 10))
@@ -232,7 +238,7 @@ export class TimetableBuilderComponent implements OnInit {
       for(let o = 0 ; o < this.timeTable.classes.length ; o++) {
         let cClass: SingleClass = this.timeTable.classes[o];
         let newSingleBlock: SingleBlock = {
-          id: blockCount, name: `Section ${blockCount + 1} with ${cClass.teacher}`, classOnly: false, maxStudents: 25, classId: cClass.id, courses: [], room: cClass.room, students: [], restrictions: []
+          id: blockCount, name: `Section ${blockCount + 1} with ${cClass.teacher}`, classOnly: false, maxStudents: 25, classId: cClass.id, courses: [], room: 1, students: [], restrictions: []
         }
         blockCount++;
         block.blocks.push(newSingleBlock);

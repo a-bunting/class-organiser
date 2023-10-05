@@ -110,6 +110,12 @@ export class AddCsvDataComponent {
       classes: this.classes,
       courses: this.courses,
       students: this.students,
+      rooms: [
+        { id: 0, name: "HS Gym" },
+        { id: 1, name: "Fitness Suite" },
+        { id: 2, name: "MS Playground" },
+        { id: 3, name: "Aux Gym" }
+      ],
       restrictions: [
         { id: 0, name: "Gender",              optionsAreClasses: false, priority: 0, description: "Do you identify as Male, Female or Other?", options: [ { id: 0, value: "Male" }, { id: 1, value: "Female" }, { id: 2, value: "Other" }, ]},
         { id: 1, name: "Fasting",             optionsAreClasses: false, priority: 1, description: "During Ramadan do you fast?", options: [ { id: 0, value: "Yes, I fast" }, { id: 1, value: "No, I do not fast" }]},
@@ -129,7 +135,7 @@ export class AddCsvDataComponent {
 
       for(let o = 0 ; o < this.classes.length ; o++) {
         let singleBlock: SingleBlock = {
-          id: i * this.classes.length + o, name: `Section ${i * this.classes.length + o}`, classId: this.classes[o].id, maxStudents: 25, classOnly: false, courses: [], room: this.classes[o].room, students: [], restrictions: []
+          id: i * this.classes.length + o, name: `Section ${i * this.classes.length + o}`, classId: this.classes[o].id, maxStudents: 25, classOnly: false, courses: [], room: 1, students: [], restrictions: []
         }
 
         newBlock.blocks.push(singleBlock);

@@ -108,6 +108,7 @@ export class BuildTimetableComponent implements OnInit {
     pasteBlock.restrictions = [...this.copyData.restrictions];
     pasteBlock.classOnly = this.copyData.classOnly;
     pasteBlock.maxStudents = this.copyData.maxStudents;
+    pasteBlock.room = this.copyData.room;
   }
 
   toggleStudentView(): void { this.studentView = !this.studentView; }
@@ -255,4 +256,11 @@ export class BuildTimetableComponent implements OnInit {
     let topPriority: number = student.coursePriorities.filter((a: { courseId: number, priority: number }) => a.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
     return topPriority;
   }
+
+  selectRoom(blockId: number, input: any): void {
+    let block: SingleBlock = this.findBlockFromId(blockId);
+    block.room = +input.target.value;
+  }
+
+  getRoomName(roomId: number): string { return this.loadedTimetable.rooms.find((a: { id: number, name: string}) => +a.id === +roomId)!.name; }
 }

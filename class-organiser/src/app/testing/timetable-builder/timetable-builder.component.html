@@ -109,7 +109,6 @@
           <div class="ttbuilder__row--text">Class {{ i+1 }}</div>
           <div class="ttbuilder__row--input ttbuilder__row--input--row">
             <input type="text" class="input__text" value="" placeholder="teacher name" [(ngModel)]="class.teacher">
-            <input type="text" class="input__text" value="" placeholder="room name" [(ngModel)]="class.room">
             <select class="input__select input__length--short" (change)="selectClassSize($event, i)">
               <option value="1" [selected]="1 === getClassSize(class.id)">1</option>
               <option value="2" [selected]="2 === getClassSize(class.id)">2</option>
