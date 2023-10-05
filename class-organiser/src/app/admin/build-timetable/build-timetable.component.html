@@ -80,7 +80,7 @@
           <div class="buildtt__block--buttons" *ngIf="!studentView">
             <div class="buildtt__block--button" [class.buildtt__block--button--selected]="block.classOnly" (click)="setClassOnly(block.id)">All students of {{ getTeacherFromClassID(block.classId) }}</div>
             <select class="input__select" (change)="selectRoom(block.id, $event)">
-              <option value="{{ room.id }}" *ngFor="let room of loadedTimetable.rooms">{{ room.name }}</option>
+              <option value="{{ room.id }}" *ngFor="let room of loadedTimetable.rooms" [selected]="room.id === block.room">{{ room.name }}</option>
             </select>
 
             <!-- <div class="buildtt__block--textInput">

@@ -113,7 +113,7 @@ export class AddCsvDataComponent {
       rooms: [
         { id: 0, name: "HS Gym" },
         { id: 1, name: "Fitness Suite" },
-        { id: 2, name: "MS Playground" },
+        { id: 2, name: "HS Pool" },
         { id: 3, name: "Aux Gym" }
       ],
       restrictions: [
