@@ -12,6 +12,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { LoadingSpinnerComponent } from './utilities/loading-spinner/loading-spinner.component';
 import { AddCsvDataComponent } from './testing/add-csv-data/add-csv-data.component';
 
+import { DragDropModule } from '@angular/cdk/drag-drop';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,7 +28,8 @@ import { AddCsvDataComponent } from './testing/add-csv-data/add-csv-data.compone
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    DragDropModule
   ],
   providers: [],
   bootstrap: [AppComponent]
