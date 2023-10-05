@@ -235,7 +235,7 @@
       padding: .2rem .3rem;
       border: .2rem dashed transparent;
 
-      &--highlight { background-color: yellow; }
+      &--highlight { background-color: yellow !important; }
       &--prio { border: .2rem solid red; background-color: white;}
 
       &:hover {

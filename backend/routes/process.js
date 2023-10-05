@@ -44,7 +44,7 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 5;
+        const MAX_ITERATIONS = 1000;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
         const MUTATION_FACTOR = 0.1;
@@ -57,7 +57,6 @@ function geneticProcessor(timetable) {
         }).filter(a => a !== undefined);
         
         const studentList = [...timetable.students.map(a => { return { ...a, requiredCourses }})];
-        console.log(studentList[0]);
 
         // set a timer - comment here rather than have this look odd on its own.
         console.time(`run timer`);
@@ -66,6 +65,8 @@ function geneticProcessor(timetable) {
             // for each iteration generate a new timetable and a new list of students, rnadomly sorted.
             let iterationStudentList = JSON.parse(JSON.stringify(studentList)).sort((a, b) => Math.random() - 0.5);
             let iterationTimetable = JSON.parse(JSON.stringify(timetable));
+            // clear the timetable
+            iterationTimetable.schedule.blocks.map(a => a.blocks.map(b => b.students = [] ));
 
             // randomise the blocks
             iterationTimetable.schedule.blocks.sort((a, b) => Math.random() - 0.5);
@@ -89,8 +90,6 @@ function geneticProcessor(timetable) {
                 generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a,i) => i < 5);
             }
         }
-
-        let generations = 0;
 
         // this bit makes it worse :) but works! but makes it worse soooo
 
@@ -166,13 +165,11 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
             let restrictionsTestFailed = false;
 
             // test if the student already has something in this timeblock and if so fail it.
-            let inTb = student.timeBlocksFilled.find(a => +a.timeBlockId === +blockWithCourse.timeBlockIndex);
-            
+            // this breaks it - i am not sure why but it does so... I must account for it elsewhere?
+            // let inTb = student.timeBlocksFilled.find(a => +a.timeBlockId === +blockWithCourse[i].timeBlockIndex);
+            // if(inTb) { console.log(+blockWithCourse[i].timeBlockIndex, inTb); restrictionsTestFailed = true; break; }
+            // if(inTb) { restrictionsTestFailed = true; break; }
 
-            // NOTE TO SELF - THE PROBLEM I SSOME STUDENTS APPEAR IN MORE THAN ONE BLOCK PER TIMESLOT.
-
-
-            if(inTb) { restrictionsTestFailed = true; break; }
             if(student.requiredCourses.find(a => +a.id === +courseId).timesLeft === 0) { restrictionsTestFailed = true; break; }
 
             for(let r = 0 ; r < restrictions.length ; r++) {
@@ -257,11 +254,15 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
         }
     }
 
+    let iteration = 0;
+
     // now iterate over the lists, going with the first priority first, then second etc.
     for(let i = 0 ; i < priorityListed.length ; i++) {
         priorityListed[i].list = priorityListed[i].list.sort((a, b) => Math.random() - 0.5); // { student: singslistudent object, courseid: courseid }
         
         for(let o = 0 ; o < priorityListed[i].list.length ; o++) {
+            iteration = o + i * priorityListed[i].list.length;
+
             let list = priorityListed[i].list[o];
             // get the options for this
             let contendingBlocks = appropriatenessTest(blockList, list.courseId, list.student).filter(a => {
@@ -275,7 +276,7 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
             for(let p = 0 ; p < contendingBlocks.length ; p++) {
                 let contendingBlock = blockList.find(a => +a.block.id === contendingBlocks[p].id);
 
-                if(contendingBlock.block.students.length === contendingBlock.block.maxStudents) { continue; } // block is full
+                if(+contendingBlock.block.students.length === +contendingBlock.block.maxStudents) { continue; } // block is full
 
                 // else it should be fine?
                 contendingBlock.block.students.push(list.student.id);
@@ -343,7 +344,7 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
             if(blocksWithCourse.length === 0) continue; // there are no blocks with this, so they dont have it
 
             for(let p = 0 ; p < blocksWithCourse.length ; p++) {
-                let studentInCourse = blocksWithCourse[p].students.find(a => +a === +student.id);
+                let studentInCourse = blocksWithCourse[p].students.includes(+student.id);
 
                 if(studentInCourse) {
                     // they have been found in the course! Now get the students ranking for this course and add points for it.
