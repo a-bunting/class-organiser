@@ -72,6 +72,7 @@
 
     <div class="ttsettings__select ttsettings__buttons">
       <div class="ttsettings__text">Controls</div>
+      <button class="input__button input__length--medium" (click)="print()">Print</button>
       <button class="input__button input__length--medium" (click)="studentEditMode(0)">Student/Edit Mode</button>
       <button class="input__button input__length--medium" (click)="studentEditMode(1)">Save</button>
       <button class="input__button input__length--medium" (click)="studentEditMode(2)">{{ !selectionData ? 'Run' : 'Rerun' }}</button>

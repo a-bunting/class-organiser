@@ -240,32 +240,37 @@
       flex-wrap: wrap;
     }
 
-    &--restriction {
-      display: flex;
-      flex-direction: column;
-    }
-
     &--course {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       background-color: rgba(lightgray, .4);
       border-radius: .5rem;
       padding: .3rem .5rem;
-      width: 50%;
+      min-width: 45%;
+      margin-bottom: .2rem;
 
       &:not(:last-of-type) {
         cursor: pointer;
       }
 
       &--name {
+        flex: 1;
         font-size: 1rem;
         margin-right: .5rem;
+        align-self: flex-start;
+        text-align: left;
       }
 
       button {
         font-size: .8rem;
       }
+    }
+
+    &--restriction {
+      width: 100%;
+
+      select { margin: 0 .5rem; }
     }
 
     &--buttons {

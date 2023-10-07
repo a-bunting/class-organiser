@@ -105,6 +105,10 @@ export class TimetableSettingsComponent implements OnChanges {
   //   this.triggerOptions.emit(true);
   // }
 
+  print(): void {
+    window.print();
+  }
+
   studentEditMode(action: number): void {
     // action 0 is to trigger student/edit modes
     // action 1 is to save
