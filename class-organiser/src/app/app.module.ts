@@ -7,12 +7,12 @@ import { BuildTimetableComponent } from './admin/build-timetable/build-timetable
 import { BuildScheduleComponent } from './admin/build-schedule/build-schedule.component';
 import { TimetableSettingsComponent } from './admin/build-timetable/timetable-settings/timetable-settings.component';
 import { TimetableBuilderComponent } from './testing/timetable-builder/timetable-builder.component';
-import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { LoadingSpinnerComponent } from './utilities/loading-spinner/loading-spinner.component';
 import { AddCsvDataComponent } from './testing/add-csv-data/add-csv-data.component';
 
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -27,9 +27,9 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule,
     HttpClientModule,
-    DragDropModule
+    DragDropModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

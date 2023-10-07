@@ -83,7 +83,7 @@ export class TimetableBuilderComponent implements OnInit {
     // number of blocks per time section is equal to the number of classes running
     for(let i = 0 ; i < this.timeTable.classes.length ; i++) {
       let singleBlock: SingleBlock = {
-        id: i, name: `Section ${i+1}`, classId: this.timeTable.classes[i].id, maxStudents: 25, classOnly: false, courses: [], room: 1, students: [], restrictions: []
+        id: i, name: `Section ${i+1}`, lockedStudents: [], classId: this.timeTable.classes[i].id, maxStudents: 25, classOnly: false, courses: [], room: 1, students: [], restrictions: []
       }
 
       blocks.push(singleBlock);
@@ -238,7 +238,7 @@ export class TimetableBuilderComponent implements OnInit {
       for(let o = 0 ; o < this.timeTable.classes.length ; o++) {
         let cClass: SingleClass = this.timeTable.classes[o];
         let newSingleBlock: SingleBlock = {
-          id: blockCount, name: `Section ${blockCount + 1} with ${cClass.teacher}`, classOnly: false, maxStudents: 25, classId: cClass.id, courses: [], room: 1, students: [], restrictions: []
+          id: blockCount, lockedStudents: [], name: `Section ${blockCount + 1} with ${cClass.teacher}`, classOnly: false, maxStudents: 25, classId: cClass.id, courses: [], room: 1, students: [], restrictions: []
         }
         blockCount++;
         block.blocks.push(newSingleBlock);

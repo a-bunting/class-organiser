@@ -14,9 +14,7 @@ export class TimetableSettingsComponent implements OnChanges {
   @Input() selectionData: SelectionData = null!;
   @Output() selectedTimetable: EventEmitter<number> = new EventEmitter<number>;
   @Output() currentTimetableChange: EventEmitter<Timetable> = new EventEmitter<Timetable>;
-  @Output() triggerSave: EventEmitter<boolean> = new EventEmitter<boolean>;
-  @Output() triggerRun: EventEmitter<boolean> = new EventEmitter<boolean>;
-  @Output() triggerOptions: EventEmitter<boolean> = new EventEmitter<boolean>;
+  @Output() triggerAction: EventEmitter<{ action: number, value: boolean }> = new EventEmitter<{ action: number, value: boolean }>;
 
 
   loadedTimetable: Timetable = null!;
@@ -62,7 +60,24 @@ export class TimetableSettingsComponent implements OnChanges {
       this.loadedTimetable.schedule.blocks[i].blocks = this.loadedTimetable.schedule.blocks[i].blocks.map((a: SingleBlock) => { return { ...a, courses: a.courses.filter((a: number) => +a !== +courseId )}});
     }
 
-    this.saveTimetable();
+    this.currentTimetableChange.emit(this.loadedTimetable);
+  }
+
+
+  addRoom(): void {
+    let newRoom: { id: number, name: string } = { id: this.loadedTimetable.rooms[this.loadedTimetable.rooms.length - 1].id + 1, name: '' };
+    this.loadedTimetable.rooms.push(newRoom);
+    this.currentTimetableChange.emit(this.loadedTimetable);
+  }
+
+  deleteRoom(roomId: number): void {
+    let roomIndex: number = this.loadedTimetable.rooms.findIndex((a: { id: number, name: string }) => a.id === roomId);
+
+    if(roomIndex !== -1) {
+      this.loadedTimetable.rooms.splice(roomIndex, 1);
+    }
+
+    this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   calculateBlocksRequired(): number {
@@ -76,17 +91,25 @@ export class TimetableSettingsComponent implements OnChanges {
     return total;
   }
 
-  saveTimetable(): void {
-    console.log(this.loadedTimetable);
-    this.currentTimetableChange.emit(this.loadedTimetable);
-    this.triggerSave.emit(true);
-  }
+  // saveTimetable(): void {
+  //   console.log(this.loadedTimetable);
+  //   this.currentTimetableChange.emit(this.loadedTimetable);
+  //   this.triggerSave.emit(true);
+  // }
 
-  runTimetable(): void {
-    this.triggerRun.emit(true);
-  }
+  // runTimetable(): void {
+  //   this.triggerRun.emit(true);
+  // }
 
-  showOptions(): void {
-    this.triggerOptions.emit(true);
+  // showOptions(): void {
+  //   this.triggerOptions.emit(true);
+  // }
+
+  studentEditMode(action: number): void {
+    // action 0 is to trigger student/edit modes
+    // action 1 is to save
+    // action 2 is to run
+    // action 3 is to show options
+    this.triggerAction.emit({ action , value: true });
   }
 }

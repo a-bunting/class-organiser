@@ -1,3 +1,5 @@
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { FixedSizeVirtualScrollStrategy } from '@angular/cdk/scrolling';
 import { Component, OnInit } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
@@ -12,7 +14,8 @@ export interface SelectionData { code: string, statistics: { index: number, stat
 export class BuildTimetableComponent implements OnInit {
 
   timetables: Timetable[] = [];
-  loadedTimetable: Timetable = null!;
+  loadedTimetable: Timetable = null!; // this is what they see
+
   studentView: boolean = false;
   loading: boolean = false;
 
@@ -37,23 +40,24 @@ export class BuildTimetableComponent implements OnInit {
   }
 
   save(): void {
-    this.lastTimetableUnRun = null!;
+    // this.loadedTimetableTemplate = null!;
     this.timetableService.addTimeTable(this.loadedTimetable);
   }
 
-  lastTimetableUnRun: Timetable = null!;
+  // loadedTimetableTemplate: Timetable = null!;
 
   run(): void {
 
     console.log(this.loadedTimetable);
 
     // save the unedited version
-    if(this.lastTimetableUnRun === null) this.lastTimetableUnRun = JSON.parse(JSON.stringify(this.loadedTimetable));
+    // if(this.loadedTimetableTemplate === null) this.loadedTimetableTemplate = JSON.parse(JSON.stringify(this.loadedTimetable));
 
     this.loading = true;
 
     // run the last unedited version if available - when saved this disappears.
-    this.databaseService.processTimetable(this.lastTimetableUnRun ?? this.loadedTimetable).subscribe({
+    // this.databaseService.processTimetable(this.loadedTimetableTemplate ?? this.loadedTimetable).subscribe({
+    this.databaseService.processTimetable(this.loadedTimetable).subscribe({
       next: (result: DatabaseReturn) => {
         // this.loadedTimetable = result.data;
         // this.studentView = true;
@@ -77,6 +81,19 @@ export class BuildTimetableComponent implements OnInit {
       },
       error: (e: any) => { console.log(e.message); }
     })
+  }
+
+  // action 0 is to trigger student/edit modes
+  // action 1 is to save
+  // action 2 is to run
+  // action 3 is to show options
+  actionFromSettings(data: { action: number, value: boolean}): void {
+    switch(data.action) {
+      case 0: this.toggleStudentView(); break;
+      case 1: this.save(); break;
+      case 2: this.run(); break;
+      case 3: this.timetableSelectionScreenToggle(); break;
+    }
   }
 
   timetableSelectionScreen: boolean = false;
@@ -109,6 +126,19 @@ export class BuildTimetableComponent implements OnInit {
     pasteBlock.classOnly = this.copyData.classOnly;
     pasteBlock.maxStudents = this.copyData.maxStudents;
     pasteBlock.room = this.copyData.room;
+  }
+
+  lockStudent(studentId: number, blockId: number): void {
+    let block: SingleBlock = this.findBlockFromId(blockId);
+    let lockedAlreadyIndex = block.lockedStudents.findIndex((a: number) => a === studentId);
+
+
+
+    if(lockedAlreadyIndex === -1) {
+      block.lockedStudents.push(studentId);
+    } else {
+      block.lockedStudents.splice(lockedAlreadyIndex, 1);
+    }
   }
 
   toggleStudentView(): void { this.studentView = !this.studentView; }
@@ -228,6 +258,7 @@ export class BuildTimetableComponent implements OnInit {
   getStudentData(blockId: number): SingleStudent[] {
     let block: SingleBlock = this.findBlockFromId(blockId);
     let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!block.students.includes(a.id));
+    students.sort((a: SingleStudent, b: SingleStudent) => a.name.surname.toLowerCase().localeCompare(b.name.surname.toLowerCase()));
     return students;
   }
 
@@ -235,6 +266,7 @@ export class BuildTimetableComponent implements OnInit {
     let timeBlock: SingleTimeBlock = this.loadedTimetable.schedule.blocks.find((a: SingleTimeBlock) => a.order === timeBlockOrder)!;
     if(!timeBlock.missingStudents) return [];
     let students: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => !!timeBlock.missingStudents!.includes(a.id));
+    students.sort((a: SingleStudent, b: SingleStudent) => a.name.surname.toLowerCase().localeCompare(b.name.surname.toLowerCase()));
     return students;
   }
 
@@ -257,10 +289,79 @@ export class BuildTimetableComponent implements OnInit {
     return topPriority;
   }
 
+  isStudentLocked(studentId: number, blockId: number): boolean {
+    let block: SingleBlock = this.findBlockFromId(blockId);
+    return block.lockedStudents.includes(studentId);
+  }
+
   selectRoom(blockId: number, input: any): void {
     let block: SingleBlock = this.findBlockFromId(blockId);
     block.room = +input.target.value;
   }
 
   getRoomName(roomId: number): string { return this.loadedTimetable.rooms.find((a: { id: number, name: string}) => +a.id === +roomId)!.name; }
+
+  //drag and drop
+  drop(input: CdkDragDrop<any>, timeBlock: number): void {
+    // console.log(input);
+    const previousGroup: number = +input.previousContainer.id.split('__')[1];
+    const newGroup: number = +input.container.id.split('__')[1];
+    // this next bit feels like it should be easier...
+    const studentId: number = +input.item.element.nativeElement.attributes[3].value;
+
+    if(previousGroup && newGroup) {
+      // group to group
+      const fromBlock: SingleBlock = this.loadedTimetable.schedule.blocks[timeBlock].blocks.find((a: SingleBlock) => a.id === previousGroup)!;
+      const toBlock: SingleBlock = this.loadedTimetable.schedule.blocks[timeBlock].blocks.find((a: SingleBlock) => a.id === newGroup)!;
+
+      let fromBlockId: number = fromBlock.students.findIndex((a: number) => a === studentId);
+
+      if(fromBlockId !== -1) {
+        fromBlock.students.splice(fromBlockId, 1);
+        toBlock.students.push(studentId);
+
+        // if they were locked in the previous block, unlock them!
+        let lockIndex: number = fromBlock.lockedStudents.findIndex((a: number) => a === studentId);
+        if(lockIndex !== -1) { fromBlock.lockedStudents.splice(lockIndex, 1); }
+      }
+    } else if(!previousGroup && newGroup) {
+      // no group to group, adding from missing to a group
+      const missingStudentIndex: number = this.loadedTimetable.schedule.blocks[timeBlock].missingStudents?.findIndex((a : number) => a === studentId)!;
+
+      if(missingStudentIndex !== -1) {
+        const toBlock: SingleBlock = this.loadedTimetable.schedule.blocks[timeBlock].blocks.find((a: SingleBlock) => a.id === newGroup)!;
+        toBlock.students.push(studentId);
+        this.loadedTimetable.schedule.blocks[timeBlock].missingStudents?.splice(missingStudentIndex, 1);
+      }
+    } else if(previousGroup && !newGroup) {
+      // no group to group, adding to missing from a group
+      const fromBlock: SingleBlock = this.loadedTimetable.schedule.blocks[timeBlock].blocks.find((a: SingleBlock) => a.id === previousGroup)!;
+      const studentIndex: number = fromBlock.students.findIndex((a: number) => a === studentId);
+
+      if(studentIndex !== -1) {
+        // if they were locked in the previous block, unlock them!
+        let lockIndex: number = fromBlock.lockedStudents.findIndex((a: number) => a === studentId);
+        if(lockIndex !== -1) { fromBlock.lockedStudents.splice(lockIndex, 1); }
+
+        if(this.loadedTimetable.schedule.blocks[timeBlock].missingStudents) {
+          this.loadedTimetable.schedule.blocks[timeBlock].missingStudents!.push(studentId);
+        } else {
+          this.loadedTimetable.schedule.blocks[timeBlock].missingStudents = ([studentId]);
+        }
+
+        fromBlock.students.splice(studentIndex, 1);
+      }
+    }
+  }
+
+  hasCourseBeenAdded(blockId: number, courseId: number, timeBlockId: number): boolean {
+    let block: SingleBlock = this.loadedTimetable.schedule.blocks[timeBlockId].blocks.find((a: SingleBlock) => a.id === blockId)!;
+
+    if(block) {
+      return block.courses.includes(courseId);
+    }
+
+    return false;
+  }
 }
+

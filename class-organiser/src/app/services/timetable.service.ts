@@ -40,6 +40,7 @@ export interface SingleBlock {
   room: number;
   maxStudents: number;
   classOnly: boolean;
+  lockedStudents: number[]
   students: number[];
   courses: number[];
   restrictions: { restrictionId: number, optionId: number }[]; // value is the optionvalue
@@ -66,7 +67,6 @@ export interface SingleStudent {
   name: { forename: string; surname: string; };
   data: DataValues[];
   coursePriorities: { courseId: number, priority: number }[];
-  schedule?: { classId: number, blockId: number }
 }
 
 export interface DataValues {

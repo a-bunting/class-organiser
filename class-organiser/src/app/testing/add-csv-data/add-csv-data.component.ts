@@ -124,18 +124,22 @@ export class AddCsvDataComponent {
       schedule: { blocks: [] }
     }
 
+    // add all student ids to all missingStudents blocks, for locking purposes.
+    let sIdArray: number[] = this.students.map((a: SingleStudent) => { return a.id; });
+
     // doi tyhe blocks
     for(let i = 0 ; i < 8 ; i++) {
       let newBlock: SingleTimeBlock = {
         name: `Block ${i+1}`,
         teachers: [],
         order: i,
-        blocks: []
+        blocks: [],
+        missingStudents: [...sIdArray]
       }
 
       for(let o = 0 ; o < this.classes.length ; o++) {
         let singleBlock: SingleBlock = {
-          id: i * this.classes.length + o, name: `Section ${i * this.classes.length + o}`, classId: this.classes[o].id, maxStudents: 25, classOnly: false, courses: [], room: 1, students: [], restrictions: []
+          id: i * this.classes.length + o, name: `Section ${i * this.classes.length + o}`, classId: this.classes[o].id, maxStudents: 25, classOnly: false, courses: [], room: 1, students: [], restrictions: [], lockedStudents: []
         }
 
         newBlock.blocks.push(singleBlock);

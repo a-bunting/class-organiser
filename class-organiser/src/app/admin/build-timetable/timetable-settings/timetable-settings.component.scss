@@ -3,6 +3,14 @@
   padding: .5rem 1rem;
   width: max-content;
 
+  background-color: rgba(#67BBF0, .6);
+  border-radius: 1rem;
+  transition: all .2s;
+
+  &:hover {
+    background-color: #67BBF0;
+  }
+
   &__title {
     font-size: 2rem;
     font-weight: bold;
@@ -14,7 +22,7 @@
   &__text {
     color: white;
     margin-bottom: 1rem;
-    background-color: maroon;
+    background-color:#4E82A3;
     width: 100%;
     padding: 1rem 2rem;
     font-size: 1.4rem;
@@ -34,25 +42,51 @@
     }
   }
 
+  &__flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: .5rem;
+  }
+
   &__select {
 
     border-radius: .5rem;
     background-color: rgba(lightgray, .5);
     overflow: hidden;
+    width: max-content;
+    transition: all .2s;
 
     &:not(:last-of-type) {
       margin-bottom: .5rem;
+    }
+
+    &:hover {
+      filter: brightness(1.1);
+      box-shadow: .1rem 0 .2rem rgba(black, .5);
     }
   }
 
   &__buttons {
     display: flex;
-    justify-content: space-around;
+    flex-direction: column;
     align-items: center;
-    padding: 1rem 2rem;
+    justify-content: center;
+    flex: 1;
+    margin-left: 1rem;
+
+    button {
+      &:first-of-type { margin-top: 0rem; }
+      &:last-of-type { margin-bottom: 1rem; }
+      margin: .5rem 1rem .5rem 1rem;
+    }
   }
 
-  &__courses {
+  &__rooms {
+    width: max-content;
+  }
+
+  &__courses, &__rooms {
     border: none;
     border-collapse: collapse;
     margin-bottom: 1rem;
