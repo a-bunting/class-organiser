@@ -1,56 +1,21 @@
 <div class="buildtt">
 
-  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+  <!-- <app-loading-spinner *ngIf="loading"></app-loading-spinner> -->
 
   <div class="buildtt__settings">
-    <app-timetable-settings [timetables]="timetables" [selectionData]="timetableSelectionData" (triggerAction)="actionFromSettings($event)" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings>
+    <!-- <app-timetable-settings [timetables]="timetables" [selectionData]="timetableSelectionData" (triggerAction)="actionFromSettings($event)" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings> -->
+    <app-timetable-settings (selectedTimetable)="selectTimetable($event)" (triggerAction)="actionFromSettings($event)" (currentTimetableChange)="timetableSettingsChange($event)"></app-timetable-settings>
   </div>
-  <div class="buildtt__display">
 
+  <div class="buildtt__display">
     <div class="buildtt__info" *ngIf="copyData">
       <p *ngIf="copyData">Press ESCAPE to quit copy mode</p>
-    </div>
-
-    <div class="buildtt__chooseTimetable" *ngIf="timetableSelectionScreen">
-      <div class="buildtt__chooseTimetable--backdrop" (click)="timetableSelectionScreenToggle()"></div>
-      <div class="buildtt__chooseTimetable--data">
-        <div class="buildtt__chooseTimetable--title">
-          <div class="buildtt__chooseTimetable--text">Choose your timetable from the choices below:</div>
-          <button class="input__button input__length--veryshort" (click)="timetableSelectionScreenToggle()">X</button>
-        </div>
-
-        <table>
-          <tr>
-            <th colspan="4">Students who got their nth choice (%)</th>
-            <th rowspan="2">Students who got their 1st or 2nd choice (%)</th>
-            <th rowspan="2">Students who missed out on their 1st <b>and</b> 2nd choice</th>
-            <th rowspan="2">Students missing a block</th>
-            <th rowspan="2">Select</th>
-          </tr>
-          <tr>
-            <th>1st</th>
-            <th>2nd</th>
-            <th>3rd</th>
-            <th>4th</th>
-          </tr>
-          <tr *ngFor="let data of timetableSelectionData.statistics">
-            <td>{{ data.stats.one | number:'0.0-0' }} %</td>
-            <td>{{ data.stats.two | number:'0.0-0' }} %</td>
-            <td>{{ data.stats.three | number:'0.0-0' }} %</td>
-            <td>{{ data.stats.four | number:'0.0-0' }} %</td>
-            <td>{{ data.stats.oneTwo | number:'0.0-0' }} %</td>
-            <td>{{ data.stats.missed | number:'0.0-0' }}</td>
-            <td>{{ data.stats.unplaced | number:'0.0-0' }}</td>
-            <td><button class="input__button" (click)="chooseTimetable(data.index)">Choose This</button></td>
-          </tr>
-        </table>
-      </div>
     </div>
 
     <div class="buildtt__tt" *ngIf="loadedTimetable">
 
       <div class="buildtt__col buildtt__col--narrow">
-        <div class="buildtt__block buildtt__block--short buildtt__switch" (click)="toggleStudentView()">{{ studentView ? 'Student Mode' : 'Edit Mode' }}</div>
+        <div class="buildtt__block buildtt__block--short buildtt__switch" ></div>
         <div class="buildtt__block buildtt__block--missingStudents buildtt__block--students" *ngIf="studentView">Unassigned</div>
         <div class="buildtt__block buildtt__block--title buildtt__block--normal" *ngFor="let class of loadedTimetable.classes">
           {{ class.teacher }}

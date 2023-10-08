@@ -109,4 +109,12 @@ export class TimetableService {
     let fromLocal: Timetable[] = JSON.parse(window.localStorage.getItem('classOrganiser')!);
     return fromLocal;
   }
+
+  createBlank(): void {
+
+  }
+
+  createDuplicate(ttId: number): void {
+
+  }
 }

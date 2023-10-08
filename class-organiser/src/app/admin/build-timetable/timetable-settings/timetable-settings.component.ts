@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
-import { SingleBlock, SingleCourse, Timetable } from 'src/app/services/timetable.service';
+import { SingleBlock, SingleCourse, Timetable, TimetableService } from 'src/app/services/timetable.service';
 import { SelectionData } from '../build-timetable.component';
 
 @Component({
@@ -8,31 +8,91 @@ import { SelectionData } from '../build-timetable.component';
   templateUrl: './timetable-settings.component.html',
   styleUrls: ['./timetable-settings.component.scss']
 })
-export class TimetableSettingsComponent implements OnChanges {
+export class TimetableSettingsComponent implements OnInit {
 
-  @Input() timetables: Timetable[] = [];
-  @Input() selectionData: SelectionData = null!;
-  @Output() selectedTimetable: EventEmitter<number> = new EventEmitter<number>;
+  // @Input() timetables: Timetable[] = [];
+  timetables: Timetable[] = [];
+  selectionData: SelectionData = null!;
+
+  @Output() selectedTimetable: EventEmitter<Timetable> = new EventEmitter<Timetable>;
   @Output() currentTimetableChange: EventEmitter<Timetable> = new EventEmitter<Timetable>;
   @Output() triggerAction: EventEmitter<{ action: number, value: boolean }> = new EventEmitter<{ action: number, value: boolean }>;
 
-
+  savedTimetable: Timetable = null!;
   loadedTimetable: Timetable = null!;
 
   constructor(
+    private timetableService: TimetableService,
+    private databaseService: DatabaseService
   ) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
-      if(changes['timetables'].currentValue.length > 0) {
-        this.loadedTimetable = this.timetables[0];
-      }
+  ngOnInit(): void {
+    this.timetables = this.timetableService.getFromLocalStorage();
 
+    if(this.timetables.length > 0) {
+      // auto select the first timetable
+      this.selectTimetable(null, this.timetables[0].id);
+      this.currentTimetableChange.emit(this.loadedTimetable);
+    }
   }
 
-  selectTimetable(input: any): void {
-    let value: number = +input.target.value;
+  save(): void {
+    // this.loadedTimetableTemplate = null!;
+    this.timetableService.addTimeTable(this.loadedTimetable);
+  }
+
+  loading: boolean = false;
+
+  run(): void {
+
+    this.loading = true;
+
+    // run the last unedited version if available - when saved this disappears.
+    // this.databaseService.processTimetable(this.loadedTimetableTemplate ?? this.loadedTimetable).subscribe({
+    this.databaseService.processTimetable(this.loadedTimetable).subscribe({
+      next: (result: DatabaseReturn) => {
+        // this.loadedTimetable = result.data;
+        // this.studentView = true;
+        console.log(result.data);
+        this.loading = false;
+        this.timetableSelectionScreen = true;
+        this.timetableSelectionData = result.data;
+      },
+      error: (e: any) => { console.log(e.message); },
+      complete: () => { this.loading = false; },
+
+    })
+  }
+
+  chooseTimetable(index: number): void {
+    this.databaseService.retrieveSelectedTimetable(this.timetableSelectionData.code, index).subscribe({
+      next: (result: DatabaseReturn) => {
+        this.loadedTimetable = result.data;
+        this.studentEditMode(0, true);
+        console.log(result);
+        this.currentTimetableChange.emit(this.loadedTimetable);
+      },
+      error: (e: any) => { console.log(e.message); }
+    })
+  }
+
+  timetableSelectionScreen: boolean = false;
+  timetableSelectionData: SelectionData = null!;
+
+  timetableSelectionScreenToggle(status: boolean): void {
+    this.timetableSelectionScreen = status;
+  }
+
+
+
+
+
+
+  selectTimetable(input: any, val?: number): void {
+    let value: number = input ? +input.target.value : val ? val : 0;
     this.loadedTimetable = this.timetables[value];
-    this.selectedTimetable.emit(value);
+    this.savedTimetable = JSON.parse(JSON.stringify(this.timetables[value]));
+    this.selectedTimetable.emit(this.loadedTimetable);
   }
 
 
@@ -91,29 +151,36 @@ export class TimetableSettingsComponent implements OnChanges {
     return total;
   }
 
-  // saveTimetable(): void {
-  //   console.log(this.loadedTimetable);
-  //   this.currentTimetableChange.emit(this.loadedTimetable);
-  //   this.triggerSave.emit(true);
-  // }
-
-  // runTimetable(): void {
-  //   this.triggerRun.emit(true);
-  // }
-
-  // showOptions(): void {
-  //   this.triggerOptions.emit(true);
-  // }
+  saveButtonDisabled(): boolean {
+    return JSON.stringify(this.savedTimetable) === JSON.stringify(this.loadedTimetable);
+  }
 
   print(): void {
     window.print();
   }
 
-  studentEditMode(action: number): void {
+  createNewTimetable(): void {
+    this.timetableService.createBlank();
+  }
+
+  createDuplicateTimetable(): void {
+
+  }
+
+  studentViewMode: boolean = false;
+
+  studentEditMode(action: number, value?: any ): void {
     // action 0 is to trigger student/edit modes
     // action 1 is to save
     // action 2 is to run
     // action 3 is to show options
-    this.triggerAction.emit({ action , value: true });
+    // action 4 is for a new timetable
+    // action 5 is to duplicate
+    // action 6 is to delete
+    if(action === 0 && value === undefined) {
+      this.studentViewMode = !this.studentViewMode;
+      value = this.studentViewMode;
+    }
+    this.triggerAction.emit({ action , value });
   }
 }

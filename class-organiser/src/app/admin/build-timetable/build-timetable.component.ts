@@ -1,5 +1,4 @@
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { FixedSizeVirtualScrollStrategy } from '@angular/cdk/scrolling';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
@@ -13,11 +12,11 @@ export interface SelectionData { code: string, statistics: { index: number, stat
 })
 export class BuildTimetableComponent implements OnInit {
 
-  timetables: Timetable[] = [];
+  // timetables: Timetable[] = [];
   loadedTimetable: Timetable = null!; // this is what they see
 
   studentView: boolean = false;
-  loading: boolean = false;
+  // loading: boolean = false;
 
   constructor(
     private timetableService: TimetableService,
@@ -27,81 +26,82 @@ export class BuildTimetableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-      this.timetables = this.timetableService.getFromLocalStorage();
+      // this.timetables = this.timetableService.getFromLocalStorage();
 
-      if(this.timetables.length > 0) {
-        // auto select the first timetable
-        this.selectTimetable(this.timetables[0].id);
-      }
+      // if(this.timetables.length > 0) {
+      //   // auto select the first timetable
+      //   this.selectTimetable(this.timetables[0].id);
+      // }
   }
 
-  selectTimetable(value: number): void {
-    this.loadedTimetable = this.timetables.find((a: Timetable) => a.id === value)!;
+  selectTimetable(value: Timetable): void {
+    // this.loadedTimetable = this.timetables.find((a: Timetable) => a.id === value)!;
+    this.loadedTimetable = value;
   }
 
-  save(): void {
-    // this.loadedTimetableTemplate = null!;
-    this.timetableService.addTimeTable(this.loadedTimetable);
-  }
+  // save(): void {
+  //   // this.loadedTimetableTemplate = null!;
+  //   this.timetableService.addTimeTable(this.loadedTimetable);
+  // }
 
-  // loadedTimetableTemplate: Timetable = null!;
+  // // loadedTimetableTemplate: Timetable = null!;
 
-  run(): void {
+  // run(): void {
 
-    console.log(this.loadedTimetable);
+  //   console.log(this.loadedTimetable);
 
-    // save the unedited version
-    // if(this.loadedTimetableTemplate === null) this.loadedTimetableTemplate = JSON.parse(JSON.stringify(this.loadedTimetable));
+  //   // save the unedited version
+  //   // if(this.loadedTimetableTemplate === null) this.loadedTimetableTemplate = JSON.parse(JSON.stringify(this.loadedTimetable));
 
-    this.loading = true;
+  //   this.loading = true;
 
-    // run the last unedited version if available - when saved this disappears.
-    // this.databaseService.processTimetable(this.loadedTimetableTemplate ?? this.loadedTimetable).subscribe({
-    this.databaseService.processTimetable(this.loadedTimetable).subscribe({
-      next: (result: DatabaseReturn) => {
-        // this.loadedTimetable = result.data;
-        // this.studentView = true;
-        console.log(result.data);
-        this.loading = false;
-        this.timetableSelectionScreen = true;
-        this.timetableSelectionData = result.data;
-      },
-      error: (e: any) => { console.log(e.message); },
-      complete: () => { this.loading = false; },
+  //   // run the last unedited version if available - when saved this disappears.
+  //   // this.databaseService.processTimetable(this.loadedTimetableTemplate ?? this.loadedTimetable).subscribe({
+  //   this.databaseService.processTimetable(this.loadedTimetable).subscribe({
+  //     next: (result: DatabaseReturn) => {
+  //       // this.loadedTimetable = result.data;
+  //       // this.studentView = true;
+  //       console.log(result.data);
+  //       this.loading = false;
+  //       this.timetableSelectionScreen = true;
+  //       this.timetableSelectionData = result.data;
+  //     },
+  //     error: (e: any) => { console.log(e.message); },
+  //     complete: () => { this.loading = false; },
 
-    })
-  }
+  //   })
+  // }
 
-  chooseTimetable(index: number): void {
-    this.databaseService.retrieveSelectedTimetable(this.timetableSelectionData.code, index).subscribe({
-      next: (result: DatabaseReturn) => {
-        this.loadedTimetable = result.data;
-        this.studentView = true;
-        console.log(result);
-      },
-      error: (e: any) => { console.log(e.message); }
-    })
-  }
+  // chooseTimetable(index: number): void {
+  //   this.databaseService.retrieveSelectedTimetable(this.timetableSelectionData.code, index).subscribe({
+  //     next: (result: DatabaseReturn) => {
+  //       this.loadedTimetable = result.data;
+  //       this.studentView = true;
+  //       console.log(result);
+  //     },
+  //     error: (e: any) => { console.log(e.message); }
+  //   })
+  // }
 
   // action 0 is to trigger student/edit modes
   // action 1 is to save
   // action 2 is to run
   // action 3 is to show options
-  actionFromSettings(data: { action: number, value: boolean}): void {
+  actionFromSettings(data: { action: number, value: any }): void {
     switch(data.action) {
-      case 0: this.toggleStudentView(); break;
-      case 1: this.save(); break;
-      case 2: this.run(); break;
-      case 3: this.timetableSelectionScreenToggle(); break;
+      case 0: this.toggleStudentView(data.value as boolean); break;
+      // case 1: this.save(); break;
+      // case 2: this.run(); break;
+      // case 3: this.timetableSelectionScreenToggle(); break;
     }
   }
 
-  timetableSelectionScreen: boolean = false;
-  timetableSelectionData: SelectionData = null!;
+  // timetableSelectionScreen: boolean = false;
+  // timetableSelectionData: SelectionData = null!;
 
-  timetableSelectionScreenToggle(): void {
-    this.timetableSelectionScreen = !this.timetableSelectionScreen;
-  }
+  // timetableSelectionScreenToggle(): void {
+  //   this.timetableSelectionScreen = !this.timetableSelectionScreen;
+  // }
 
   copyData: SingleBlock = null!;
 
@@ -141,14 +141,12 @@ export class BuildTimetableComponent implements OnInit {
     }
   }
 
-  toggleStudentView(): void { this.studentView = !this.studentView; }
+  toggleStudentView(value: boolean): void { this.studentView = value; }
 
   timetableSettingsChange(timetable: Timetable): void {
     // let newId: number = timetable.id;
-    console.log(timetable);
-    this.loadedTimetable.courses = timetable.courses;
-    console.log(this.loadedTimetable);
-    this.timetableService.addTimeTable(this.loadedTimetable);
+    this.loadedTimetable = timetable;
+    // this.timetableService.addTimeTable(this.loadedTimetable);
   }
 
   getTeacherFromClassID(classId: number): string {
