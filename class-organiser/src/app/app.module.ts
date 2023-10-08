@@ -12,6 +12,7 @@ import { AddCsvDataComponent } from './testing/add-csv-data/add-csv-data.compone
 
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
+import { StudentDataComponent } from './students/student-data/student-data.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { FormsModule } from '@angular/forms';
     TimetableSettingsComponent,
     LoadingSpinnerComponent,
     AddCsvDataComponent,
+    StudentDataComponent,
   ],
   imports: [
     BrowserModule,

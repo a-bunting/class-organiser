@@ -65,6 +65,7 @@ export interface SingleClass {
 export interface SingleStudent {
   id: number;
   classId: number;
+  email?: string;
   name: { forename: string; surname: string; };
   data: DataValues[];
   coursePriorities: { courseId: number, priority: number }[];

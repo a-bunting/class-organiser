@@ -1,4 +1,5 @@
 .buildtt {
+  position: relative;
   display: flex;
   height: 100%;
   margin-left: 2rem;
@@ -26,8 +27,8 @@
     width: 35rem;
     height: max-content;
     padding: 1rem 2rem;
-    background-color: white;
-    border: .3rem solid red;
+    background-color: lightcoral;
+    border: .3rem solid black;
     z-index: 10000;
     font-size: 2rem;
     text-align: center;
@@ -37,9 +38,11 @@
   }
 
   &__display {
-    position: relative;
+    position: sticky;
+    top: 0rem;
     flex: 1;
     padding: 1rem 2rem;
+
   }
 
   &__tt {

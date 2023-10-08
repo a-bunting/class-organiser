@@ -1,13 +1,24 @@
 .buildtt {
   display: flex;
   height: 100%;
+  margin-left: 2rem;
+  position: relative;
+}
+@media print {
+  .buildtt__settings {
+    display: none;
+  }
 }
 .buildtt__settings {
   flex-basis: max-content;
-  background-color: blue;
+  left: 1rem;
   position: sticky;
-  left: 0;
   z-index: 1000;
+  padding: 0.5rem;
+  padding-left: 0rem;
+  padding-right: 1rem;
+  margin-left: -1rem;
+  filter: drop-shadow(0.2rem 0 0.4rem rgba(0, 0, 0, 0.5));
 }
 .buildtt__info {
   position: fixed;
@@ -24,22 +35,27 @@
   text-align: center;
   box-shadow: 0.2rem 0 0.4rem rgba(0, 0, 0, 0.5);
 }
+@media print {
+  .buildtt__info {
+    position: absolute;
+  }
+}
 .buildtt__display {
+  position: sticky;
+  top: 0rem;
   flex: 1;
-  background-color: greenyellow;
   padding: 1rem 2rem;
 }
 .buildtt__tt {
-  position: relative;
   display: flex;
-  -moz-column-gap: 0.5rem;
-       column-gap: 0.5rem;
+  -moz-column-gap: 0.3rem;
+       column-gap: 0.3rem;
   height: 100%;
 }
 .buildtt__col {
   display: flex;
   flex-direction: column;
-  row-gap: 0.5rem;
+  row-gap: 0.3rem;
 }
 .buildtt__col--narrow {
   flex: 0 0 12rem;
@@ -70,19 +86,42 @@
 }
 .buildtt__block {
   position: relative;
-  background-color: lightgray;
+  background-color: lightcoral;
   border-radius: 0.5rem;
   overflow-y: auto;
   overflow-x: hidden;
+  border: 0.1rem solid black;
+  transition: all 0.2s;
+}
+@media print {
+  .buildtt__block {
+    overflow: auto;
+  }
+}
+@media print {
+  .buildtt__block {
+    background-color: none;
+    display: grid;
+    grid-template: max-content 1fr/1fr max-content;
+  }
+  .buildtt__block__paste {
+    display: none;
+  }
+}
+.buildtt__block:hover {
+  background-color: lightskyblue;
 }
 .buildtt__block--title {
   min-width: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 1.2rem;
   text-align: center;
   padding: 0.5rem 1rem;
+}
+.buildtt__block--tbTitle button {
+  margin-left: 0.5rem;
 }
 .buildtt__block--textInput {
   display: flex;
@@ -103,10 +142,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.6rem;
+  padding-right: 0.5rem;
+}
+.buildtt__block--missingStudents {
+  height: -moz-max-content;
+  height: max-content;
+  max-height: 25%;
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 2rem;
 }
 .buildtt__block--normal {
   flex: 1;
+}
+@media print {
+  .buildtt__block--normal {
+    flex-basis: max-content;
+  }
 }
 .buildtt__block--name, .buildtt__block--room {
   padding: 0.5rem 1rem;
@@ -114,7 +169,7 @@
 .buildtt__block--name {
   position: sticky;
   top: 0;
-  background-color: maroon;
+  background-color: #4E82A3;
   color: white;
   font-size: 1.2rem;
   font-weight: bold;
@@ -132,10 +187,25 @@
   cursor: pointer;
   transform: scale(1.2);
 }
+@media print {
+  .buildtt__block--name {
+    grid-column: 1/2;
+    grid-row: 1/2;
+  }
+}
 .buildtt__block--room {
-  background-color: lightblue;
+  background-color: #67BBF0;
+  color: black;
   font-size: 1rem;
   font-style: italic;
+}
+@media print {
+  .buildtt__block--room {
+    grid-column: 2/3;
+    grid-row: 1/2;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
 }
 .buildtt__block--courses {
   display: flex;
@@ -143,24 +213,34 @@
   align-items: center;
   flex-wrap: wrap;
 }
-.buildtt__block--restriction {
-  display: flex;
-  flex-direction: column;
-}
 .buildtt__block--course {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   background-color: rgba(211, 211, 211, 0.4);
   border-radius: 0.5rem;
   padding: 0.3rem 0.5rem;
+  min-width: 45%;
+  margin-bottom: 0.2rem;
 }
 .buildtt__block--course:not(:last-of-type) {
   cursor: pointer;
 }
 .buildtt__block--course--name {
+  flex: 1;
   font-size: 1rem;
   margin-right: 0.5rem;
+  align-self: flex-start;
+  text-align: left;
+}
+.buildtt__block--course button {
+  font-size: 0.8rem;
+}
+.buildtt__block--restriction {
+  width: 100%;
+}
+.buildtt__block--restriction select {
+  margin: 0 0.5rem;
 }
 .buildtt__block--buttons {
   display: flex;
@@ -177,7 +257,7 @@
   background-color: rgba(128, 128, 128, 0.5);
 }
 .buildtt__block--button--selected {
-  background-color: rgba(255, 127, 80, 0.5);
+  background-color: rgba(103, 187, 240, 0.8);
 }
 .buildtt__block--button:hover {
   cursor: pointer;
@@ -186,9 +266,53 @@
 .buildtt__block--data {
   padding: 0.2rem 0.3rem;
 }
+.buildtt__block--students {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  row-gap: 0.1rem;
+  -moz-column-gap: 0.1rem;
+       column-gap: 0.1rem;
+  font-size: 1rem;
+}
+@media print {
+  .buildtt__block--students {
+    grid-column: 1/3;
+    grid-row: 2/3;
+  }
+}
+.buildtt__block--student {
+  background-color: lightcoral;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.3rem;
+  border: 0.2rem dashed transparent;
+}
+.buildtt__block--student--highlight {
+  background-color: yellow !important;
+}
+.buildtt__block--student--prio {
+  border: 0.2rem solid red;
+  background-color: white;
+}
+.buildtt__block--student--locked {
+  background-color: black;
+  color: white;
+}
+.buildtt__block--student:hover {
+  cursor: grab;
+  border: 0.2rem dashed rgba(0, 0, 0, 0.5);
+}
+.buildtt__block--student:active {
+  background-color: white;
+  transform: scale(1.3);
+}
 .buildtt__switch {
   font-size: 1.2rem;
 }
 .buildtt__switch:hover {
   cursor: pointer;
+}
+
+.cdk-drop-list-receiving, .cdk-drop-list-dragging {
+  background-color: white;
 }

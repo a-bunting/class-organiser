@@ -1,0 +1,41 @@
+<div class="studentData">
+
+    <div class="studentData__title">Student Data</div>
+
+    <table *ngIf="loadedTimetable">
+        <thead>
+            <tr>
+                <th rowspan="2">Forename</th>
+                <th rowspan="2">Surname</th>
+                <th rowspan="2">Email</th>
+    
+                <th rowspan="2" *ngFor="let restriction of loadedTimetable.restrictions">
+                    {{ restriction.name }}
+                </th>
+    
+                <th rowspan="1" [attr.colspan]="getOptionalUnits().length">Course Priority</th>
+            </tr>      
+            <tr>
+                <th *ngFor="let course of getOptionalUnits(); let i = index">{{ i + 1 }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let student of  loadedTimetable.students">
+                <td>{{ student.name.forename }}</td>
+                <td>{{ student.name.surname }}</td>
+                <td>{{ student?.email }}</td>
+                <td *ngFor="let restriction of loadedTimetable.restrictions">
+                    <select class="input__select input__length--medium">
+                        <option value="{{ option.id }}" *ngFor="let option of restriction.options" [selected]="getStudentRestrictionData(student, restriction).id === option.id">{{ option.value }}</option>
+                    </select>
+                </td>
+                <td *ngFor="let course of getOptionalUnits()">
+                    <select class="input__Select input__length--medium">
+                        <!-- <option value="{{ course.id }}" *ngFor="let course of getOptionalUnits(); let i = index" [selected]="getStudentPriorityData(student, course).priority === i+1">{{ course.name }}</option> -->
+                    </select>
+                    <!-- {{ getStudentPriorityData(student, course).name }} -->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

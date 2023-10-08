@@ -59,6 +59,8 @@
     overflow-y: scroll;
     overflow-x: auto;
 
+    position: relative;
+
     @media print { overflow-y: auto; }
   }
 
