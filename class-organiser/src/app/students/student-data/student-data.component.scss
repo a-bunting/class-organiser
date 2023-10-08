@@ -27,6 +27,7 @@
         th, td {
             padding: 12px 15px;
             text-align: center;
+            font-size: 1.2rem;
         }
 
         tbody, tr {
@@ -40,11 +41,11 @@
         }
 
         tbody tr:nth-of-type(even) {
-            background-color: rgba(#f3f3f3, .4);  
+            background-color: rgba(#f3f3f3, .4);
         }
 
         tbody tr:nth-of-type(odd) {
-            background-color: rgba(#f3f3f3, .8);  
+            background-color: rgba(#f3f3f3, .8);
         }
 
         tbody tr:last-of-type {

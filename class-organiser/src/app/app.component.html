@@ -1,10 +1,16 @@
 <div class="structure__background"></div>
 <div class="structure">
   <header>
+
+    <select (change)="loadTimetable($event)">
+      <option selected disabled>Choose your timetable</option>
+      <option value="{{ timetable.id }}" *ngFor="let timetable of timetables">{{ timetable.name }}</option>
+    </select>
+
     <nav>
       <a routerLink="timetables">Timetables</a>
-      <a routerLink="csv">Import CSV Data</a>
-      <a routerLink="students">Student Data</a>
+      <a routerLink="csv">Import Data</a>
+      <a routerLink="students" *ngIf="loadedTimetable">Student Data</a>
     </nav>
     <div class="dashboard__logo">The PE Thing</div>
   </header>

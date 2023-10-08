@@ -30,6 +30,20 @@
     padding: 0 2rem 0 2rem;
     margin: .5rem;
 
+    select {
+      padding: 1rem 2rem;
+      border-radius: 1rem;
+      box-shadow: .2rem 0 .4rem rgba(black, .5);
+      text-align: center;
+      transition: all .2s;
+      margin-left: -1.5rem;
+
+      &:hover {
+        cursor: pointer;
+        filter: brightness(1.05);
+      }
+    }
+
     nav {
       a {
         padding: 1rem 2rem;
