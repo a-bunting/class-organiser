@@ -4,7 +4,7 @@
 
   <div class="buildtt__settings">
     <!-- <app-timetable-settings [timetables]="timetables" [selectionData]="timetableSelectionData" (triggerAction)="actionFromSettings($event)" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings> -->
-    <app-timetable-settings (selectedTimetable)="selectTimetable($event)" (triggerAction)="actionFromSettings($event)" (currentTimetableChange)="timetableSettingsChange($event)"></app-timetable-settings>
+    <app-timetable-settings (triggerAction)="actionFromSettings($event)"></app-timetable-settings>
   </div>
 
   <div class="buildtt__display">
@@ -26,7 +26,11 @@
       <div cdkDropListGroup class="buildtt__col buildtt__col--normal" *ngFor="let timeBlock of loadedTimetable.schedule.blocks; let g = index">
 
         <!-- title -->
-        <div class="buildtt__block buildtt__block--short"><input type="text" class="input__text input__text--full input__text--center margin__right--small" [(ngModel)]="timeBlock.name">{{ getStudentsInTimeBlock(g) }}</div>
+        <div class="buildtt__block buildtt__block--short buildtt__block--tbTitle">
+          <input type="text" class="input__text input__text--full input__text--center margin__right--small" [(ngModel)]="timeBlock.name">
+          {{ getStudentsInTimeBlock(g) }}
+          <button class="input__button input__length--veryshort" (click)="deleteTimeBlock(g)">X</button>
+        </div>
         <div cdkDropList (cdkDropListDropped)="drop($event, g)" class="buildtt__block buildtt__block--missingStudents buildtt__block--students" *ngIf="studentView">
           <div cdkDrag  [cdkDragData]="student.id" class="buildtt__block--student" *ngFor="let student of getMissingStudentData(timeBlock.order)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" (click)="highlightStudent(student.id)">{{ student.name.forename }} {{ student.name.surname }}</div>
         </div>

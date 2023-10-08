@@ -52,19 +52,20 @@
         </div>
       </div>
 
-      <div class="ttsettings__select">
+      <div class="ttsettings__select" *ngIf="loadedTimetable">
         <div class="ttsettings__text">Rename Timetable</div>
         <div class="ttsettings__timetable">
-          <input type="text" class="input__text input__length--full" [disabled]="!loadedTimetable" [(ngModel)]="loadedTimetable.name">
+          <input type="text" class="input__text input__length--full" [(ngModel)]="loadedTimetable.name">
         </div>
       </div>
     </div>
 
-    <div class="ttsettings__select ttsettings__buttons">
+    <div class="ttsettings__select ttsettings__buttons ttsettings__buttons--action">
       <div class="ttsettings__text">Actions</div>
-      <button class="input__button input__length--medium" (click)="studentEditMode(4)">New</button>
-      <button class="input__button input__length--medium" (click)="studentEditMode(5)">Duplicate</button>
-      <button class="input__button input__length--medium" (click)="studentEditMode(6)">Delete</button>
+      <button class="input__button input__length--medium" (click)="addTimeBlock()">Add Timeblock</button>
+      <button class="input__button input__length--medium" (click)="createNewTimetable()">New</button>
+      <button class="input__button input__length--medium" (click)="createDuplicateTimetable()">Duplicate</button>
+      <button class="input__button input__length--medium" (click)="deleteTimetable()">Delete</button>
     </div>
   </div>
 
@@ -108,7 +109,7 @@
           <th>Delete</th>
         </tr>
         <tr *ngFor="let room of loadedTimetable.rooms">
-          <td><input type="text" class="input__text input__length--full" [(ngModel)]="room.name" placeholder="Name of Room"></td>
+          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="room.name" placeholder="Name of Room"></td>
           <td><button class="input__button input__length--veryshort" (click)="deleteRoom(room.id)">X</button></td>
         </tr>
       </table>
@@ -118,14 +119,40 @@
       </div>
     </div>
 
-    <div class="ttsettings__select ttsettings__buttons">
-      <div class="ttsettings__text">Controls</div>
-      <button class="input__button input__length--medium" (click)="print()">Print</button>
-      <button class="input__button input__length--medium" (click)="studentEditMode(0)">Student/Edit Mode</button>
-      <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button>
-      <button class="input__button input__length--medium" (click)="run()">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
-      <button class="input__button input__length--medium" (click)="timetableSelectionScreenToggle(true)" *ngIf="timetableSelectionData">Options</button>
+    <div class="ttsettings__select" *ngIf="loadedTimetable">
+      <div class="ttsettings__text">Classes</div>
+
+      <table class="ttsettings__rooms">
+        <tr>
+          <th>Class Teacher</th>
+          <th>Delete</th>
+        </tr>
+        <tr *ngFor="let class of loadedTimetable.classes">
+          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="class.teacher" placeholder="Name of Teacher"></td>
+          <td><button class="input__button input__length--veryshort" (click)="deleteClass(class.id)">X</button></td>
+        </tr>
+      </table>
+
+      <div class="ttsettings__courses--buttons">
+        <button class="input__button" (click)="addClass()">Add Class</button>
+      </div>
     </div>
 
   </div>
+
+  <div class="ttsettings__select ttsettings__buttons">
+    <div class="ttsettings__text">Controls</div>
+    <div class="ttsettings__buttons--row">
+      <button class="input__button input__length--medium" (click)="print()">Print</button>
+      <button class="input__button input__length--medium" (click)="studentEditMode(0)">Student/Edit Mode</button>
+    </div>
+    <div class="ttsettings__buttons--row">
+      <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button>
+      <button class="input__button input__length--medium" (click)="run()">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
+    </div>
+    <div class="ttsettings__buttons--row">
+      <button class="input__button input__length--medium" (click)="timetableSelectionScreenToggle(true)" *ngIf="timetableSelectionData">Options</button>
+    </div>
+  </div>
+
 </div>

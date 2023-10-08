@@ -1,6 +1,7 @@
 import { NumberSymbol } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, last, Observable } from 'rxjs';
+import { DatabaseService } from './database.service';
 
 export interface Timetable {
   id: number;
@@ -80,41 +81,111 @@ export interface DataValues {
 })
 export class TimetableService {
 
-  timetables: Timetable[] = []
+  loadedTimetable: BehaviorSubject<Timetable> = new BehaviorSubject<Timetable>(null!);
+  timetables: BehaviorSubject<Timetable[]> = new BehaviorSubject<Timetable[]>(null!);
 
-  constructor() { }
+  loaded: Timetable = null!;
 
-  getTimetable(timetableId?: number): Timetable {
-    return this.timetables.find((a: Timetable) => a.id === timetableId)!;
+  constructor(
+    private databaseService: DatabaseService
+  ) {
+    this.timetables.next(this.getTimetables());
   }
 
   getTimetables(): Timetable[] {
-    return this.timetables;
+    return this.getFromLocalStorage();
   }
 
-  addTimeTable(timetable: Timetable): boolean {
-    this.addToLocalStorage(timetable);
-    return true;
+  getTimetableById(ttId: number): Timetable {
+    return this.timetables.value.find((a: Timetable) => a.id === ttId)!;
   }
 
-  saveTimetable(timetable: Timetable): void {
-    this.addToLocalStorage(timetable);
+  loadTimetable(ttId: number): void {
+    const timetable: Timetable = this.getTimetableById(ttId);
+    this.loaded = timetable;
+    this.loadedTimetable.next(timetable);
   }
 
-  addToLocalStorage(timetable: Timetable): void {
-    window.localStorage.setItem('classOrganiser', JSON.stringify([timetable]));
+  newTimetableData(blocks: Timetable): void {
+    this.loaded = blocks;
+    this.updateLocalStorage(this.loaded.id, this.loaded);
+    this.loadedTimetable.next(this.loaded);
+  }
+
+  updateSavedTimetable(updatedTimetable: Timetable): void {
+    this.loaded = updatedTimetable;
+    this.updateLocalStorage(this.loaded.id, this.loaded);
+  }
+
+  updateLocalStorage(ttId: number, updatedTimetable: Timetable): void {
+    let localStorage: Timetable[] = this.getFromLocalStorage();
+    let ttInStorage: Timetable[] = localStorage.map((a: Timetable) => {
+      if(a.id === ttId) {
+        return updatedTimetable;
+      } else return a
+    });
+    // update the local storage
+    window.localStorage.setItem('classOrganiser', JSON.stringify(ttInStorage));
+  }
+
+  addNewToLocalStorage(newTimetable: Timetable): void {
+    let localStorage: Timetable[] = this.getFromLocalStorage();
+    localStorage.push(newTimetable);
+    window.localStorage.setItem('classOrganiser', JSON.stringify(localStorage));
+    // set the new timetable as the loaded one.
+    this.loaded = newTimetable;
+    this.loadedTimetable.next(newTimetable);
+    this.timetables.next(localStorage);
   }
 
   getFromLocalStorage(): Timetable[] {
     let fromLocal: Timetable[] = JSON.parse(window.localStorage.getItem('classOrganiser')!);
-    return fromLocal;
+    return fromLocal ?? [];
   }
 
   createBlank(): void {
+    const lastId: number = this.timetables.value[this.timetables.value.length - 1].id;
+    console.log(`new`);
 
+    let newTimetable: Timetable = {
+      id: lastId +1,
+      name: "New Timetable",
+      classes: [],
+      courses: [],
+      students: [],
+      rooms: [],
+      restrictions: [
+        { id: 0, name: "Gender",              optionsAreClasses: false, priority: 0, description: "Do you identify as Male, Female or Other?", options: [ { id: 0, value: "Male" }, { id: 1, value: "Female" }, { id: 2, value: "Other" }, ]},
+        { id: 1, name: "Fasting",             optionsAreClasses: false, priority: 1, description: "During Ramadan do you fast?", options: [ { id: 0, value: "Yes, I fast" }, { id: 1, value: "No, I do not fast" }]},
+        { id: 2, name: "Single Sex Swimming", optionsAreClasses: false, priority: 0, description: "Do you require single sex swimming?", options: [ { id: 0, value: "Yes, I require single sex swimming" }, { id: 1, value: "No, I do not require single sex swimming" }]}
+      ],
+      schedule: { blocks: [] }
+    }
+
+    this.addNewToLocalStorage(newTimetable);
   }
 
-  createDuplicate(ttId: number): void {
-
+  createDuplicate(): void {
+    // duplicate the loaded timetable
+    const timetable: Timetable = JSON.parse(JSON.stringify(this.loadedTimetable.value));
+    const lastId: number = this.timetables.value[this.timetables.value.length - 1].id;
+    timetable.id = lastId + 1;
+    this.addNewToLocalStorage(timetable);
   }
+
+  deleteTimetable(): void {
+    console.log(`delete`);
+    let localStorage: Timetable[] = this.getFromLocalStorage();
+    let index: number = localStorage.findIndex((a: Timetable) => a.id === this.loadedTimetable.value.id);
+    localStorage.splice(index, 1);
+    // update the local storage
+    window.localStorage.setItem('classOrganiser', JSON.stringify(localStorage));
+    this.timetables.next(localStorage);
+
+    if(this.timetables.value.length > 0) {
+      this.loaded = this.timetables.value[0];
+      this.loadedTimetable.next(this.timetables.value[0]);
+    }
+  }
+
 }

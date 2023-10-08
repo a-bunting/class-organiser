@@ -37,12 +37,12 @@
   }
 
   &__display {
+    position: relative;
     flex: 1;
     padding: 1rem 2rem;
   }
 
   &__tt {
-    position: relative;
     display: flex;
     column-gap: .3rem;
     height: 100%;
@@ -135,6 +135,12 @@
       font-size: 1.2rem;
       text-align: center;
       padding: .5rem 1rem;
+    }
+
+    &--tbTitle {
+      button {
+        margin-left: .5rem;
+      }
     }
 
     &--textInput {

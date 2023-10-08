@@ -148,7 +148,7 @@ export class AddCsvDataComponent {
       newTimetable.schedule.blocks.push(newBlock);
     }
 
-    this.timetableService.addTimeTable(newTimetable);
+    this.timetableService.addNewToLocalStorage(newTimetable);
   }
 
   newData: string = `

@@ -47,6 +47,7 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: .5rem;
+    column-gap: .5rem;
 
     &--col {
       display: flex;
@@ -64,8 +65,9 @@
     border-radius: .5rem;
     background-color: rgba(lightgray, .5);
     overflow: hidden;
-    width: max-content;
+    // width: max-content;
     transition: all .2s;
+    flex: 1;
 
     &:not(:last-of-type) {
       margin-bottom: .5rem;
@@ -83,12 +85,15 @@
     align-items: center;
     justify-content: center;
     flex: 1;
-    margin-left: 1rem;
 
-    button {
-      &:first-of-type { margin-top: 0rem; }
-      &:last-of-type { margin-bottom: 1rem; }
-      margin: .5rem 1rem .5rem 1rem;
+    &--row { display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; column-gap: .5rem; margin-bottom: .5rem; }
+
+    &--action {
+      button {
+        &:first-of-type { margin-top: 0rem; }
+        &:last-of-type { margin-bottom: 1rem; }
+        margin: .5rem 1rem .5rem 1rem;
+      }
     }
   }
 
