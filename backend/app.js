@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(cors({
-  origin: ['https://pe.sweeto.co.uk', 'http://localhost:4200']
+  origin: ['http://pe.sweeto.co.uk', 'https://pe.sweeto.co.uk', 'http://localhost:4200']
 }))
 
 // app.use((req, res, next) => {
