@@ -161,6 +161,7 @@ export class TimetableSettingsComponent implements OnInit {
     })
 
     this.reSortStudentPriorities();
+    console.log(this.loadedTimetable.students);
 
     this.currentTimetableChange.emit(this.loadedTimetable);
   }
@@ -169,7 +170,7 @@ export class TimetableSettingsComponent implements OnInit {
   reSortStudentPriorities(): void {
     this.loadedTimetable.students.map((a: SingleStudent) => {
       let required: { courseId: number, priority: number }[] = a.coursePriorities.filter((b: { courseId: number, priority: number }) => b.priority === 0);
-      let optional: { courseId: number, priority: number }[] = a.coursePriorities.filter((b: { courseId: number, priority: number }) => b.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority ).map((a: { courseId: number, priority: number }, i: number) => { return { courseId: a.courseId, priority: i } });
+      let optional: { courseId: number, priority: number }[] = a.coursePriorities.filter((b: { courseId: number, priority: number }) => b.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority ).map((a: { courseId: number, priority: number }, i: number) => { return { courseId: a.courseId, priority: i + 1 } });
       a.coursePriorities = required.concat(...optional)
     })
   }

@@ -86,6 +86,12 @@ export class StudentDataComponent implements OnInit {
     dataValue.value = newValue;
     this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
+  
+  modifyClassTeacher(studentId: number, input: any): void {
+    let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === studentId)!;
+    student.classId = +input.target.value;
+    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+  }
 
   content: string = '';
 

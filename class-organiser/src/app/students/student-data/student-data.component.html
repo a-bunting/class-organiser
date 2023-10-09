@@ -19,6 +19,7 @@
                 <th rowspan="2">Forename</th>
                 <th rowspan="2">Surname</th>
                 <th rowspan="2">Email</th>
+                <th rowspan="2">Teacher</th>
 
                 <th rowspan="2" *ngFor="let restriction of loadedTimetable.restrictions">
                     {{ restriction.name }}
@@ -35,6 +36,11 @@
                 <td>{{ student.name.forename }}</td>
                 <td>{{ student.name.surname }}</td>
                 <td>{{ student?.email }}</td>
+                <td>
+                    <select class="input__select input__length--medium" (change)="modifyClassTeacher(student.id, $event)">
+                        <option value="{{ class.id }}" *ngFor="let class of loadedTimetable.classes" [selected]="class.id === student.classId">{{ class.teacher }}</option>
+                    </select>
+                </td>
                 <td *ngFor="let restriction of loadedTimetable.restrictions">
                     <select class="input__select input__length--medium" (change)="modifyDataValue(student, restriction.id, $event)">
                         <option value="{{ option.id }}" *ngFor="let option of restriction.options" [selected]="getStudentRestrictionData(student, restriction).id === option.id">{{ option.value }}</option>
