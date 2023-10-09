@@ -2,8 +2,19 @@
 
     <div class="studentData__title">Student Data</div>
 
+    <div class="studentData__import" *ngIf="loadedTimetable.students.length === 0">
+        <div class="studentData__import--title">Import from CSV File</div>
+        <div class="studentData__import--box">
+            <div class="studentData__import--drop" (drop)="onDrop($event)" (dragover)="onDragOver($event)">Drop a CSV file here to import</div>
+            <div class="studentData__import--instructions">
+                <img src="../../../assets/howToCsv1.jpg" alt="How to CSV Step 1">
+                <img src="../../../assets/howToCsv2.jpg" alt="How to CSV Step 2">
+            </div>
+        </div>
+    </div>
+
     <table *ngIf="loadedTimetable">
-        <thead>
+        <thead *ngIf="loadedTimetable.students.length > 0">
             <tr>
                 <th rowspan="2">Forename</th>
                 <th rowspan="2">Surname</th>

@@ -62,10 +62,10 @@
 
     <div class="ttsettings__select ttsettings__buttons ttsettings__buttons--action">
       <div class="ttsettings__text">Actions</div>
-      <button class="input__button input__length--medium" (click)="addTimeBlock()">Add Timeblock</button>
+      <button class="input__button input__length--medium" (click)="addTimeBlock()" *ngIf="loadedTimetable">Add Timeblock</button>
       <button class="input__button input__length--medium" (click)="createNewTimetable()">New</button>
-      <button class="input__button input__length--medium" (click)="createDuplicateTimetable()">Duplicate</button>
-      <button class="input__button input__length--medium" (click)="deleteTimetable()">Delete</button>
+      <button class="input__button input__length--medium" (click)="createDuplicateTimetable()" *ngIf="loadedTimetable">Duplicate</button>
+      <button class="input__button input__length--medium" (click)="deleteTimetable()" *ngIf="loadedTimetable">Delete</button>
     </div>
   </div>
 
@@ -82,7 +82,7 @@
       </tr>
       <tr *ngFor="let course of loadedTimetable.courses">
         <td><input type="text" class="input__text input__length--medium" [(ngModel)]="course.name" placeholder="Name of Course" (blur)="editCourse(true)" (keyup)="editCourse(false, $event)"></td>
-        <td><input type="checkbox" [(ngModel)]="course.requirement.required"></td>
+        <td><input type="checkbox" [(ngModel)]="course.requirement.required" (change)="changeRequired(course.id, $event)"></td>
         <td><input type="text" class="input__text input__length--short" [(ngModel)]="course.requirement.times"></td>
         <td><input type="text" class="input__text input__length--short" [(ngModel)]="course.classSize"></td>
         <td><button class="input__button input__length--veryshort" (click)="deleteCourse(course.id)">X</button></td>
@@ -140,7 +140,7 @@
 
   </div>
 
-  <div class="ttsettings__select ttsettings__buttons">
+  <div class="ttsettings__select ttsettings__buttons" *ngIf="loadedTimetable">
     <div class="ttsettings__text">Controls</div>
     <div class="ttsettings__buttons--row">
       <button class="input__button input__length--medium" (click)="print()">Print</button>

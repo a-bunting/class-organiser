@@ -18,14 +18,41 @@ export class AddCsvDataComponent {
   ) {}
 
   data: CsvObject[] = [];
+  content: string = '';
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    const files = (event.dataTransfer?.files || []) as FileList;
+    this.handleFiles(files);
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  private handleFiles(files: FileList): void {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      this.readFileContents(file);
+    }
+  }
+
+  private readFileContents(file: File): void {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const contents = e.target?.result as string;
+      this.content = contents; // Do something with the CSV contents
+      this.parseCsvString(contents);
+    };
+    reader.readAsText(file);
+  }
+
 
   // thanks chatgpt!
-  parseCsvString(): void {
-    let csvData = (document.getElementById('csvData') as HTMLTextAreaElement).value;
+  parseCsvString(csvData: string): void {
 
     const rows = csvData.trim().split('\n');
     const headers = rows[0].split(',');
-
     const results: CsvObject[] = [];
 
     for (let i = 1; i < rows.length; i++) {
@@ -67,7 +94,7 @@ export class AddCsvDataComponent {
 
     console.log(this.students, this.courses, this.classes);
 
-    this.saveTimetable();
+    // this.saveTimetable();
   }
 
   classes: { teacher: string, id: number, room: string }[] = [];

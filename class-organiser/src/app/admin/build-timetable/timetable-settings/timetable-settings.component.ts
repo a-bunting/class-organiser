@@ -56,6 +56,7 @@ export class TimetableSettingsComponent implements OnInit {
 
   run(): void {
 
+    console.log(this.loadedTimetable);
     this.loading = true;
 
     // run the last unedited version if available - when saved this disappears.
@@ -108,6 +109,17 @@ export class TimetableSettingsComponent implements OnInit {
   //   this.selectedTimetable.emit(this.loadedTimetable);
   // }
 
+  changeRequired(courseId: number, input: any) : void {
+    let status: boolean = input.target.checked;
+    console.log(status, input.target.checked);
+
+    this.loadedTimetable.students.map((a: SingleStudent) => {
+      let priority: { courseId: number, priority: number } = a.coursePriorities.find((b: { courseId: number, priority: number }) => b.courseId === courseId)!;
+      priority.priority = status === true ? 0 : a.coursePriorities.filter((b: { priority: number, courseId: number }) => b.priority !== 0).length + 1;
+    })
+
+    this.reSortStudentPriorities();
+  }
 
   addCourse(): void {
     let newCourse: SingleCourse;
@@ -117,6 +129,11 @@ export class TimetableSettingsComponent implements OnInit {
     } else {
       newCourse = { id: 0, name: '', classSize: 25,  requirement: { required: true, times: 1 }};
     }
+
+    // add it to each student
+    let newCoursePriority: { priority: number, courseId: number } = { courseId: newCourse.id, priority: 0 };
+    this.loadedTimetable.students.map((a: SingleStudent) => a.coursePriorities.push({...newCoursePriority}));
+
     this.loadedTimetable.courses.push(newCourse);
     this.currentTimetableChange.emit(this.loadedTimetable);
   }
@@ -139,7 +156,22 @@ export class TimetableSettingsComponent implements OnInit {
       this.loadedTimetable.schedule.blocks[i].blocks = this.loadedTimetable.schedule.blocks[i].blocks.map((a: SingleBlock) => { return { ...a, courses: a.courses.filter((a: number) => +a !== +courseId )}});
     }
 
+    this.loadedTimetable.students.map((a: SingleStudent) => {
+      a.coursePriorities = a.coursePriorities.filter((b: { courseId: number, priority: number }) => b.courseId !== courseId);
+    })
+
+    this.reSortStudentPriorities();
+
     this.currentTimetableChange.emit(this.loadedTimetable);
+  }
+
+  // fill in gaps in the student priority list so they go from 1 to x
+  reSortStudentPriorities(): void {
+    this.loadedTimetable.students.map((a: SingleStudent) => {
+      let required: { courseId: number, priority: number }[] = a.coursePriorities.filter((b: { courseId: number, priority: number }) => b.priority === 0);
+      let optional: { courseId: number, priority: number }[] = a.coursePriorities.filter((b: { courseId: number, priority: number }) => b.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority ).map((a: { courseId: number, priority: number }, i: number) => { return { courseId: a.courseId, priority: i } });
+      a.coursePriorities = required.concat(...optional)
+    })
   }
 
 
@@ -162,6 +194,8 @@ export class TimetableSettingsComponent implements OnInit {
     if(roomIndex !== -1) {
       this.loadedTimetable.rooms.splice(roomIndex, 1);
     }
+
+    if(this.loadedTimetable.rooms.length === 0) { this.loadedTimetable.rooms.push({ id: 0, name: 'New Room' })};
 
     this.currentTimetableChange.emit(this.loadedTimetable);
   }

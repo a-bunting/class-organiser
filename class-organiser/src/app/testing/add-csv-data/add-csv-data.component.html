@@ -1,2 +1,13 @@
-<textarea class="input__textarea" id="csvData" [(ngModel)]="newData"></textarea><br />
-<button class="input__button" (click)="parseCsvString()">Submit</button>
+<!-- <textarea class="input__textarea" id="csvData" [(ngModel)]="newData"></textarea><br /> -->
+<!-- <button class="input__button" (click)="parseCsvString()">Submit</button> -->
+
+<div class="csv">
+    <div class="csv__title">Import Data</div>
+
+    <textarea cols="30" rows="10" [(ngModel)]="content"></textarea>
+
+    <div class="csv__dropFile"></div>
+
+    <div class="drop-zone" (drop)="onDrop($event)" (dragover)="onDragOver($event)">Drop CSV file here</div>
+
+</div>

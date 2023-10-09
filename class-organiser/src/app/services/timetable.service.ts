@@ -145,20 +145,23 @@ export class TimetableService {
   }
 
   createBlank(): void {
-    const lastId: number = this.timetables.value[this.timetables.value.length - 1].id;
-    console.log(`new`);
+    const timetables: Timetable[] = this.getFromLocalStorage();
+    let maxId: number = 0;
+
+    for(let i = 0 ; i < timetables.length ; i++) {
+      if(timetables[i].id > maxId) maxId = timetables[i].id;
+    }
+
+    maxId  = maxId === 0 ? 0 : maxId + 1;
 
     let newTimetable: Timetable = {
-      id: lastId +1,
+      id: maxId,
       name: "New Timetable",
       classes: [],
       courses: [],
       students: [],
-      rooms: [],
+      rooms: [{ id: 0, name: 'New Room' }],
       restrictions: [
-        { id: 0, name: "Gender",              optionsAreClasses: false, priority: 0, description: "Do you identify as Male, Female or Other?", options: [ { id: 0, value: "Male" }, { id: 1, value: "Female" }, { id: 2, value: "Other" }, ]},
-        { id: 1, name: "Fasting",             optionsAreClasses: false, priority: 1, description: "During Ramadan do you fast?", options: [ { id: 0, value: "Yes, I fast" }, { id: 1, value: "No, I do not fast" }]},
-        { id: 2, name: "Single Sex Swimming", optionsAreClasses: false, priority: 0, description: "Do you require single sex swimming?", options: [ { id: 0, value: "Yes, I require single sex swimming" }, { id: 1, value: "No, I do not require single sex swimming" }]}
       ],
       schedule: { blocks: [] }
     }
