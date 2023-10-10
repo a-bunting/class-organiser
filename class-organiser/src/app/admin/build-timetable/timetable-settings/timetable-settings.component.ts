@@ -98,7 +98,6 @@ export class TimetableSettingsComponent implements OnInit {
 
   selectTimetable(input: any, val?: number): void {
       let value: number = input ? +input.target.value : val ? val : 0;
-      console.log(value);
       this.timetableService.loadTimetable(value);
   }
 

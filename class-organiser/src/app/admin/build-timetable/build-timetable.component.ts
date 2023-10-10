@@ -263,6 +263,8 @@ export class BuildTimetableComponent implements OnInit {
     // this next bit feels like it should be easier...
     const studentId: number = +input.item.element.nativeElement.attributes[3].value;
 
+    console.log(previousGroup, newGroup, studentId);
+
     if(previousGroup && newGroup) {
       // group to group
       const fromBlock: SingleBlock = this.loadedTimetable.schedule.blocks[timeBlock].blocks.find((a: SingleBlock) => a.id === previousGroup)!;

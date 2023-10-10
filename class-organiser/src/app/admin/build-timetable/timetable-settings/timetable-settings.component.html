@@ -148,7 +148,7 @@
     </div>
     <div class="ttsettings__buttons--row">
       <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button>
-      <button class="input__button input__length--medium" (click)="run()">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
+      <button class="input__button input__length--medium" (click)="run()" [disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
     </div>
     <div class="ttsettings__buttons--row">
       <button class="input__button input__length--medium" (click)="timetableSelectionScreenToggle(true)" *ngIf="timetableSelectionData">Options</button>

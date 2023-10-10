@@ -149,10 +149,8 @@ export class TimetableService {
     let maxId: number = 0;
 
     for(let i = 0 ; i < timetables.length ; i++) {
-      if(timetables[i].id > maxId) maxId = timetables[i].id;
+      if(timetables[i].id >= maxId) maxId = timetables[i].id + 1;
     }
-
-    maxId  = maxId === 0 ? 0 : maxId + 1;
 
     let newTimetable: Timetable = {
       id: maxId,
@@ -172,8 +170,13 @@ export class TimetableService {
   createDuplicate(): void {
     // duplicate the loaded timetable
     const timetable: Timetable = JSON.parse(JSON.stringify(this.loadedTimetable.value));
-    const lastId: number = this.timetables.value[this.timetables.value.length - 1].id;
-    timetable.id = lastId + 1;
+    let maxId: number = 0;
+
+    for(let i = 0 ; i < this.timetables.value.length ; i++) {
+      if(this.timetables.value[i].id >= maxId) maxId = this.timetables.value[i].id + 1;
+    }
+
+    timetable.id = maxId;
     this.addNewToLocalStorage(timetable);
   }
 
