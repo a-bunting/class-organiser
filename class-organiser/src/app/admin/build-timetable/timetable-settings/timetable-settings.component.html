@@ -1,5 +1,3 @@
-<app-loading-spinner *ngIf="loading"></app-loading-spinner>
-
 <div class="ttsettings__chooseTimetable" *ngIf="timetableSelectionScreen">
   <div class="ttsettings__chooseTimetable--backdrop" (click)="timetableSelectionScreenToggle(false)"></div>
   <div class="ttsettings__chooseTimetable--data">
@@ -36,36 +34,39 @@
   </div>
 </div>
 
-<div class="ttsettings">
-  <div class="ttsettings__title">Settings</div>
+<app-loading-spinner *ngIf="loading"></app-loading-spinner>
 
-  <div class="ttsettings__flex">
+<div class="ttsettings">
+
+
+  <div class="ttsettings__title">
+    <p>Settings</p>
+    <input type="text" class="input__text input__length--long" [(ngModel)]="loadedTimetable.name">
+  </div>
+
+  <!-- <div class="ttsettings__flex">
 
     <div class="ttsettings__flex--col">
-      <div class="ttsettings__select">
-        <div class="ttsettings__text">Timetable</div>
-        <div class="ttsettings__timetable">
-          <select class="input__select input__length--long" (change)="selectTimetable($event)">
-            <option value="" disabled selected>Select Timetable</option>
-            <option value="{{ timetable.id }}" *ngFor="let timetable of timetables" [selected]="loadedTimetable.id === timetable.id">{{ timetable.name }}</option>
-          </select>
-        </div>
-      </div>
 
       <div class="ttsettings__select" *ngIf="loadedTimetable">
         <div class="ttsettings__text">Rename Timetable</div>
         <div class="ttsettings__timetable">
-          <input type="text" class="input__text input__length--full" [(ngModel)]="loadedTimetable.name">
         </div>
       </div>
     </div>
+  </div> -->
 
-    <div class="ttsettings__select ttsettings__buttons ttsettings__buttons--action">
-      <div class="ttsettings__text">Actions</div>
+  <div class="ttsettings__select ttsettings__buttons" *ngIf="loadedTimetable">
+    <div class="ttsettings__text">Controls</div>
+    <div class="ttsettings__buttons--row">
+      <button class="input__button input__length--medium" (click)="print()">Print</button>
+      <button class="input__button input__length--medium" (click)="studentEditMode(0)">{{ studentViewMode ? 'Edit' : 'Student' }} Mode</button>
+      <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button>
+    </div>
+    <div class="ttsettings__buttons--row">
+      <button class="input__button input__length--medium" (click)="run()" [disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
+      <button class="input__button input__length--medium" (click)="timetableSelectionScreenToggle(true)" [disabled]="timetableSelectionData === null">Options</button>
       <button class="input__button input__length--medium" (click)="addTimeBlock()" *ngIf="loadedTimetable">Add Timeblock</button>
-      <button class="input__button input__length--medium" (click)="createNewTimetable()">New</button>
-      <button class="input__button input__length--medium" (click)="createDuplicateTimetable()" *ngIf="loadedTimetable">Duplicate</button>
-      <button class="input__button input__length--medium" (click)="deleteTimetable()" *ngIf="loadedTimetable">Delete</button>
     </div>
   </div>
 
@@ -75,10 +76,10 @@
     <table class="ttsettings__courses">
       <tr>
         <th>Name</th>
-        <th>Required</th>
-        <th>Times</th>
-        <th>Max Class Size</th>
-        <th>Delete</th>
+        <th [tooltip]="'Is this a required coure?'">Required</th>
+        <th [tooltip]="'How many times the students is required to take this course'">Times</th>
+        <th [tooltip]="'How many students can be placed in one block (can be overridden in the block view)'">Max Class Size</th>
+        <th [tooltip]="'Delete this course'">Delete</th>
       </tr>
       <tr *ngFor="let course of loadedTimetable.courses">
         <td><input type="text" class="input__text input__length--medium" [(ngModel)]="course.name" placeholder="Name of Course" (blur)="editCourse(true)" (keyup)="editCourse(false, $event)"></td>
@@ -138,21 +139,6 @@
       </div>
     </div>
 
-  </div>
-
-  <div class="ttsettings__select ttsettings__buttons" *ngIf="loadedTimetable">
-    <div class="ttsettings__text">Controls</div>
-    <div class="ttsettings__buttons--row">
-      <button class="input__button input__length--medium" (click)="print()">Print</button>
-      <button class="input__button input__length--medium" (click)="studentEditMode(0)">Student/Edit Mode</button>
-    </div>
-    <div class="ttsettings__buttons--row">
-      <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button>
-      <button class="input__button input__length--medium" (click)="run()" [disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
-    </div>
-    <div class="ttsettings__buttons--row">
-      <button class="input__button input__length--medium" (click)="timetableSelectionScreenToggle(true)" *ngIf="timetableSelectionData">Options</button>
-    </div>
   </div>
 
 </div>

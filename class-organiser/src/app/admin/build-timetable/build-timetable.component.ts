@@ -236,6 +236,7 @@ export class BuildTimetableComponent implements OnInit {
   highlightedStudent: number = -1;
 
   highlightStudent(studentId: number): void { this.highlightedStudent = studentId; }
+
   getStudentPriority(studentId: number): number {
     let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === studentId)!;
     let topPriority: number = student.coursePriorities.filter((a: { courseId: number, priority: number }) => a.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
@@ -261,9 +262,7 @@ export class BuildTimetableComponent implements OnInit {
     const previousGroup: number = +input.previousContainer.id.split('__')[1];
     const newGroup: number = +input.container.id.split('__')[1];
     // this next bit feels like it should be easier...
-    const studentId: number = +input.item.element.nativeElement.attributes[3].value;
-
-    console.log(previousGroup, newGroup, studentId);
+    const studentId: number = input.item.data;
 
     if(previousGroup && newGroup) {
       // group to group

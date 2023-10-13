@@ -17,7 +17,9 @@
     height: 100vh;
     background-image: linear-gradient(to right, lightcoral, lightblue);
     filter: drop-shadow(.2rem 0 .4rem black);
-    clip-path: polygon(8% 27%, 19% 33%, 33% 33%, 41% 28%, 50% 16%, 60% 9%, 77% 3%, 91% 6%, 98% 14%, 99% 28%, 99% 45%, 95% 68%, 92% 87%, 83% 93%, 72% 93%, 69% 85%, 64% 73%, 52% 60%, 43% 76%, 29% 68%, 18% 59%, 11% 50%, 3% 49%, 0% 50%, 0% 27%);  }
+    clip-path: polygon(8% 27%, 19% 33%, 33% 33%, 41% 28%, 50% 16%, 60% 9%, 77% 3%, 91% 6%, 98% 14%, 99% 28%, 99% 45%, 95% 68%, 92% 87%, 83% 93%, 72% 93%, 69% 85%, 64% 73%, 52% 60%, 43% 76%, 29% 68%, 18% 59%, 11% 50%, 3% 49%, 0% 50%, 0% 27%);
+    z-index: -1;
+  }
 
   header {
     flex-basis: 5rem;
@@ -73,7 +75,7 @@
     overflow-y: scroll;
     overflow-x: auto;
 
-    position: relative;
+    // position: relative;
 
     @media print { overflow-y: auto; }
   }
@@ -97,5 +99,29 @@
 
   @media print {
     &__background, footer, header { display: none; }
+  }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+
+  select { margin-right: 1rem; }
+
+  &__icon {
+
+    border-radius: 1rem;
+    padding: .5rem 1rem;
+    transition: all .2s;
+
+    img {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    &:hover {
+      cursor: pointer;
+      background-color: #009879;
+    }
   }
 }

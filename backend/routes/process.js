@@ -45,7 +45,7 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 100;
+        const MAX_ITERATIONS = 2000;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
         const MUTATION_FACTOR = 0.1;
@@ -274,8 +274,6 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
         }
     }
 
-    let iteration = 0;
-
     // now iterate over the lists, going with the first priority first, then second etc.
     for(let i = 0 ; i < priorityListed.length ; i++) {
 
@@ -360,7 +358,7 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
         for(let o = 0 ; o < studentPriorities.length ; o++) {
             let priority = studentPriorities[o];
             // find the blocks with this courses.
-            let blocksWithCourse = blocks.filter(a => !!a.courses.find(b => +b === +priority.courseId));
+            let blocksWithCourse = blocks.filter(a => +a.selectedCourse === +priority.courseId);
 
             if(blocksWithCourse.length === 0) continue; // there are no blocks with this, so they dont have it
 

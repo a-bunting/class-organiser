@@ -1,3 +1,3 @@
 export const environment = {
-    apiUrl: 'http://localhost:3002/api'
+    apiUrl: 'https://pebackend.sweeto.co.uk/api'
 };

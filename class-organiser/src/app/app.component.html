@@ -2,10 +2,15 @@
 <div class="structure">
   <header>
 
-    <select (change)="loadTimetable($event)">
-      <option selected disabled>Choose your timetable</option>
-      <option value="{{ timetable.id }}" *ngFor="let timetable of timetables">{{ timetable.name }}</option>
-    </select>
+    <div class="controls">
+      <select (change)="loadTimetable($event)">
+        <option selected disabled>Choose your timetable</option>
+        <option value="{{ timetable.id }}" *ngFor="let timetable of timetables">{{ timetable.name }}</option>
+      </select>
+      <div class="controls__icon" (click)="createNewTimetable()" [tooltip]="'Create blank timetable'"><img src="../assets/icons/file-empty.png" alt="Create Blank Timetable"></div>
+      <div class="controls__icon" (click)="createDuplicateTimetable()" [tooltip]="'Create duplicate of this timetable'"><img src="../assets/icons/copy.png" alt="Duplicate Current Timetable"></div>
+      <div class="controls__icon" (click)="deleteTimetable()" [tooltip]="'Delete this timetable'"><img src="../assets/icons/bin2.png" alt="Delete Current Timetable"></div>
+    </div>
 
     <nav>
       <a routerLink="timetables">Timetables</a>

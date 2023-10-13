@@ -305,17 +305,17 @@ export class TimetableSettingsComponent implements OnInit {
     window.print();
   }
 
-  createNewTimetable(): void {
-    this.timetableService.createBlank();
-  }
+  // createNewTimetable(): void {
+  //   this.timetableService.createBlank();
+  // }
 
-  createDuplicateTimetable(): void {
-    this.timetableService.createDuplicate();
-  }
+  // createDuplicateTimetable(): void {
+  //   this.timetableService.createDuplicate();
+  // }
 
-  deleteTimetable(): void {
-    this.timetableService.deleteTimetable();
-  }
+  // deleteTimetable(): void {
+  //   this.timetableService.deleteTimetable();
+  // }
 
   studentViewMode: boolean = false;
 

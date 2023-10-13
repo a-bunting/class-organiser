@@ -41,7 +41,8 @@ export interface SingleBlock {
   room: number;
   maxStudents: number;
   classOnly: boolean;
-  lockedStudents: number[]
+  lockedStudents: number[];
+  selectedCourse?: number;
   students: number[];
   courses: number[];
   restrictions: { restrictionId: number, optionId: number }[]; // value is the optionvalue
@@ -177,6 +178,7 @@ export class TimetableService {
     }
 
     timetable.id = maxId;
+    timetable.name = timetable.name + ' (Copy)';
     this.addNewToLocalStorage(timetable);
   }
 

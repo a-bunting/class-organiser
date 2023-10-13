@@ -1,25 +1,20 @@
-const cors = require('cors');
 const express = require('express');
 const bodyParser = require('body-parser');
-
-const userRoutes = require('./routes/user');
-const processingRoutes = require('./routes/process');
-
 const app = express();
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    // res.header('Access-Control-Allow-Origin', 'https://pe.sweeto.co.uk');
+    res.header('Access-Control-Allow-Methods', 'GET,POST');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
+
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-app.use(cors({
-  origin: ['http://pe.sweeto.co.uk', 'https://pe.sweeto.co.uk', 'http://localhost:4200']
-}))
-
-// app.use((req, res, next) => {
-//   res.setHeader("Access-Control-Allow-Origin", "https://pe.sweeto.co.uk");
-//   res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//   next();
-// })
+  app.use(bodyParser.urlencoded({ extended: false }));
+  
+  const userRoutes = require('./routes/user');
+  const processingRoutes = require('./routes/process');
 
 // all the various api calls...
 app.use("/api/user", userRoutes);

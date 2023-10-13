@@ -1,4 +1,5 @@
 import { Component , OnInit } from '@angular/core';
+import { DatabaseService } from './services/database.service';
 import { Timetable, TimetableService } from './services/timetable.service';
 
 @Component({
@@ -14,7 +15,8 @@ export class AppComponent implements OnInit {
   loadedTimetable: Timetable = null!;
 
   constructor(
-    private timetableService: TimetableService
+    private timetableService: TimetableService,
+    private databaseService: DatabaseService
   ) {
   }
 
@@ -43,4 +45,17 @@ export class AppComponent implements OnInit {
     console.log(`loading ${+input.target.value}`);
     this.timetableService.loadTimetable(+input.target.value);
   }
+
+  createNewTimetable(): void {
+    this.timetableService.createBlank();
+  }
+
+  createDuplicateTimetable(): void {
+    this.timetableService.createDuplicate();
+  }
+
+  deleteTimetable(): void {
+    this.timetableService.deleteTimetable();
+  }
+
 }

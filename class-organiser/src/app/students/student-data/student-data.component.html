@@ -3,12 +3,12 @@
     <div class="studentData__title">Student Data</div>
 
     <div class="studentData__import" *ngIf="loadedTimetable.students.length === 0">
-        <div class="studentData__import--title">Import from CSV File</div>
+        <div class="studentData__import--title">Import from TSV File</div>
         <div class="studentData__import--box">
-            <div class="studentData__import--drop" (drop)="onDrop($event)" (dragover)="onDragOver($event)">Drop a CSV file here to import</div>
+            <div class="studentData__import--drop" (drop)="onDrop($event)" (dragover)="onDragOver($event)">Drop a TSV file here to import</div>
             <div class="studentData__import--instructions">
-                <img src="../../../assets/howToCsv1.jpg" alt="How to CSV Step 1">
-                <img src="../../../assets/howToCsv2.jpg" alt="How to CSV Step 2">
+                <img src="../../../assets/howToCsv1.jpg" alt="How to TSV Step 1">
+                <img src="../../../assets/howToCsv2-2.jpg" alt="How to TSV Step 2">
             </div>
         </div>
     </div>
@@ -16,19 +16,19 @@
     <table *ngIf="loadedTimetable">
         <thead *ngIf="loadedTimetable.students.length > 0">
             <tr>
-                <th rowspan="2">Forename</th>
-                <th rowspan="2">Surname</th>
-                <th rowspan="2">Email</th>
-                <th rowspan="2">Teacher</th>
+                <th rowspan="2" (click)="sortByForeName()">Forename</th>
+                <th rowspan="2" (click)="sortBySurname()">Surname</th>
+                <th rowspan="2" (click)="sortByEmail()">Email</th>
+                <th rowspan="2" (click)="sortByTeacher()">Teacher</th>
 
-                <th rowspan="2" *ngFor="let restriction of loadedTimetable.restrictions">
+                <th rowspan="2" *ngFor="let restriction of loadedTimetable.restrictions" (click)="sortByRestriction(restriction.id)">
                     {{ restriction.name }}
                 </th>
 
                 <th rowspan="1" [attr.colspan]="getOptionalUnits().length">Course Priority</th>
             </tr>
             <tr>
-                <th *ngFor="let course of getOptionalUnits(); let i = index">{{ i + 1 }}</th>
+                <th *ngFor="let course of getOptionalUnits(); let i = index" (click)="sortByPriority(i+1)">{{ i + 1 }}</th>
             </tr>
         </thead>
         <tbody>

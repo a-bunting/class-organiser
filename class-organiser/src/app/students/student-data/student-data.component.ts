@@ -12,7 +12,7 @@ interface CsvObject {
 })
 export class StudentDataComponent implements OnInit {
 
-  timetables: Timetable[] = [];
+  // timetables: Timetable[] = [];
   loadedTimetable: Timetable = null!;
 
   constructor(
@@ -22,16 +22,16 @@ export class StudentDataComponent implements OnInit {
 
   ngOnInit(): void {
     // subscribe to chnages in the all timetable.
-    this.timetableService.timetables.subscribe({
-      next: (tt: Timetable[]) => {
-        this.timetables = tt;
+    // this.timetableService.timetables.subscribe({
+    //   next: (tt: Timetable[]) => {
+    //     this.timetables = tt;
 
-        if(!this.loadedTimetable && this.timetables.length > 0) {
-          this.timetableService.loadTimetable(this.timetables[0].id);
-        }
-      },
-      error: (e: any) => { console.log(`Error: ${e}`)}
-    })
+    //     if(!this.loadedTimetable && this.timetables.length > 0) {
+    //       this.timetableService.loadTimetable(this.timetables[0].id);
+    //     }
+    //   },
+    //   error: (e: any) => { console.log(`Error: ${e}`)}
+    // })
     // subscribe to chnages in the loaded timetable.
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => {
@@ -55,6 +55,65 @@ export class StudentDataComponent implements OnInit {
     let studentData: number = student.coursePriorities.find((a: { courseId: number, priority: number }) => a.priority === priority)!.courseId;
     let courseName: SingleCourse = this.loadedTimetable.courses.find((a: SingleCourse) => a.id === studentData)!;
     return courseName.id;
+  }
+
+  asc: boolean = true;
+
+  sortByEmail(): void {
+    this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
+      if(this.asc) return a.email?.localeCompare(b.email ?? '')!
+      else return b.email?.localeCompare(a.email ?? '')!
+    });
+
+    this.asc = !this.asc;
+  }
+
+  sortByTeacher(): void {
+    this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
+      if(this.asc) return a.classId - b.classId
+      else return b.classId - a.classId
+    });
+
+    this.asc = !this.asc;
+  }
+
+  sortByForeName(): void {
+    this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
+      if(this.asc) return a.name.forename.localeCompare(b.name.forename);
+      else return b.name.forename.localeCompare(a.name.forename)
+    });
+
+    this.asc = !this.asc;
+  }
+
+  sortBySurname(): void {
+    this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
+      if(this.asc) return a.name.surname.localeCompare(b.name.surname);
+      else return b.name.surname.localeCompare(a.name.surname)
+    });
+
+    this.asc = !this.asc;
+  }
+
+  sortByRestriction(restrictionId: number): void {
+    this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
+      let aD: number = a.data.find((c: DataValues) => c.restrictionId === restrictionId)!.value;
+      let bD: number = b.data.find((c: DataValues) => c.restrictionId === restrictionId)!.value;
+      if(this.asc) return aD - bD;
+      else return bD - aD;
+    })
+    this.asc = !this.asc;
+  }
+
+  sortByPriority(priority: number): void {
+    this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
+      let aD: number = a.coursePriorities.find((c: { courseId: number, priority: number }) => c.priority === priority)!.courseId;
+      let bD: number = b.coursePriorities.find((c: { courseId: number, priority: number }) => c.priority === priority)!.courseId;
+      if(this.asc) return aD - bD;
+      else return bD - aD;
+    })
+
+    this.asc = !this.asc;
   }
 
   changeCoursePriority(student: SingleStudent, destinationPriority: number, input: any): void {
@@ -86,7 +145,7 @@ export class StudentDataComponent implements OnInit {
     dataValue.value = newValue;
     this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
-  
+
   modifyClassTeacher(studentId: number, input: any): void {
     let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === studentId)!;
     student.classId = +input.target.value;
@@ -127,13 +186,13 @@ export class StudentDataComponent implements OnInit {
   parseCsvString(csvData: string): void {
 
     const rows = csvData.trim().split('\n');
-    const headers = rows[0].split(',');
+    const headers = rows[0].split('\t');
     const results: CsvObject[] = [];
     let students: SingleStudent[] = [];
     let exclusions: string[] = ['','timestamp'];
 
     for (let i = 1; i < rows.length; i++) {
-      const values = rows[i].split(',').map(header => header.trim());
+      const values = rows[i].split('\t').map(header => header.trim());
       const entry: CsvObject = {};
 
       for (let j = 0; j < headers.length; j++) {
@@ -158,7 +217,7 @@ export class StudentDataComponent implements OnInit {
 
     students = results.map((a: CsvObject, i: number) => {
       return {
-        id: i, classId: this.getClassId(a['teacher']), 
+        id: i, classId: this.getClassId(a['teacher']),
         name: { forename: a['name'].split(' ')[0], surname: a['name'].split(' ')[1] },
         email: a['email'],
         data: this.getStudentRestrictionDataValues(a),
@@ -177,11 +236,8 @@ export class StudentDataComponent implements OnInit {
     let classesLastId: number = 0;
 
     for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
-      if(this.loadedTimetable.classes[i].id > classesLastId) classesLastId = this.loadedTimetable.classes[i].id;
+      if(this.loadedTimetable.classes[i].id >= classesLastId) classesLastId = this.loadedTimetable.classes[i].id + 1;
     }
-
-    // set the new id to be +1
-    classesLastId = classesLastId === 0 ? 0 : classesLastId + 1;
 
     // makes a list of classes with all teachers, including new ones.
     for(let i = 0 ; i < teachers.length ; i++) {
@@ -207,14 +263,14 @@ export class StudentDataComponent implements OnInit {
 
   getCoursePriorities(a: CsvObject): { priority: number, courseId: number }[] {
     let coursePriorities: { priority: number, courseId: number }[] = [];
-    
+
     for(let i = 0 ; i < 16 ; i++) {
       if(!isNaN(this.getCourseId(a[`${i}`]))) coursePriorities.push({ priority: i, courseId: this.getCourseId(a[`${i}`])})
     }
-    
+
     // add in the required things.
     const requiredCourses: SingleCourse[] = this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true );
-    
+
     for(let i = 0 ; i < requiredCourses.length ; i++) {
       coursePriorities.push({ priority: 0, courseId: this.getCourseId(requiredCourses[i].name)})
     }
@@ -230,11 +286,9 @@ export class StudentDataComponent implements OnInit {
     let newCourses: number = 0;
 
     for(let i = 0 ; i < coursesList.length ; i++) {
-      if(coursesList[i].id > lastId) lastId = coursesList[i].id;
+      if(coursesList[i].id >= lastId) lastId = coursesList[i].id + 1;
     }
 
-    lastId = lastId === 0 ? 0 : lastId + 1;
-    
     // ifnd new courses and add them
     for(let i = 0 ; i < 16 ; i++) {
       if(!courses.includes(dataSet[`${i+1}`])) {
@@ -254,23 +308,22 @@ export class StudentDataComponent implements OnInit {
   generateRestrictions(data: CsvObject[]): void {
     let restrictionLists: string[] = this.loadedTimetable.restrictions.map((a: Restriction) => { return a.name });
     let lastRestrictionId: number = 0;
-    
+
     for(let i = 0 ; i < this.loadedTimetable.restrictions.length ; i++) {
-      if(this.loadedTimetable.restrictions[i].id > lastRestrictionId) lastRestrictionId = this.loadedTimetable.restrictions[i].id;
+      if(this.loadedTimetable.restrictions[i].id >= lastRestrictionId) lastRestrictionId = this.loadedTimetable.restrictions[i].id + 1;
     }
-    
+
     let addedRestrictions: number = 0;
-    lastRestrictionId = lastRestrictionId === 0 ? 0 : lastRestrictionId + 1;
 
     for(let i = 0 ; i < this.restrictionInclusionList.length ; i++) {
-      
-      
+
+
       if(!restrictionLists.includes(this.restrictionInclusionList[i])) {
         // this is a new one, get all the options
         let optionsSet = Array.from(new Set(data.map(a => { return a[this.restrictionInclusionList[i]] }))).map((a: string, i: number) => { return { id: i, value: a}});
 
         let newRestriction: Restriction = {
-          id: lastRestrictionId + addedRestrictions, name: this.restrictionInclusionList[i], description: '', optionsAreClasses: false, options: optionsSet, priority: 0 
+          id: lastRestrictionId + addedRestrictions, name: this.restrictionInclusionList[i], description: '', optionsAreClasses: false, options: optionsSet, priority: 0
         }
 
         addedRestrictions++;
@@ -287,7 +340,7 @@ export class StudentDataComponent implements OnInit {
       let studentData: string = data[restriction.name];
       restrictionData.push({ restrictionId: restriction.id, value: restriction.options.find((a: { id: number, value: string }) => a.value === studentData )!.id });
     }
-  
+
     return restrictionData;
   }
 
