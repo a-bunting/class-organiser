@@ -138,6 +138,8 @@ function geneticProcessor(timetable) {
             statistics.push({ index: i, stats });
             // add to saved data
             savedData.push({ code, index: i, data: { ...timetable, schedule: a }});
+            // setup a timer to get rid of the data after 20 mins
+            setTimeout(() => { removeSavedItem(code); console.log(`deleting ${code}`); }, 1000*60*60);
             // log to node console
             console.log(`(${i+1}) Total score: ${a.scores.score} - 1st or 2nd (${((a.scores.priorityOneOrTwo / studentList.length)).toFixed(2) * 100}%, ${a.scores.nonOneOrTwo.length} missed out), 1st Prio (${((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100}%), 2nd Prio (${((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100}%), 3rd Prio (${((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100}%), Missing students (${stats.unplaced})`);
         })
@@ -147,6 +149,11 @@ function geneticProcessor(timetable) {
         
         resolve({ code, statistics }); //finished properly
     })
+}
+
+function removeSavedItem(code) {
+    let data = savedData.filter(a => a.code !== code);
+    savedData = data;
 }
 
 function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterationStudentList) {
