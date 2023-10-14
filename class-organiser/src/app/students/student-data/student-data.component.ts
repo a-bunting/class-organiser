@@ -293,7 +293,7 @@ export class StudentDataComponent implements OnInit {
     for(let i = 0 ; i < 16 ; i++) {
       if(!courses.includes(dataSet[`${i+1}`])) {
         // this is new
-        coursesList.push({ id: lastId + newCourses, name: dataSet[`${i+1}`], classSize: 25, requirement: { required: false, times: 1 } });
+        coursesList.push({ id: lastId + newCourses, name: dataSet[`${i+1}`], classSize: 24, requirement: { required: false, times: 1 } });
         courses.push(dataSet[`${i}`]);
         newCourses++;
       }

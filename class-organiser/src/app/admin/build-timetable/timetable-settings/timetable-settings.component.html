@@ -8,27 +8,27 @@
 
     <table>
       <tr>
-        <th colspan="4">Students who got their nth choice (%)</th>
+        <th colspan="3">Students who got their nth choice (%)</th>
         <th rowspan="2">Students who got their 1st or 2nd choice (%)</th>
         <th rowspan="2">Students who missed out on their 1st <b>and</b> 2nd choice</th>
         <th rowspan="2">Students missing a block</th>
+        <th rowspan="2">Students missing required</th>
         <th rowspan="2">Select</th>
       </tr>
       <tr>
         <th>1st</th>
         <th>2nd</th>
         <th>3rd</th>
-        <th>4th</th>
       </tr>
       <tr *ngFor="let data of timetableSelectionData.statistics">
         <td>{{ data.stats.one | number:'0.0-0' }} %</td>
         <td>{{ data.stats.two | number:'0.0-0' }} %</td>
         <td>{{ data.stats.three | number:'0.0-0' }} %</td>
-        <td>{{ data.stats.four | number:'0.0-0' }} %</td>
         <td>{{ data.stats.oneTwo | number:'0.0-0' }} %</td>
         <td>{{ data.stats.missed | number:'0.0-0' }}</td>
         <td>{{ data.stats.unplaced | number:'0.0-0' }}</td>
-        <td><button class="input__button" (click)="chooseTimetable(data.index)">Choose This</button></td>
+        <td>{{ getStudentNamesFromArray(data.stats.notAllRequired) }}</td>
+        <td><button class="input__button input__length--small" (click)="chooseTimetable(data.index)">Select</button></td>
       </tr>
     </table>
   </div>
@@ -70,7 +70,33 @@
     </div>
   </div>
 
-  <div class="ttsettings__select" *ngIf="loadedTimetable">
+  <div class="ttsettings__select" *ngIf="loadedTimetable && studentViewMode">
+    <div class="ttsettings__text">Stats</div>
+
+    <div *ngIf="loadedTimetable.schedule.scores">
+      <div class="ttsettings__stats--bar">
+        <div class="ttsettings__stats--bar--title ttsettings__stats--bar--title--long">Students</div>
+        <div class="ttsettings__stats--bar--text">{{ loadedTimetable.students.length }} students</div>
+      </div>
+      <div class="ttsettings__stats--bar">
+        <div class="ttsettings__stats--bar--title ttsettings__stats--bar--title--long">Missing 1st or 2nd</div>
+        <div class="ttsettings__stats--bar--text">{{ loadedTimetable.schedule.scores.nonOneOrTwo.length }} students</div>
+      </div>
+      <div class="ttsettings__stats--bar">
+        <div class="ttsettings__stats--bar--title ttsettings__stats--bar--title--long">Missing Required</div>
+        <div class="ttsettings__stats--bar--text">{{ loadedTimetable.schedule.scores.notAllRequired.length }} students</div>
+      </div>
+
+      <div class="ttsettings__stats--bar" *ngFor="let choice of loadedTimetable.schedule.scores.prioritySatisfied; let i = index">
+        <div class="ttsettings__stats--bar--title">Priority {{ i + 1 }}</div>
+        <div class="ttsettings__stats--bar--bar" [ngStyle]="{'background-image': 'repeating-linear-gradient(to right, blue 0%, lightblue ' + (choice/loadedTimetable.students.length)*100 + '%, white ' + (choice/loadedTimetable.students.length)*100 + '%, white 100%)'}">
+          <div class="ttsettings__stats--bar--percentage">{{ (choice/loadedTimetable.students.length)*100 | number:"1.2-2" }}%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode">
     <div class="ttsettings__text">Courses</div>
 
     <table class="ttsettings__courses">
@@ -99,7 +125,7 @@
     </div>
   </div>
 
-  <div class="ttsettings__flex">
+  <div class="ttsettings__flex" *ngIf="!studentViewMode">
 
     <div class="ttsettings__select" *ngIf="loadedTimetable">
       <div class="ttsettings__text">Rooms</div>

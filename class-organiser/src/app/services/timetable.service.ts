@@ -1,6 +1,7 @@
 import { NumberSymbol } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, last, Observable } from 'rxjs';
+import { SelectionData } from '../admin/build-timetable/build-timetable.component';
 import { DatabaseService } from './database.service';
 
 export interface Timetable {
@@ -24,6 +25,7 @@ export interface SingleCourse {
 // schedule data
 export interface Schedule {
   blocks: SingleTimeBlock[];
+  scores?: { score: number, nonOneOrTwo: number[], notAllRequired: number[], priorityOneOrTwo: number, prioritySatisfied: number[] };
 }
 
 export interface SingleTimeBlock {

@@ -78,7 +78,7 @@
             <div class="buildtt__block--restrictions">
               <div class="buildtt__block--course buildtt__block--restriction" *ngFor="let restriction of block.restrictions">
                 <div class="buildtt__block--course--name">{{ getRestrictionNameFromId(restriction.restrictionId) }}</div>
-                <select class="input__select input__length--medium" (click)="changeBlockRestrictionOption(block.id, restriction.restrictionId, $event)">
+                <select class="input__select input__length--medium" (change)="changeBlockRestrictionOption(block.id, restriction.restrictionId, $event)">
                   <option value="{{ option.id }}" *ngFor="let option of getRestrictionOptions(restriction.restrictionId)" [selected]="option.id === restriction.optionId">{{ option.value }}</option>
                 </select>
                 <button class="input__button input__length--veryshort" (click)="removeRestrictionFromBlock(block.id, restriction.restrictionId)">X</button>

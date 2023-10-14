@@ -45,9 +45,10 @@ function geneticProcessor(timetable) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 2000;
+        const MAX_ITERATIONS = 2500;
+        const ALL_REQUIRED_SCORE = 200;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
-        const MAX_THEORETICAL_SCORE = timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
+        const MAX_THEORETICAL_SCORE = timetable.students.length * ALL_REQUIRED_SCORE + timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
         const MUTATION_FACTOR = 0.1;
 
         let generatedSchedules = [];
@@ -76,7 +77,7 @@ function geneticProcessor(timetable) {
             let timetableProcessed = processTimetableBasedUponPriorityIterateOverPriority(iterationTimetable, iterationStudentList);
 
             // then measure how well each one fits the timetable, returns { score: totalScore, prioritySatisfied };
-            let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING);
+            let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
 
             // test to see if there is a perfect fit, if so end
             if((scores.score / MAX_THEORETICAL_SCORE) >= 1) {
@@ -128,7 +129,7 @@ function geneticProcessor(timetable) {
         // print out the best three
         generatedSchedules.forEach((a, i) => {
             // do the stats
-            let stats = { nonOneOrTwo: a.scores.nonOneOrTwo, unplaced: a.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0), missed: a.scores.nonOneOrTwo.length, oneTwo: ((a.scores.priorityOneOrTwo / studentList.length)).toFixed(2) * 100, one: ((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100, two: ((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100, three: ((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100, four: ((a.scores.prioritySatisfied[3] / studentList.length)).toFixed(2) * 100}
+            let stats = { nonOneOrTwo: a.scores.nonOneOrTwo, unplaced: a.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0), missed: a.scores.nonOneOrTwo.length, oneTwo: ((a.scores.priorityOneOrTwo / studentList.length)).toFixed(2) * 100, one: ((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100, two: ((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100, three: ((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100, four: ((a.scores.prioritySatisfied[3] / studentList.length)).toFixed(2) * 100, notAllRequired: a.scores.notAllRequired }
             // sort the blocks properly as intended
             a.blocks.map(a => { return a.blocks.sort((a, b) => +a.id - +b.id ) });
             a.blocks.sort((a, b) => +a.order - +b.order);
@@ -333,13 +334,14 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
 
 }
 
-function getFitnessRating(timetable, PRIORITY_SCORING) {
+function getFitnessRating(timetable, PRIORITY_SCORING, ALL_REQUIRED_SCORE) {
 
     // score is based on priorities being matched.
     totalScore = 0;
-    prioritySatisfied = [...Array(timetable.students[0].coursePriorities.length).keys()].map(a => {return 0});
+    prioritySatisfied = [...Array(timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).keys()].map(a => {return 0});
     priorityOneOrTwo = 0;
     nonOneOrTwo = [];
+    notAllRequired = [];
 
     // get a list of all the blocks...
     const blocks = [].concat(...timetable.schedule.blocks.map(a => { return a.blocks.map(b => { return b }) }));
@@ -355,13 +357,44 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
         if(totalStudents === timetable.students.length) totalScore += 500;
     }
 
+    let requiredCourses = timetable.courses.filter(a => a.requirement.required === true).map(a => a.id);
+
     for(let i = 0 ; i < timetable.students.length ; i++) {
         // get non zero priorities
         let student = timetable.students[i];
         let studentPriorities = student.coursePriorities.filter(a => a.priority !== 0);
+        let studentRequired = student.coursePriorities.filter(a => a.priority === 0)
         let studentScore = 0;
         let firstOrSecond = false;
+        let studentRequiredCount = 0;
 
+        // first check the required courses they have
+        for(let o = 0 ; o < studentRequired.length ; o++) {
+            let course = studentRequired[o];
+            let blocksWithCourse = blocks.filter(a => +a.selectedCourse === +course.courseId);
+
+            if(blocksWithCourse.length === 0) continue;
+
+            for(let p = 0 ; p < blocksWithCourse.length ; p++) {
+                let studentInCourse = blocksWithCourse[p].students.includes(+student.id);
+                if(studentInCourse) {
+                    studentRequiredCount++;
+                    break;
+                }
+            }
+        }
+
+        let totalRequired = requiredCourses.length - studentRequiredCount;
+        // console.log(totalRequired, requiredCourses.length, studentRequired.map(a => a.courseId ));
+
+        if(totalRequired > 0) {
+            // some required courses have not been met
+            notAllRequired.push(student.id);
+        } else {
+           studentScore += ALL_REQUIRED_SCORE;
+        }
+
+        // then do the courses with priority
         for(let o = 0 ; o < studentPriorities.length ; o++) {
             let priority = studentPriorities[o];
             // find the blocks with this courses.
@@ -374,20 +407,23 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
 
                 if(studentInCourse) {
                     // they have been found in the course! Now get the students ranking for this course and add points for it.
-                    switch(priority.priority) {
-                        case 1: studentScore += PRIORITY_SCORING[0]; prioritySatisfied[0]++; break;
-                        case 2: studentScore += PRIORITY_SCORING[1]; prioritySatisfied[1]++; break;
-                        case 3: studentScore += PRIORITY_SCORING[2]; prioritySatisfied[2]++; break;
-                        case 4: studentScore += PRIORITY_SCORING[3]; prioritySatisfied[3]++; break;
-                        case 5: studentScore += PRIORITY_SCORING[4]; prioritySatisfied[4]++; break;
-                        case 6: studentScore += PRIORITY_SCORING[5]; prioritySatisfied[5]++; break;
-                        case 7: studentScore += PRIORITY_SCORING[6]; prioritySatisfied[6]++; break;
-                        case 8: studentScore += PRIORITY_SCORING[7]; prioritySatisfied[7]++; break;
-                        case 9: studentScore += PRIORITY_SCORING[8]; prioritySatisfied[8]++; break;
-                        case 10: studentScore += PRIORITY_SCORING[9]; prioritySatisfied[9]++; break;
-                        case 11: studentScore += PRIORITY_SCORING[10]; prioritySatisfied[10]++; break;
-                        default: break;
-                    }
+                    // switch(priority.priority) {
+                    //     case 1: studentScore += PRIORITY_SCORING[0]; prioritySatisfied[0]++; break;
+                    //     case 2: studentScore += PRIORITY_SCORING[1]; prioritySatisfied[1]++; break;
+                    //     case 3: studentScore += PRIORITY_SCORING[2]; prioritySatisfied[2]++; break;
+                    //     case 4: studentScore += PRIORITY_SCORING[3]; prioritySatisfied[3]++; break;
+                    //     case 5: studentScore += PRIORITY_SCORING[4]; prioritySatisfied[4]++; break;
+                    //     case 6: studentScore += PRIORITY_SCORING[5]; prioritySatisfied[5]++; break;
+                    //     case 7: studentScore += PRIORITY_SCORING[6]; prioritySatisfied[6]++; break;
+                    //     case 8: studentScore += PRIORITY_SCORING[7]; prioritySatisfied[7]++; break;
+                    //     case 9: studentScore += PRIORITY_SCORING[8]; prioritySatisfied[8]++; break;
+                    //     case 10: studentScore += PRIORITY_SCORING[9]; prioritySatisfied[9]++; break;
+                    //     case 11: studentScore += PRIORITY_SCORING[10]; prioritySatisfied[10]++; break;
+                    //     default: break;
+                    // }
+
+                    studentScore += PRIORITY_SCORING[priority.priority - 1]; 
+                    prioritySatisfied[priority.priority - 1]++;
 
                     if(priority.priority <= 2) { firstOrSecond = true; };
 
@@ -405,8 +441,10 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
         totalScore += studentScore;
     }
 
-    return { score: totalScore, prioritySatisfied, priorityOneOrTwo, nonOneOrTwo };
+    return { score: totalScore, prioritySatisfied, priorityOneOrTwo, nonOneOrTwo, notAllRequired };
 }
+
+//Ali Al, Nyah Wright, Rayan Quereshi, Ana Sosa, Simon Landinez, Khalifa Al, Ava Bolka
 
 // function breedAndMutate(parentTimetables) {
 
@@ -503,71 +541,69 @@ function getFitnessRating(timetable, PRIORITY_SCORING) {
 
 // }
 
-
-
-function runTest(timetable) {
-    return new Promise((resolve) => {
-        let MAX_ITERATIONS_ARRAY = [1, 5, 10, 50, 100, 500, 1000, 2500, 5000, 10000, 15000, 20000, 50000];
-        let averagesArray = [];
-        const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
+// function runTest(timetable) {
+//     return new Promise((resolve) => {
+//         let MAX_ITERATIONS_ARRAY = [1, 5, 10, 50, 100, 500, 1000, 2500, 5000, 10000, 15000, 20000, 50000];
+//         let averagesArray = [];
+//         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         
-        for(let n = 0 ; n < MAX_ITERATIONS_ARRAY.length ;n++) {
+//         for(let n = 0 ; n < MAX_ITERATIONS_ARRAY.length ;n++) {
             
-            let iterationScore = 0;
-            const MAX_ITERATIONS = MAX_ITERATIONS_ARRAY[n];
+//             let iterationScore = 0;
+//             const MAX_ITERATIONS = MAX_ITERATIONS_ARRAY[n];
             
-            for(let m = 0 ; m < 20 ; m++) {
-                // run each 20 times
-                // first make a bunch of different versions of the schedule, shuffling the students each time.
+//             for(let m = 0 ; m < 20 ; m++) {
+//                 // run each 20 times
+//                 // first make a bunch of different versions of the schedule, shuffling the students each time.
                 
-                let generatedSchedules = [];
+//                 let generatedSchedules = [];
                 
-                // this is what should be appended to each student. It is what is required of them by the organiser and takes no optional things into account.
-                let requiredCourses = timetable.courses.map(a => { 
-                    return { id: +a.id, timesLeft: +a.requirement.times, required: a.requirement.required } 
-                }).filter(a => a !== undefined);
+//                 // this is what should be appended to each student. It is what is required of them by the organiser and takes no optional things into account.
+//                 let requiredCourses = timetable.courses.map(a => { 
+//                     return { id: +a.id, timesLeft: +a.requirement.times, required: a.requirement.required } 
+//                 }).filter(a => a !== undefined);
                 
-                const studentList = [...timetable.students.map(a => { return { ...a, requiredCourses }})];
+//                 const studentList = [...timetable.students.map(a => { return { ...a, requiredCourses }})];
                 
-                for(let a = 0 ; a < MAX_ITERATIONS ; a++) {
-                    // for each iteration generate a new timetable and a new list of students, rnadomly sorted.
-                    let iterationStudentList = JSON.parse(JSON.stringify(studentList)).sort((a, b) => Math.random() - 0.5);
-                    let iterationTimetable = JSON.parse(JSON.stringify(timetable));
-                    // clear the timetable
-                    iterationTimetable.schedule.blocks.map(a => a.blocks.map(b => b.students = [] ));
+//                 for(let a = 0 ; a < MAX_ITERATIONS ; a++) {
+//                     // for each iteration generate a new timetable and a new list of students, rnadomly sorted.
+//                     let iterationStudentList = JSON.parse(JSON.stringify(studentList)).sort((a, b) => Math.random() - 0.5);
+//                     let iterationTimetable = JSON.parse(JSON.stringify(timetable));
+//                     // clear the timetable
+//                     iterationTimetable.schedule.blocks.map(a => a.blocks.map(b => b.students = [] ));
         
-                    // randomise the blocks
-                    iterationTimetable.schedule.blocks.sort((a, b) => Math.random() - 0.5);
+//                     // randomise the blocks
+//                     iterationTimetable.schedule.blocks.sort((a, b) => Math.random() - 0.5);
         
-                    // now iterate over each time block, in which each student needs to appear
-                    let timetableProcessed = processTimetableBasedUponPriorityIterateOverPriority(iterationTimetable, iterationStudentList);
+//                     // now iterate over each time block, in which each student needs to appear
+//                     let timetableProcessed = processTimetableBasedUponPriorityIterateOverPriority(iterationTimetable, iterationStudentList);
         
-                    // then measure how well each one fits the timetable, returns { score: totalScore, prioritySatisfied };
-                    let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING);
+//                     // then measure how well each one fits the timetable, returns { score: totalScore, prioritySatisfied };
+//                     let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING);
         
-                    generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
+//                     generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
         
-                    // every 500 iterations reduce the generated schedules to the top 500
-                    // if this ever goes full genetic this will need to be removed for breeding purposes
-                    if(a % 500 === 0) {
-                        generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a,i) => i < 5);
-                    }
-                }
+//                     // every 500 iterations reduce the generated schedules to the top 500
+//                     // if this ever goes full genetic this will need to be removed for breeding purposes
+//                     if(a % 500 === 0) {
+//                         generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a,i) => i < 5);
+//                     }
+//                 }
         
-                generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a, i) => i === 1);
+//                 generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a, i) => i === 1);
 
-                // print out the best three
-                generatedSchedules.forEach((a, i) => { iterationScore += a.scores.score; })
-            }
+//                 // print out the best three
+//                 generatedSchedules.forEach((a, i) => { iterationScore += a.scores.score; })
+//             }
 
-            iterationScore = iterationScore / 10;
-            averagesArray.push({ iterations: MAX_ITERATIONS_ARRAY[n], averageScore: iterationScore});
-        }
+//             iterationScore = iterationScore / 10;
+//             averagesArray.push({ iterations: MAX_ITERATIONS_ARRAY[n], averageScore: iterationScore});
+//         }
         
-        console.log(averagesArray);
-        resolve({ averagesArray }); //finished properly
-    })
-}
+//         console.log(averagesArray);
+//         resolve({ averagesArray }); //finished properly
+//     })
+// }
 
 
 module.exports = router;

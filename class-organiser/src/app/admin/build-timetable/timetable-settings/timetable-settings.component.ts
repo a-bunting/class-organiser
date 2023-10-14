@@ -317,7 +317,7 @@ export class TimetableSettingsComponent implements OnInit {
   //   this.timetableService.deleteTimetable();
   // }
 
-  studentViewMode: boolean = false;
+  studentViewMode: boolean = true;
 
   studentEditMode(action: number, value?: any ): void {
     // action 0 is to trigger student/edit modes
@@ -332,5 +332,20 @@ export class TimetableSettingsComponent implements OnInit {
       value = this.studentViewMode;
     }
     this.triggerAction.emit({ action , value });
+  }
+
+  getStudentNamesFromArray(names: number[]): string {
+    let output: string = '';
+
+    if(names.length === 0) return 'None';
+
+    for(let i = 0 ; i < names.length ; i++) {
+      let name: string = this.loadedTimetable.students.find((a: SingleStudent) => a.id === names[i])!.name.forename + ' ' + this.loadedTimetable.students.find((a: SingleStudent) => a.id === names[i])!.name.surname;
+      output += name;
+
+      if(i !== names.length - 1) output += ', ';
+    }
+
+    return output;
   }
 }

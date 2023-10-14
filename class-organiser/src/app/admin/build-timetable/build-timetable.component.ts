@@ -3,7 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
-export interface SelectionData { code: string, statistics: { index: number, stats: { missed: number, oneTwo: number, one: number, two: number, three: number, four: number, unplaced: number }}[] }
+export interface SelectionData {
+  code: string,
+  statistics: { index: number, stats: { missed: number, oneTwo: number, one: number, two: number, three: number, four: number, unplaced: number, notAllRequired: number[] }}[]
+}
 
 @Component({
   selector: 'app-build-timetable',
@@ -189,6 +192,8 @@ export class BuildTimetableComponent implements OnInit {
     let block: SingleBlock = this.findBlockFromId(blockId);
     let restriction: { restrictionId: number, optionId: number } = block.restrictions.find((a: { restrictionId: number, optionId: number }) => a.restrictionId === restrictionId)!;
     let value = +input.target.value;
+
+    console.log(blockId, restrictionId, value);
 
     restriction.optionId = value;
     this.timetableService.updateSavedTimetable(this.loadedTimetable);
