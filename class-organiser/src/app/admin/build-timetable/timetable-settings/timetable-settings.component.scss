@@ -1,7 +1,7 @@
 .ttsettings {
 
   padding: .5rem 1rem;
-  width: max-content;
+  width: 40rem;
 
   background-color: rgba(#67BBF0, .6);
   border-radius: 1rem;
@@ -203,14 +203,12 @@
           width: 8rem;
           text-align: center;
 
-          &:nth-of-type(1) { width: 5rem; }
-          &:nth-of-type(2) { width: 5rem; }
-          &:nth-of-type(3) { width: 5rem; }
-          &:nth-of-type(4) { width: 7rem; }
-          &:nth-of-type(5) { width: 7rem; }
-          &:nth-of-type(6) { width: 7rem; }
-          &:nth-of-type(7) { width: 20rem; }
-          &:nth-of-type(8) { width: 5rem; }
+          &:nth-last-of-type(6) { width: 7rem; }
+          &:nth-last-of-type(5) { width: 7rem; }
+          &:nth-last-of-type(4) { width: 12rem; }
+          &:nth-last-of-type(3) { width: 7rem; }
+          &:nth-last-of-type(2) { width: 12rem; }
+          &:nth-last-of-type(1) { width: 5rem; }
         }
 
         th {
@@ -261,6 +259,55 @@
         color: white;
         padding: .5rem 1rem;
         text-align: right;
+      }
+
+      &--list {
+        display: flex;
+        justify-content: space-around;
+        row-gap: .5rem;
+        flex-wrap: wrap;
+      }
+
+      &--student {
+        border-radius: .5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 15rem;
+        margin-right: 1rem;
+
+        &--name {
+          flex: 1;
+          padding: .5rem 1rem;
+          color: white;
+          font-size: 1.2rem;
+          transition: all .2s;
+          background-color: #4E82A3;
+          border-radius: .5rem 0 0 .5rem;
+
+          &:hover {
+            cursor: pointer;
+            filter: brightness(1.2);
+          }
+        }
+
+        &--remove {
+          align-self: stretch;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.2rem;
+          font-weight: bold;
+          background-color: coral;
+          padding: .5rem 1rem;
+          border-radius: 0 .5rem .5rem 0;
+          transition: all .2s;
+
+          &:hover {
+            cursor: pointer;
+            filter: brightness(1.2);
+          }
+        }
       }
     }
   }

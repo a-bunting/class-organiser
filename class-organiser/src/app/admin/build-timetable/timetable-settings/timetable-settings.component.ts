@@ -80,6 +80,7 @@ export class TimetableSettingsComponent implements OnInit {
     this.databaseService.retrieveSelectedTimetable(this.timetableSelectionData.code, index).subscribe({
       next: (result: DatabaseReturn) => {
         console.log(result.data);
+        this.studentViewMode = true;
         this.timetableService.newTimetableData(result.data);
         this.studentEditMode(0, true);
       },
@@ -317,7 +318,7 @@ export class TimetableSettingsComponent implements OnInit {
   //   this.timetableService.deleteTimetable();
   // }
 
-  studentViewMode: boolean = true;
+  studentViewMode: boolean = false;
 
   studentEditMode(action: number, value?: any ): void {
     // action 0 is to trigger student/edit modes
@@ -336,16 +337,26 @@ export class TimetableSettingsComponent implements OnInit {
 
   getStudentNamesFromArray(names: number[]): string {
     let output: string = '';
-
+    const MAX_NAMES: number = 5;
     if(names.length === 0) return 'None';
 
-    for(let i = 0 ; i < names.length ; i++) {
+    for(let i = 0 ; i < (names.length > MAX_NAMES ? MAX_NAMES : names.length) ; i++) {
       let name: string = this.loadedTimetable.students.find((a: SingleStudent) => a.id === names[i])!.name.forename + ' ' + this.loadedTimetable.students.find((a: SingleStudent) => a.id === names[i])!.name.surname;
       output += name;
 
       if(i !== names.length - 1) output += ', ';
     }
 
+    if(names.length > MAX_NAMES) { output += `... and ${names.length - MAX_NAMES} more.`};
+
     return output;
+  }
+
+  removeFromNonOneOrTwo(studentId: number): void {
+    this.loadedTimetable.schedule.scores!.nonOneOrTwo = this.loadedTimetable.schedule.scores!.nonOneOrTwo.filter((a: number) => a !== studentId);
+  }
+
+  removeFromNotAllRequired(studentId: number): void {
+    this.loadedTimetable.schedule.scores!.notAllRequired = this.loadedTimetable.schedule.scores!.notAllRequired.filter((a: number) => a !== studentId);
   }
 }

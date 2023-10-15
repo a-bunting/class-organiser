@@ -4,8 +4,16 @@ import { DatabaseReturn, DatabaseService } from 'src/app/services/database.servi
 import { Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
 export interface SelectionData {
-  code: string,
-  statistics: { index: number, stats: { missed: number, oneTwo: number, one: number, two: number, three: number, four: number, unplaced: number, notAllRequired: number[] }}[]
+  code: string;
+  statistics: OptionStatistics[];
+}
+
+export interface OptionStatistics {
+  index: number, stats: TimetableStatistics
+}
+
+export interface TimetableStatistics {
+  score: number, unplaced: number, nonOneOrTwo: number[], notAllRequired: number[], priorityOneOrTwo: number, prioritySatisfied: number[]
 }
 
 @Component({
@@ -48,6 +56,7 @@ export class BuildTimetableComponent implements OnInit {
   actionFromSettings(data: { action: number, value: any }): void {
     switch(data.action) {
       case 0: this.toggleStudentView(data.value as boolean); break;
+      case 1: this.highlightStudent(data.value as number); break;
     }
   }
 

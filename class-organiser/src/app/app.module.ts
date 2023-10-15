@@ -15,6 +15,7 @@ import { StudentDataComponent } from './students/student-data/student-data.compo
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { TooltipComponent } from './directives/tooltip/tooltip.component';
 import { TooltipModule } from './directives/tooltip/tooltip.module';
+import { OrdinalPipe } from './utilities/ordinal.pipe';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { TooltipModule } from './directives/tooltip/tooltip.module';
     LoadingSpinnerComponent,
     AddCsvDataComponent,
     StudentDataComponent,
-    TooltipComponent
+    TooltipComponent,
+    OrdinalPipe
   ],
   imports: [
     BrowserModule,
