@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BuildTimetableComponent } from './admin/build-timetable/build-timetable.component';
 import { TimetableSettingsComponent } from './admin/build-timetable/timetable-settings/timetable-settings.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoadingSpinnerComponent } from './utilities/loading-spinner/loading-spinner.component';
 import { AddCsvDataComponent } from './testing/add-csv-data/add-csv-data.component';
 
@@ -20,6 +20,7 @@ import { LoginComponent } from './user/login/login.component';
 import { RegisterComponent } from './user/register/register.component';
 import { TimetablesComponent } from './timetables/timetables.component';
 import { StartComponent } from './start/start.component';
+import { AuthInterceptor } from './interceptors/auth-interceptor';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,11 @@ import { StartComponent } from './start/start.component';
     FormsModule,
     TooltipModule
   ],
-  providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
+  providers: [
+    Title,
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    {provide: LocationStrategy, useClass: HashLocationStrategy}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

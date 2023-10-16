@@ -69,7 +69,7 @@
   <div class="ttsettings__select" *ngIf="loadedTimetable && studentViewMode">
     <div class="ttsettings__text">Stats</div>
 
-    <div *ngIf="loadedTimetable.schedule.scores">
+    <div *ngIf="loadedTimetable.schedule.scores"> <!-- take out nooneortwo when all consistent, i.e. trent doesnt have the wrong data! -->
       <div class="ttsettings__stats--bar">
         <div class="ttsettings__stats--bar--title ttsettings__stats--bar--title--long">Students</div>
         <div class="ttsettings__stats--bar--text">{{ loadedTimetable.students.length }} students</div>
@@ -86,12 +86,12 @@
         </div>
       </div>
 
-      <div class="ttsettings__stats--bar">
+      <div class="ttsettings__stats--bar" *ngIf="loadedTimetable.schedule.scores.notAllRequired">
         <div class="ttsettings__stats--bar--title ttsettings__stats--bar--title--long">Missing Required</div>
         <div class="ttsettings__stats--bar--text">{{ loadedTimetable.schedule.scores.notAllRequired.length }} students</div>
       </div>
 
-      <div class="ttsettings__stats--bar ttsettings__stats--bar--list" *ngIf="loadedTimetable.schedule.scores.notAllRequired.length > 0">
+      <div class="ttsettings__stats--bar ttsettings__stats--bar--list" *ngIf="loadedTimetable.schedule.scores.notAllRequired">
         <div class="ttsettings__stats--bar--student" *ngFor="let student of loadedTimetable.schedule.scores.notAllRequired">
           <div class="ttsettings__stats--bar--student--name" (click)="studentEditMode(1, student)">{{ getStudentNamesFromArray([student]) }}</div>
           <div class="ttsettings__stats--bar--student--remove" (click)="removeFromNotAllRequired(student)">x</div>

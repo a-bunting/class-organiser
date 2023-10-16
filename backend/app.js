@@ -11,10 +11,10 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: false }));
-  
-  const userRoutes = require('./routes/user');
-  const processingRoutes = require('./routes/process');
+app.use(bodyParser.urlencoded({ extended: false }));
+
+const userRoutes = require('./routes/user');
+const processingRoutes = require('./routes/process');
 
 // all the various api calls...
 app.use("/api/user", userRoutes);

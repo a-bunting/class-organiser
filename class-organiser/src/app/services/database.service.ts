@@ -18,6 +18,12 @@ export class DatabaseService {
     private http: HttpClient
   ) { }
 
+  // user stuff
+  login(email: string, password: string): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/login`, { email, password }).pipe(take(1));
+  }  
+
+  // timetable stuff
   processTimetable(timetable: Timetable): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/process/timetable`, { timetable }).pipe(take(1));
   }
@@ -25,4 +31,6 @@ export class DatabaseService {
   retrieveSelectedTimetable(code: string, selectionId: number): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/process/selectSavedItem`, { code, selectionId }).pipe(take(1));
   }
+
+
 }
