@@ -1,0 +1,32 @@
+<div class="structure__background"></div>
+<div class="structure">
+  <header>
+
+    <div class="controls">
+      <select (change)="loadTimetable($event)">
+        <option selected disabled>Choose your timetable</option>
+        <option value="{{ timetable.id }}" *ngFor="let timetable of timetables">{{ timetable.name }}</option>
+      </select>
+      <div class="controls__icon" (click)="createNewTimetable()" [tooltip]="'Create blank timetable'"><img src="../assets/icons/file-empty.png" alt="Create Blank Timetable"></div>
+      <div class="controls__icon" (click)="createDuplicateTimetable()" [tooltip]="'Create duplicate of this timetable'"><img src="../assets/icons/copy.png" alt="Duplicate Current Timetable"></div>
+      <div class="controls__icon" (click)="deleteTimetable()" [tooltip]="'Delete this timetable'"><img src="../assets/icons/bin2.png" alt="Delete Current Timetable"></div>
+    </div>
+
+    <nav>
+      <a routerLink="timetables">Timetables</a>
+      <a routerLink="students" *ngIf="loadedTimetable">Student Data</a>
+    </nav>
+    <div class="dashboard__logo">The PE Thing</div>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer>
+    <div class="footer">
+      Made by and Copyright to <a href="mailto:alex.bunting@gmail.com">Alex Bunting</a>, 2023
+    </div>
+  </footer>
+</div>
+

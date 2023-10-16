@@ -16,6 +16,10 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { TooltipComponent } from './directives/tooltip/tooltip.component';
 import { TooltipModule } from './directives/tooltip/tooltip.module';
 import { OrdinalPipe } from './utilities/ordinal.pipe';
+import { LoginComponent } from './user/login/login.component';
+import { RegisterComponent } from './user/register/register.component';
+import { TimetablesComponent } from './timetables/timetables.component';
+import { StartComponent } from './start/start.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +30,11 @@ import { OrdinalPipe } from './utilities/ordinal.pipe';
     AddCsvDataComponent,
     StudentDataComponent,
     TooltipComponent,
-    OrdinalPipe
+    OrdinalPipe,
+    LoginComponent,
+    RegisterComponent,
+    TimetablesComponent,
+    StartComponent
   ],
   imports: [
     BrowserModule,
