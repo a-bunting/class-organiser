@@ -110,7 +110,7 @@
   <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode">
     <div class="ttsettings__text">
       <p>Courses</p>
-      <div class="ttsettings__text--minmax" [tooltip]="'Collapse Courses'" (click)="toggleSection('courses')">
+      <div class="ttsettings__text--minmax" (click)="toggleSection('courses')">
         <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showCourses">
         <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showCourses">
       </div>
@@ -134,7 +134,52 @@
     </table>
 
     <div class="ttsettings__courses--buttons" *ngIf="showCourses">
-      <button class="input__button" (click)="addCourse()">Add Course</button>
+      <button class="input__button input__length--full" (click)="addCourse()">Add Course</button>
+    </div>
+  </div>
+
+  <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode">
+    <div class="ttsettings__text">
+      <p>Data Collection</p>
+      <div class="ttsettings__text--minmax" (click)="toggleSection('restrictions')">
+        <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showRestrictions">
+        <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showRestrictions">
+      </div>
+    </div>
+
+    <table class="ttsettings__courses" *ngIf="showRestrictions">
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Poll</th>
+        <th>Delete</th>
+      </tr>
+      <tbody *ngFor="let restriction of loadedTimetable.restrictions">
+        <tr>
+          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="restriction.name" placeholder="Data Name" (blur)="editRestriction(true)" (keyup)="editRestriction(false, $event)"></td>
+          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="restriction.description"></td>
+          <td><input type="checkbox"></td>
+          <td><button class="input__button input__length--veryshort" (click)="deleteRestriction(restriction.id)">X</button></td>
+        </tr>
+        <tr>
+          <td colspan="1">Add Option</td>
+          <td colspan="1">
+            <input type="text" class="input___text input__length--medium" id="restrictionOption{{restriction.id}}">
+          </td>
+          <td>
+            <select>
+              <option *ngFor="let option of restriction.options">{{ option.value }}</option>
+            </select>
+          </td>
+          <td colspan="1">
+            <button class="input__button input__length--veryshort" (click)="addOption(restriction.id)">1</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ttsettings__courses--buttons" *ngIf="showRestrictions">
+      <button class="input__button input__length--full" (click)="addRestriction()">Add Data</button>
     </div>
   </div>
 
@@ -143,7 +188,7 @@
     <div class="ttsettings__select" *ngIf="loadedTimetable">
       <div class="ttsettings__text">
         <p>Rooms</p>
-        <div class="ttsettings__text--minmax" [tooltip]="'Collapse Rooms'"  (click)="toggleSection('rooms')">
+        <div class="ttsettings__text--minmax" (click)="toggleSection('rooms')">
           <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showRooms">
           <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showRooms">
         </div>
@@ -161,14 +206,14 @@
       </table>
 
       <div class="ttsettings__courses--buttons" *ngIf="showRooms">
-        <button class="input__button" (click)="addRoom()">Add Room</button>
+        <button class="input__button input__length--full" (click)="addRoom()">Add Room</button>
       </div>
     </div>
 
     <div class="ttsettings__select" *ngIf="loadedTimetable">
       <div class="ttsettings__text">
         <p>Classes</p>
-        <div class="ttsettings__text--minmax" [tooltip]="'Collapse Classes'" (click)="toggleSection('classes')">
+        <div class="ttsettings__text--minmax" (click)="toggleSection('classes')">
           <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showClasses">
           <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showClasses">
         </div>
@@ -186,7 +231,7 @@
       </table>
 
       <div class="ttsettings__courses--buttons" *ngIf="showClasses">
-        <button class="input__button" (click)="addClass()">Add Class</button>
+        <button class="input__button input__length--full" (click)="addClass()">Add Class</button>
       </div>
     </div>
 

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
-import { SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
+import { DataValues, Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 import { SelectionData } from '../build-timetable.component';
 
 @Component({
@@ -25,15 +25,6 @@ export class TimetableSettingsComponent implements OnInit {
   showRooms: boolean = true;
   showClasses: boolean = true;
   showRestrictions: boolean = true;
-
-  toggleSection(sectionName: string): void {
-    switch(sectionName) {
-      case 'courses': this.showCourses = !this.showCourses; break;
-      case 'rooms': this.showRooms = !this.showRooms; break;
-      case 'classes': this.showClasses = !this.showClasses; break;
-      case 'restrictions': this.showRestrictions = !this.showRestrictions; break;
-    }
-  }
 
   constructor(
     private timetableService: TimetableService,
@@ -133,6 +124,52 @@ export class TimetableSettingsComponent implements OnInit {
     })
 
     this.reSortStudentPriorities();
+  }
+
+  addRestriction(): void {
+    let newRestriction: Restriction;
+
+    if(this.loadedTimetable.restrictions.length > 0) {
+      newRestriction = { id: this.loadedTimetable.restrictions[this.loadedTimetable.restrictions.length - 1].id + 1, name: '', description: '', optionsAreClasses: false, priority: -1, options: []};
+    } else {
+      newRestriction = { id: 0, name: '', description: '', optionsAreClasses: false, priority: -1, options: []};
+    }
+
+    // add a data value for this to each student
+    let dataValue: DataValues = { restrictionId: newRestriction.id, value: 0 };
+    this.loadedTimetable.students.map((a: SingleStudent) => a.data.push({...dataValue}));
+
+    this.loadedTimetable.restrictions.push(newRestriction);
+    this.currentTimetableChange.emit(this.loadedTimetable);
+  }
+
+  deleteRestriction(restrictionId: number): void {
+    this.loadedTimetable.restrictions = this.loadedTimetable.restrictions.filter((a: Restriction) => a.id !== restrictionId);
+
+    for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
+      this.loadedTimetable.schedule.blocks[i].blocks = this.loadedTimetable.schedule.blocks[i].blocks.map((a: SingleBlock) => { return { ...a, restrictions: a.restrictions.filter((a: { restrictionId: number, optionId: number }) => +a.restrictionId !== +restrictionId )}});
+    }
+
+    this.loadedTimetable.students.map((a: SingleStudent) => { a.data = a.data.filter((b: DataValues) => b.restrictionId !== restrictionId); })
+
+    this.currentTimetableChange.emit(this.loadedTimetable);
+  }
+
+  editRestriction(bypass: boolean, input?: any): void {
+    if(bypass) {
+      this.currentTimetableChange.emit(this.loadedTimetable);
+      return;
+    }
+
+    if(input.keyCode === 13) {
+      this.currentTimetableChange.emit(this.loadedTimetable);
+    }
+  }
+
+  addOption(restrictionId: number): void {
+    let restriction: Restriction = this.loadedTimetable.restrictions.find((a: Restriction) => +a.id === restrictionId)!;
+    let value: string = (document.getElementById(`restrictionOption${restrictionId}`)! as HTMLInputElement).value;
+    restriction.options.push({ id: restriction.options.length, value });
   }
 
   addCourse(): void {
@@ -372,5 +409,14 @@ export class TimetableSettingsComponent implements OnInit {
 
   removeFromNotAllRequired(studentId: number): void {
     this.loadedTimetable.schedule.scores!.notAllRequired = this.loadedTimetable.schedule.scores!.notAllRequired.filter((a: number) => a !== studentId);
+  }
+
+  toggleSection(sectionName: string): void {
+    switch(sectionName) {
+      case 'courses': this.showCourses = !this.showCourses; break;
+      case 'rooms': this.showRooms = !this.showRooms; break;
+      case 'classes': this.showClasses = !this.showClasses; break;
+      case 'restrictions': this.showRestrictions = !this.showRestrictions; break;
+    }
   }
 }
