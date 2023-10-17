@@ -108,9 +108,15 @@
   </div>
 
   <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode">
-    <div class="ttsettings__text">Courses</div>
+    <div class="ttsettings__text">
+      <p>Courses</p>
+      <div class="ttsettings__text--minmax" [tooltip]="'Collapse Courses'" (click)="toggleSection('courses')">
+        <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showCourses">
+        <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showCourses">
+      </div>
+    </div>
 
-    <table class="ttsettings__courses">
+    <table class="ttsettings__courses" *ngIf="showCourses">
       <tr>
         <th>Name</th>
         <th [tooltip]="'Is this a required coure?'">Required</th>
@@ -127,21 +133,23 @@
       </tr>
     </table>
 
-    <div class="ttsettings__courses--buttons">
+    <div class="ttsettings__courses--buttons" *ngIf="showCourses">
       <button class="input__button" (click)="addCourse()">Add Course</button>
-    </div>
-
-    <div class="ttsettings__courses--info">
-      <!-- <div class="ttsettings__currentCourses">You currently have students taking {{ calculateBlocksRequired() }} / {{ loadedTimetable.schedule.blocks.length }} blocks.</div> -->
     </div>
   </div>
 
   <div class="ttsettings__flex" *ngIf="!studentViewMode">
 
     <div class="ttsettings__select" *ngIf="loadedTimetable">
-      <div class="ttsettings__text">Rooms</div>
+      <div class="ttsettings__text">
+        <p>Rooms</p>
+        <div class="ttsettings__text--minmax" [tooltip]="'Collapse Rooms'"  (click)="toggleSection('rooms')">
+          <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showRooms">
+          <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showRooms">
+        </div>
+      </div>
 
-      <table class="ttsettings__rooms">
+      <table class="ttsettings__rooms" *ngIf="showRooms">
         <tr>
           <th>Room</th>
           <th>Delete</th>
@@ -152,15 +160,21 @@
         </tr>
       </table>
 
-      <div class="ttsettings__courses--buttons">
+      <div class="ttsettings__courses--buttons" *ngIf="showRooms">
         <button class="input__button" (click)="addRoom()">Add Room</button>
       </div>
     </div>
 
     <div class="ttsettings__select" *ngIf="loadedTimetable">
-      <div class="ttsettings__text">Classes</div>
+      <div class="ttsettings__text">
+        <p>Classes</p>
+        <div class="ttsettings__text--minmax" [tooltip]="'Collapse Classes'" (click)="toggleSection('classes')">
+          <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showClasses">
+          <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showClasses">
+        </div>
+      </div>
 
-      <table class="ttsettings__rooms">
+      <table class="ttsettings__rooms" *ngIf="showClasses">
         <tr>
           <th>Class Teacher</th>
           <th>Delete</th>
@@ -171,7 +185,7 @@
         </tr>
       </table>
 
-      <div class="ttsettings__courses--buttons">
+      <div class="ttsettings__courses--buttons" *ngIf="showClasses">
         <button class="input__button" (click)="addClass()">Add Class</button>
       </div>
     </div>

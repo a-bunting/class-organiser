@@ -21,6 +21,7 @@ import { RegisterComponent } from './user/register/register.component';
 import { TimetablesComponent } from './timetables/timetables.component';
 import { StartComponent } from './start/start.component';
 import { AuthInterceptor } from './interceptors/auth-interceptor';
+import { AuthGuard } from './guards/auth.guard';
 
 @NgModule({
   declarations: [
@@ -47,6 +48,7 @@ import { AuthInterceptor } from './interceptors/auth-interceptor';
   ],
   providers: [
     Title,
+    AuthGuard,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     {provide: LocationStrategy, useClass: HashLocationStrategy}
   ],

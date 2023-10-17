@@ -20,7 +20,7 @@ router.get('/tokenCheck', (req, res, next) => {
     jwt.verify(token, process.env.SALT);
     res.status(200).json({ error: false, data: {}, message: `` })
   } catch(e) {
-    res.status(200).json({ error: true, data: {}, message: `Authentication Failed - Invalid Token` })
+    res.status(401).json({ error: true, data: {}, message: `Authentication Failed - Invalid Token` })
   }
 });
 
@@ -28,9 +28,7 @@ router.get('/tokenCheck', (req, res, next) => {
 * Logs in a user...
 */
 router.post('/login', (req, res, next) => {
-
-  console.log(`here`);
-
+    
   const email = req.body.email;
   const password = req.body.password;
   const remainLoggedIn = req.body.remainLoggedIn ? req.body.remainLoggedIn : req.body.remainLoggedIn ? req.body.remainLoggedIn : '7d';

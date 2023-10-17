@@ -11,7 +11,7 @@ export class AuthInterceptor implements HttpInterceptor {
     // add the token to all outgoing requests...
     intercept(req: HttpRequest<any>, next: HttpHandler) {
 
-        const token: string = this.auth.token;
+        const token: string = this.auth.token();
 
         // create a clone of the request to avoid bad things
         const reqClone: HttpRequest<any> = req.clone({

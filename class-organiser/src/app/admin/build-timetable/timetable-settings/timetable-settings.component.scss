@@ -38,6 +38,24 @@
     font-size: 1.4rem;
     font-weight: bold;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    &--minmax {
+
+      transition: all .2s;
+
+      &:hover {
+        cursor: pointer;
+        filter: invert(100%) sepia(0%) saturate(3315%) hue-rotate(102deg) brightness(118%) contrast(107%);
+      }
+
+      img {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
   }
 
   &__timetable {

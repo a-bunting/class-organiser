@@ -15,26 +15,23 @@ export class LoginComponent {
   error: string = '';
 
   constructor(
-    private authService: AuthenticationService, 
+    private authService: AuthenticationService,
     private databaseService: DatabaseService,
-    private router: Router
-  
    ) {}
 
   login(): void {
     if(!this.email || !this.password) return;
-  
+
     this.databaseService.login(this.email, this.password).subscribe({
       next: (result: DatabaseReturn) => {
         console.log(result);
-        this.authService.user.next(result.data);
-        // this.router.navigate(['']);
+        this.authService.loginNewUser(result.data);
       },
       error: (e: any) => {
-        this.error = e.error.message;
+        this.error = e;
         console.log(`Error: ${e}`);
       }
-    })  
+    })
   }
 
 }

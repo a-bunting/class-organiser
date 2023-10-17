@@ -21,6 +21,20 @@ export class TimetableSettingsComponent implements OnInit {
   savedTimetable: Timetable = null!;
   loadedTimetable: Timetable = null!;
 
+  showCourses: boolean = true;
+  showRooms: boolean = true;
+  showClasses: boolean = true;
+  showRestrictions: boolean = true;
+
+  toggleSection(sectionName: string): void {
+    switch(sectionName) {
+      case 'courses': this.showCourses = !this.showCourses; break;
+      case 'rooms': this.showRooms = !this.showRooms; break;
+      case 'classes': this.showClasses = !this.showClasses; break;
+      case 'restrictions': this.showRestrictions = !this.showRestrictions; break;
+    }
+  }
+
   constructor(
     private timetableService: TimetableService,
     private databaseService: DatabaseService

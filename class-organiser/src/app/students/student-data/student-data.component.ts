@@ -1,4 +1,7 @@
 import { Component, OnInit, provideZoneChangeDetection } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthenticationService, User } from 'src/app/services/authentication.service';
+import { DatabaseService } from 'src/app/services/database.service';
 import { DataValues, Restriction, SingleClass, SingleCourse, SingleStudent, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
 interface CsvObject {
@@ -14,25 +17,26 @@ export class StudentDataComponent implements OnInit {
 
   // timetables: Timetable[] = [];
   loadedTimetable: Timetable = null!;
+  user: User = null!;
 
   constructor(
+    private router: Router,
+    private authService: AuthenticationService,
     private timetableService: TimetableService
   ) {
   }
 
   ngOnInit(): void {
-    // subscribe to chnages in the all timetable.
-    // this.timetableService.timetables.subscribe({
-    //   next: (tt: Timetable[]) => {
-    //     this.timetables = tt;
+    // subscribe to users and check if the user is logged in
+    this.authService.user.subscribe({
+      next: (user: User) => {
+        if(user) { this.user = user; return }
+        // not logged in
+        this.router.navigate(['start']);
+      },
+      error: (e: any) => { console.log(`Error with your login: ${e}`)}
+    })
 
-    //     if(!this.loadedTimetable && this.timetables.length > 0) {
-    //       this.timetableService.loadTimetable(this.timetables[0].id);
-    //     }
-    //   },
-    //   error: (e: any) => { console.log(`Error: ${e}`)}
-    // })
-    // subscribe to chnages in the loaded timetable.
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => {
         this.loadedTimetable = tt;
@@ -299,7 +303,9 @@ export class StudentDataComponent implements OnInit {
       }
     }
 
+
     this.courses = this.courses.concat(...coursesList);
+    console.log(this.courses);
     this.loadedTimetable.courses = this.courses;
   }
 

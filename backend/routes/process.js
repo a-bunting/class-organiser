@@ -16,16 +16,18 @@ const userMethods = require('../methods/user');
 //savedData.push({ code, index: i, data: { ...timetable, schedule: a }});
 let savedData = [];
 
-router.post('/timetable', (req, res, next) => {
+router.post('/timetable', checkAuth, (req, res, next) => {
+    console.log(userMethods.getUserDataFromToken(req))
     const timetable = req.body.timetable;
-    process(timetable, res);
+    process(timetable, res, req);
 });
 
-router.post('/selectSavedItem', (req, res, next) => {
+router.post('/selectSavedItem', checkAuth, (req, res, next) => {
     const selectionId = req.body.selectionId;
     const code = req.body.code;
+    const token = req.headers.authorization.split(" ")[1];
 
-    let data = savedData.find(a => a.code === code && a.index === selectionId);
+    let data = savedData.find(a => a.code === code && a.index === selectionId && a.token === token);
     
     if(data) {
         res.status(200).json({ error: false, message: '', data: data.data })
@@ -34,14 +36,14 @@ router.post('/selectSavedItem', (req, res, next) => {
     }
 });
 
-async function process(timetable, res) {
+async function process(timetable, res, req) {
     // run the processor then return the results.
-    const result = await geneticProcessor(timetable);
+    const result = await geneticProcessor(timetable, req);
     // const result = await runTest(timetable);
     res.status(200).json({ error: false, message: '', data: result })
 }
 
-function geneticProcessor(timetable) {
+function geneticProcessor(timetable, req) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
@@ -124,6 +126,7 @@ function geneticProcessor(timetable) {
         generatedSchedules = generatedSchedules.sort((a, b) => +b.scores.score - +a.scores.score).filter((a, i) => i < 5);
 
         const code = stringMethods.generateRandomString();
+        const token = req.headers.authorization.split(" ")[1];
         let statistics = []
 
         // print out the best three
@@ -138,7 +141,7 @@ function geneticProcessor(timetable) {
             // save the data to be retrieved
             statistics.push({ index: i, stats: a.scores });
             // add to saved data
-            savedData.push({ code, index: i, data: { ...timetable, schedule: a }});
+            savedData.push({ code, token, index: i, data: { ...timetable, schedule: a }});
             // setup a timer to get rid of the data after 20 mins
             setTimeout(() => { removeSavedItem(code); console.log(`deleting ${code}`); }, 1000*60*60);
             // log to node console

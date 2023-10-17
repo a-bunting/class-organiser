@@ -21,7 +21,11 @@ export class DatabaseService {
   // user stuff
   login(email: string, password: string): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/login`, { email, password }).pipe(take(1));
-  }  
+  }
+
+  checkAuthStatus(): Observable<DatabaseReturn> {
+    return this.http.get<DatabaseReturn>(`${environment.apiUrl}/user/tokenCheck`).pipe(take(1));
+  }
 
   // timetable stuff
   processTimetable(timetable: Timetable): Observable<DatabaseReturn> {
