@@ -14,10 +14,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const userRoutes = require('./routes/user');
+const exportRoutes = require('./routes/export');
 const processingRoutes = require('./routes/process');
 
 // all the various api calls...
 app.use("/api/user", userRoutes);
+app.use("/api/export", exportRoutes);
 app.use("/api/process", processingRoutes);
 
 module.exports = app;

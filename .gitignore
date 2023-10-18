@@ -1,6 +1,7 @@
 *.env
 .env
 .environment
+class-organiser-google.json
 
 # Logs
 logs

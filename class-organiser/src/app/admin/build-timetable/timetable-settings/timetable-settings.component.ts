@@ -411,4 +411,18 @@ export class TimetableSettingsComponent implements OnInit {
       case 'restrictions': this.showRestrictions = !this.showRestrictions; break;
     }
   }
+
+  /**
+   * Experimental
+   */
+
+  googleExport(): void {
+
+    this.databaseService.googleSheet().subscribe({
+      next: (result: DatabaseReturn) => {
+        console.log(result);
+      },
+      error: (e: any) => { console.log(e); }
+    })
+  }
 }

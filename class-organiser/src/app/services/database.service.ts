@@ -49,6 +49,12 @@ export class DatabaseService {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/deleteClass`, { ttId, classId }).pipe(take(1));
   }
 
+  // exports
+  googleSheet(): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/export/gSheet`, {}).pipe(take(1));
+  }
+
+
 
 
 
