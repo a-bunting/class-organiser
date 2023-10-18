@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService, User } from '../services/authentication.service';
 import { DatabaseService } from '../services/database.service';
 import { Timetable, TimetableService } from '../services/timetable.service';
@@ -17,6 +17,7 @@ export class TimetablesComponent {
 
   constructor(
     private router: Router,
+    private activeRoute: ActivatedRoute,
     public authService: AuthenticationService,
     private timetableService: TimetableService,
     private databaseService: DatabaseService
@@ -39,20 +40,23 @@ export class TimetablesComponent {
     this.timetableService.timetables.subscribe({
       next: (tt: Timetable[]) => {
         this.timetables = tt;
-
-        if(!this.loadedTimetable && this.timetables.length > 0) {
-          this.timetableService.loadTimetable(this.timetables[0].id);
-        }
       },
       error: (e: any) => { console.log(`Error: ${e}`)}
     })
     // subscribe to chnages in the loaded timetable.
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => {
-        this.loadedTimetable = tt;
+        if(tt) {
+          this.loadedTimetable = tt;
+          this.router.navigate(['timetables']);
+        }
       },
       error: (e: any) => { console.log(`Error: ${e}`)}
     })
+  }
+
+  saveTimetable(): void {
+    this.timetableService.fullSave(this.loadedTimetable);
   }
 
   loadTimetable(input: any): void {

@@ -1,8 +1,36 @@
 .register {
+  position: relative;
+  padding: 2rem;
+  width: max-content;
+
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  row-gap: 1rem;
+
+  &__compose {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    row-gap: 1rem;
+    width: 40rem;
+  }
+
+  &__error, &__sent {
+    text-align: center;
+    padding: 1rem 2rem;
+    font-size: 1.4rem;
+    border-radius: 1rem;
+    width: 100%;
+    border-radius: .1rem solid black;
+  }
+
+  &__error {
+    background-color: lightcoral;
+  }
+
+  &__sent {
+    background-color: lightgreen;
+  }
 
   @media screen and (max-width: 1300px) {
     flex-direction: row;

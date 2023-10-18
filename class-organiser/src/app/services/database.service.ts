@@ -27,6 +27,10 @@ export class DatabaseService {
     return this.http.get<DatabaseReturn>(`${environment.apiUrl}/user/tokenCheck`).pipe(take(1));
   }
 
+  sendMessage(from: string, message: string): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/emailEnquiry`, { from, message }).pipe(take(1));
+  }
+
   // timetable stuff
   processTimetable(timetable: Timetable): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/process/timetable`, { timetable }).pipe(take(1));
@@ -35,6 +39,17 @@ export class DatabaseService {
   retrieveSelectedTimetable(code: string, selectionId: number): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/process/selectSavedItem`, { code, selectionId }).pipe(take(1));
   }
+
+  // timetable saving etc
+  saveTimetable(timetable: Timetable): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/saveTimetable`, { timetable }).pipe(take(1));
+  }
+
+  deleteClass(ttId: number, classId: number[]): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/deleteClass`, { ttId, classId }).pipe(take(1));
+  }
+
+
 
 
 }

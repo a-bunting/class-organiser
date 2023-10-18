@@ -14,8 +14,8 @@ export class TimetableSettingsComponent implements OnInit {
   timetables: Timetable[] = [];
   selectionData: SelectionData = null!;
 
-  @Output() selectedTimetable: EventEmitter<Timetable> = new EventEmitter<Timetable>;
-  @Output() currentTimetableChange: EventEmitter<Timetable> = new EventEmitter<Timetable>;
+  // @Output() selectedTimetable: EventEmitter<Timetable> = new EventEmitter<Timetable>;
+  // @Output() currentTimetableChange: EventEmitter<Timetable> = new EventEmitter<Timetable>;
   @Output() triggerAction: EventEmitter<{ action: number, value: boolean }> = new EventEmitter<{ action: number, value: boolean }>;
 
   savedTimetable: Timetable = null!;
@@ -42,10 +42,6 @@ export class TimetableSettingsComponent implements OnInit {
     this.timetableService.timetables.subscribe({
       next: (tt: Timetable[]) => {
         this.timetables = tt;
-
-        if(!this.loadedTimetable && this.timetables.length > 0) {
-          this.timetableService.loadTimetable(this.timetables[0].id);
-        }
       },
       error: (e: any) => { console.log(`Error: ${e}`)}
     })
@@ -53,7 +49,6 @@ export class TimetableSettingsComponent implements OnInit {
   }
 
   save(): void {
-    // this.loadedTimetableTemplate = null!;
     this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
@@ -81,10 +76,15 @@ export class TimetableSettingsComponent implements OnInit {
     })
   }
 
+  selectedTimetableLoading: boolean = false;
+
   chooseTimetable(index: number): void {
+    this.selectedTimetableLoading = true;
+
     this.databaseService.retrieveSelectedTimetable(this.timetableSelectionData.code, index).subscribe({
       next: (result: DatabaseReturn) => {
         console.log(result.data);
+        this.selectedTimetableLoading = false;
         this.studentViewMode = true;
         this.timetableService.newTimetableData(result.data);
         this.studentEditMode(0, true);
@@ -107,13 +107,6 @@ export class TimetableSettingsComponent implements OnInit {
       this.timetableService.loadTimetable(value);
   }
 
-  // selectTimetable(input: any, val?: number): void {
-  //   let value: number = input ? +input.target.value : val ? val : 0;
-  //   this.loadedTimetable = this.timetables[value];
-  //   this.savedTimetable = JSON.parse(JSON.stringify(this.timetables[value]));
-  //   this.selectedTimetable.emit(this.loadedTimetable);
-  // }
-
   changeRequired(courseId: number, input: any) : void {
     let status: boolean = input.target.checked;
     console.log(status, input.target.checked);
@@ -130,9 +123,9 @@ export class TimetableSettingsComponent implements OnInit {
     let newRestriction: Restriction;
 
     if(this.loadedTimetable.restrictions.length > 0) {
-      newRestriction = { id: this.loadedTimetable.restrictions[this.loadedTimetable.restrictions.length - 1].id + 1, name: '', description: '', optionsAreClasses: false, priority: -1, options: []};
+      newRestriction = { id: this.loadedTimetable.restrictions[this.loadedTimetable.restrictions.length - 1].id + 1, name: '', description: '', poll: true, options: []};
     } else {
-      newRestriction = { id: 0, name: '', description: '', optionsAreClasses: false, priority: -1, options: []};
+      newRestriction = { id: 0, name: '', description: '', poll: true, options: []};
     }
 
     // add a data value for this to each student
@@ -140,7 +133,7 @@ export class TimetableSettingsComponent implements OnInit {
     this.loadedTimetable.students.map((a: SingleStudent) => a.data.push({...dataValue}));
 
     this.loadedTimetable.restrictions.push(newRestriction);
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   deleteRestriction(restrictionId: number): void {
@@ -152,17 +145,17 @@ export class TimetableSettingsComponent implements OnInit {
 
     this.loadedTimetable.students.map((a: SingleStudent) => { a.data = a.data.filter((b: DataValues) => b.restrictionId !== restrictionId); })
 
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   editRestriction(bypass: boolean, input?: any): void {
     if(bypass) {
-      this.currentTimetableChange.emit(this.loadedTimetable);
+      //this.currentTimetableChange.emit(this.loadedTimetable);
       return;
     }
 
     if(input.keyCode === 13) {
-      this.currentTimetableChange.emit(this.loadedTimetable);
+      //this.currentTimetableChange.emit(this.loadedTimetable);
     }
   }
 
@@ -186,17 +179,17 @@ export class TimetableSettingsComponent implements OnInit {
     this.loadedTimetable.students.map((a: SingleStudent) => a.coursePriorities.push({...newCoursePriority}));
 
     this.loadedTimetable.courses.push(newCourse);
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   editCourse(bypass: boolean, input?: any): void {
     if(bypass) {
-      this.currentTimetableChange.emit(this.loadedTimetable);
+      //this.currentTimetableChange.emit(this.loadedTimetable);
       return;
     }
 
     if(input.keyCode === 13) {
-      this.currentTimetableChange.emit(this.loadedTimetable);
+      //this.currentTimetableChange.emit(this.loadedTimetable);
     }
   }
 
@@ -214,7 +207,7 @@ export class TimetableSettingsComponent implements OnInit {
     this.reSortStudentPriorities();
     console.log(this.loadedTimetable.students);
 
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   // fill in gaps in the student priority list so they go from 1 to x
@@ -237,7 +230,7 @@ export class TimetableSettingsComponent implements OnInit {
     }
 
     this.loadedTimetable.rooms.push(newRoom);
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   deleteRoom(roomId: number): void {
@@ -249,7 +242,7 @@ export class TimetableSettingsComponent implements OnInit {
 
     if(this.loadedTimetable.rooms.length === 0) { this.loadedTimetable.rooms.push({ id: 0, name: 'New Room' })};
 
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   addClass(): void {
@@ -280,7 +273,7 @@ export class TimetableSettingsComponent implements OnInit {
     }
 
     this.loadedTimetable.classes.push(newClass);
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
 
@@ -300,10 +293,9 @@ export class TimetableSettingsComponent implements OnInit {
       }
 
       // and then remove the class.
+      this.timetableService.setupClassDeletion(classId);
       this.loadedTimetable.classes.splice(classIndex, 1);
     }
-
-    this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   addTimeBlock(): void {
@@ -335,7 +327,7 @@ export class TimetableSettingsComponent implements OnInit {
     }
 
     this.loadedTimetable.schedule.blocks.push(newTimeBlock);
-    this.currentTimetableChange.emit(this.loadedTimetable);
+    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   calculateBlocksRequired(): number {

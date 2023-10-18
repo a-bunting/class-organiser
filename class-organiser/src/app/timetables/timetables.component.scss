@@ -41,6 +41,8 @@
         background-color: lightcoral;
         border-radius: 1rem;
         transition: all .2s;
+        text-decoration: none;
+        border: .1rem solid transparent;
 
         &:not(:last-of-type) {
           margin-right: 1rem;
@@ -58,6 +60,8 @@
       margin-left: 3rem;
     }
   }
+
+  .link__active { border: .1rem solid black; }
 
   main {
     flex: 1;

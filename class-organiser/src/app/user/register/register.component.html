@@ -1,6 +1,20 @@
 <div class="register">
-  <div class="register__text">Send me a message</div>
-  <input type="text" class="register__input--text" placeholder="Email Address">
-  <textarea class="register__input--textarea" placeholder="Write your message here"></textarea>
-  <button class="register__input--button">Send Message</button>
+  <app-small-loader *ngIf="sendingEmail"></app-small-loader>
+
+  <div class="register__compose" *ngIf="!emailSent">
+    <div class="register__text">Send me a message</div>
+
+    <div class="register__error" *ngIf="error">
+      {{ error }}
+    </div>
+
+    <input type="text" class="register__input--text" placeholder="Email Address" [(ngModel)]="email">
+    <textarea class="register__input--textarea" placeholder="Write your message here" [(ngModel)]="message"></textarea>
+    <button class="register__input--button" (click)="sendEmail()">Send Message</button>
+  </div>
+
+  <div class="register__sent" *ngIf="emailSent">
+    Message Sent successfully. I will read and respond to your message within 48 hours.
+  </div>
+
 </div>

@@ -1,6 +1,9 @@
 <div class="ttsettings__chooseTimetable" *ngIf="timetableSelectionScreen">
   <div class="ttsettings__chooseTimetable--backdrop" (click)="timetableSelectionScreenToggle(false)"></div>
   <div class="ttsettings__chooseTimetable--data">
+
+    <app-small-loader *ngIf="selectedTimetableLoading"></app-small-loader>
+
     <div class="ttsettings__chooseTimetable--title">
       <div class="ttsettings__chooseTimetable--text">Choose your timetable from the choices below:</div>
       <button class="input__button input__length--veryshort" (click)="timetableSelectionScreenToggle(false)">X</button>
@@ -37,7 +40,7 @@
 
   <div class="ttsettings__title">
     <p>Settings</p>
-    <input type="text" class="input__text input__length--long" [(ngModel)]="loadedTimetable.name">
+    <input type="text" class="input__text input__length--long" *ngIf="loadedTimetable" [(ngModel)]="loadedTimetable.name">
   </div>
 
   <!-- <div class="ttsettings__flex">
@@ -57,7 +60,7 @@
     <div class="ttsettings__buttons--row">
       <button class="input__button input__length--medium" (click)="print()">Print</button>
       <button class="input__button input__length--medium" (click)="studentEditMode(0)">{{ studentViewMode ? 'Edit' : 'Student' }} Mode</button>
-      <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button>
+      <!-- <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button> -->
     </div>
     <div class="ttsettings__buttons--row">
       <button class="input__button input__length--medium" (click)="run()" [disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
@@ -158,7 +161,7 @@
         <tr>
           <td><input type="text" class="input__text input__length--medium" [(ngModel)]="restriction.name" placeholder="Data Name" (blur)="editRestriction(true)" (keyup)="editRestriction(false, $event)"></td>
           <td><input type="text" class="input__text input__length--medium" [(ngModel)]="restriction.description"></td>
-          <td><input type="checkbox"></td>
+          <td><input type="checkbox" [(ngModel)]="restriction.poll"></td>
           <td><button class="input__button input__length--veryshort" (click)="deleteRestriction(restriction.id)">X</button></td>
         </tr>
         <tr>

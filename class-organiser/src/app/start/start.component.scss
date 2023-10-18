@@ -10,10 +10,10 @@
       flex-direction: column;
   }
 
-
   &__left {
     position: relative;
     flex: 1;
+    justify-content: flex-end;
     padding: 2rem 4rem;
     margin-left: 9.5rem;
 
@@ -32,6 +32,7 @@
     font-size: 6rem;
     font-weight: bold;
     text-align: right;
+    justify-self: flex-start;
 
     @media screen and (max-width: 1300px) {
       grid-row: 1 / -1;
@@ -43,8 +44,10 @@
   }
 
   &__window {
-    margin-top: 3rem;
-    height: 23rem;
+    margin-top: 0rem;
+    height: max-content;
+    display: flex;
+    justify-content: flex-end;
 
     @media screen and (max-width: 1300px) {
       grid-row: 1 / 2;
@@ -60,6 +63,7 @@
     line-height: 2rem;
     margin-top: 5rem;
     text-align: right;
+    justify-self: flex-end;
 
     @media screen and (max-width: 1300px) {
       grid-row: 2 / -1;

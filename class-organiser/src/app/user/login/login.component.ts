@@ -13,6 +13,7 @@ export class LoginComponent {
   email: string = '';
   password: string = '';
   error: string = '';
+  loggingIn: boolean = false;
 
   constructor(
     private authService: AuthenticationService,
@@ -22,13 +23,17 @@ export class LoginComponent {
   login(): void {
     if(!this.email || !this.password) return;
 
+    this.loggingIn = true;
+
     this.databaseService.login(this.email, this.password).subscribe({
       next: (result: DatabaseReturn) => {
         console.log(result);
+        this.loggingIn = false;
         this.authService.loginNewUser(result.data);
       },
       error: (e: any) => {
         this.error = e;
+        this.loggingIn = false;
         console.log(`Error: ${e}`);
       }
     })

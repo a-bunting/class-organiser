@@ -329,7 +329,7 @@ export class StudentDataComponent implements OnInit {
         let optionsSet = Array.from(new Set(data.map(a => { return a[this.restrictionInclusionList[i]] }))).map((a: string, i: number) => { return { id: i, value: a}});
 
         let newRestriction: Restriction = {
-          id: lastRestrictionId + addedRestrictions, name: this.restrictionInclusionList[i], description: '', optionsAreClasses: false, options: optionsSet, priority: 0
+          id: lastRestrictionId + addedRestrictions, name: this.restrictionInclusionList[i], description: '', poll: true, options: optionsSet
         }
 
         addedRestrictions++;

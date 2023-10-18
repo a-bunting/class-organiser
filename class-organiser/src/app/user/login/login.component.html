@@ -1,5 +1,7 @@
 <div class="login">
+  <app-small-loader *ngIf="loggingIn"></app-small-loader>
   <div class="login__text">Login</div>
+  <div class="login__error" *ngIf="error">There was an error logging you in, please try again.</div>
   <input type="text" class="login__input--text" [(ngModel)]="email" placeholder="Email Address">
   <input type="password" class="login__input--text" [(ngModel)]="password" placeholder="Password">
   <button class="login__input--button" (click)="login()">Login</button>

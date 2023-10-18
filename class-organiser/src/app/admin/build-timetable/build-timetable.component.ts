@@ -35,18 +35,10 @@ export class BuildTimetableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-      // this.timetables = this.timetableService.getFromLocalStorage();
-
-      // if(this.timetables.length > 0) {
-      //   // auto select the first timetable
-      //   this.selectTimetable(this.timetables[0].id);
-      // }
-          // subscribe to chnages in the loaded timetable.
+    // subscribe to chnages in the loaded timetable.
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => {
         this.loadedTimetable = tt;
-        console.log(`loaded`);
-        console.log(this.loadedTimetable);
       },
       error: (e: any) => { console.log(`Error: ${e}`)}
     })
@@ -82,7 +74,7 @@ export class BuildTimetableComponent implements OnInit {
     pasteBlock.maxStudents = this.copyData.maxStudents;
     pasteBlock.room = this.copyData.room;
 
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   lockStudent(studentId: number, blockId: number): void {
@@ -95,8 +87,7 @@ export class BuildTimetableComponent implements OnInit {
       block.lockedStudents.splice(lockedAlreadyIndex, 1);
     }
 
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
-
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   toggleStudentView(value: boolean): void { this.studentView = value; }
@@ -118,7 +109,7 @@ export class BuildTimetableComponent implements OnInit {
 
   deleteTimeBlock(index: number): void {
     this.loadedTimetable.schedule.blocks.splice(index, 1);
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   /**
@@ -127,7 +118,7 @@ export class BuildTimetableComponent implements OnInit {
   setClassOnly(blockId: number): void {
     let block: SingleBlock = this.findBlockFromId(blockId);
     block.classOnly = !block.classOnly;
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   /**
@@ -144,7 +135,7 @@ export class BuildTimetableComponent implements OnInit {
       this.selectRestriction(blockId, null, +data[1]);
     }
 
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   /**
@@ -155,7 +146,7 @@ export class BuildTimetableComponent implements OnInit {
     // let block: SingleBlock = this.loadedTimetable.schedule.blocks.find((a: SingleTimeBlock) => !!a.blocks.find((a: SingleBlock) => a.id === blockId))!.blocks.filter((a: SingleBlock) => a.id === blockId)[0];
     let block: SingleBlock = this.findBlockFromId(blockId);
     block.courses.push(courseId);
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   removeCourseFromBlock(blockId: number, courseId: number): void {
@@ -167,7 +158,7 @@ export class BuildTimetableComponent implements OnInit {
       block.courses.splice(index, 1);
     }
 
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   getCourseNameFromId(courseId: number): string {
@@ -182,7 +173,7 @@ export class BuildTimetableComponent implements OnInit {
     let restrictionId: number = val ?? input.target.value;
     let restriction: Restriction = this.loadedTimetable.restrictions.find((a: Restriction) => a.id === restrictionId)!;
     block.restrictions.push({ restrictionId: restrictionId, optionId: restriction.options[0].id })
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   removeRestrictionFromBlock(blockId: number, restrictionId: number): void {
@@ -194,7 +185,7 @@ export class BuildTimetableComponent implements OnInit {
       block.restrictions.splice(index, 1);
     }
 
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   changeBlockRestrictionOption(blockId: number, restrictionId: number, input: any): void {
@@ -205,7 +196,7 @@ export class BuildTimetableComponent implements OnInit {
     console.log(blockId, restrictionId, value);
 
     restriction.optionId = value;
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   getRestrictionOptions(restrictionId: number): { id: number, value: string }[] {
@@ -265,7 +256,7 @@ export class BuildTimetableComponent implements OnInit {
   selectRoom(blockId: number, input: any): void {
     let block: SingleBlock = this.findBlockFromId(blockId);
     block.room = +input.target.value;
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   getRoomName(roomId: number): string { return this.loadedTimetable.rooms.find((a: { id: number, name: string}) => +a.id === +roomId)!.name; }
@@ -322,7 +313,7 @@ export class BuildTimetableComponent implements OnInit {
       }
     }
 
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   hasCourseBeenAdded(blockId: number, courseId: number, timeBlockId: number): boolean {

@@ -1,8 +1,25 @@
 .login {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: flex-end;
   row-gap: 1rem;
+  padding: 2rem;
+  width: max-content;
+
+  &__error {
+    text-align: center;
+    padding: 1rem 2rem;
+    font-size: 1.4rem;
+    border-radius: 1rem;
+    width: 100%;
+    border-radius: .1rem solid black;
+  }
+
+  &__error {
+    background-color: lightcoral;
+  }
 
   @media screen and (max-width: 1300px) {
     flex-direction: row;

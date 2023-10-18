@@ -2,11 +2,12 @@ import { NumberSymbol } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, last, Observable } from 'rxjs';
 import { SelectionData, TimetableStatistics } from '../admin/build-timetable/build-timetable.component';
-import { DatabaseService } from './database.service';
+import { DatabaseReturn, DatabaseService } from './database.service';
 
 export interface Timetable {
   id: number;
   name: string;
+  code: string;
   classes: SingleClass[];
   schedule: Schedule;
   courses: SingleCourse[];
@@ -54,8 +55,7 @@ export interface Restriction {
   id: number;
   name: string;
   description: string;
-  optionsAreClasses: boolean;
-  priority: number;
+  poll: boolean;
   options: { id: number, value: string }[];
 }
 
@@ -132,6 +132,11 @@ export class TimetableService {
     window.localStorage.setItem('classOrganiser', JSON.stringify(ttInStorage));
   }
 
+  fullSave(updatedTimetable: Timetable): void {
+    this.updateLocalStorage(updatedTimetable.id, updatedTimetable);
+    this.saveToDatabase(updatedTimetable);
+  }
+
   addNewToLocalStorage(newTimetable: Timetable): void {
     let localStorage: Timetable[] = this.getFromLocalStorage();
     localStorage.push(newTimetable);
@@ -142,21 +147,34 @@ export class TimetableService {
     this.timetables.next(localStorage);
   }
 
+  saveToDatabase(newTimetable: Timetable): void {
+
+    this.databaseService.saveTimetable(newTimetable).subscribe({
+      next: (result: DatabaseReturn) => {
+        console.log(result);
+      },
+      error: (e: any) => {
+        console.log(`Error: ${e}`);
+      }
+    })
+  }
+
   getFromLocalStorage(): Timetable[] {
     let fromLocal: Timetable[] = JSON.parse(window.localStorage.getItem('classOrganiser')!);
     return fromLocal ?? [];
   }
 
+
+  /**
+   * Creation and Deletion of timetables
+   */
+
   createBlank(): void {
     const timetables: Timetable[] = this.getFromLocalStorage();
-    let maxId: number = 0;
-
-    for(let i = 0 ; i < timetables.length ; i++) {
-      if(timetables[i].id >= maxId) maxId = timetables[i].id + 1;
-    }
 
     let newTimetable: Timetable = {
-      id: maxId,
+      id: undefined!,
+      code: "",
       name: "New Timetable",
       classes: [],
       courses: [],
@@ -167,22 +185,59 @@ export class TimetableService {
       schedule: { blocks: [] }
     }
 
-    this.addNewToLocalStorage(newTimetable);
+    this.databaseService.saveTimetable(newTimetable).subscribe({
+      next: (result: DatabaseReturn) => {
+        newTimetable.id = result.data.id;
+        newTimetable.code = result.data.code;
+        this.addNewToLocalStorage(newTimetable);
+      },
+      error: (e: any) => { console.log(`Error: ${e}`) }
+    })
+
   }
 
   createDuplicate(): void {
     // duplicate the loaded timetable
     const timetable: Timetable = JSON.parse(JSON.stringify(this.loadedTimetable.value));
-    let maxId: number = 0;
-
-    for(let i = 0 ; i < this.timetables.value.length ; i++) {
-      if(this.timetables.value[i].id >= maxId) maxId = this.timetables.value[i].id + 1;
-    }
-
-    timetable.id = maxId;
+    timetable.code = ""; // force a new entry in the db
     timetable.name = timetable.name + ' (Copy)';
-    this.addNewToLocalStorage(timetable);
+
+    this.databaseService.saveTimetable(timetable).subscribe({
+      next: (result: DatabaseReturn) => {
+        timetable.id = result.data.id;
+        timetable.code = result.data.code;
+        this.addNewToLocalStorage(timetable);
+      },
+      error: (e: any) => { console.log(`Error: ${e}`) }
+    })
   }
+
+
+
+
+
+
+
+  // these are arrays of values to dlete from the database as opposed to updated
+  // in the case of a save. They only trigger on a full save so a reload can be performed and only the
+  // acts of clicking save actually impacts the database.
+  // clears upon reloading of timetable o0r saving of timetable
+  deletedUnsavedClasses: number[] = [];
+  deletedUnsavedCourses: number[] = [];
+  deletedUnsavedRestrictions: number[] = [];
+  deletedUnsavedStudents: number[] = [];
+
+  setupClassDeletion(classId: number): void {
+    this.deletedUnsavedClasses.push(classId);
+  }
+
+  // WHERE TO RUN THIS? :D
+
+
+
+
+
+
 
   deleteTimetable(): void {
     console.log(`delete`);
