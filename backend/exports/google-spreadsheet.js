@@ -1,6 +1,6 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
-// const creds = require('../class-organiser-b8943a99b912.json');
+// const creds = require('../class-organiser-google.json');
 
 async function createNewSpreadsheet() {
 
