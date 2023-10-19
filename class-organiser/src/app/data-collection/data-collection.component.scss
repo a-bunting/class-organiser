@@ -78,6 +78,13 @@
             font-weight: bold;
         }
 
+        &--desc {
+            font-size: 1.4rem;
+            font-style: italic;
+            text-align: center;
+            padding: .5rem 1rem;
+        }
+
         &--split {
             display: flex;
             justify-content: space-between;
@@ -124,12 +131,12 @@
        }
 
        &--input {
-           input {
-            border-radius: .5rem;
-            padding: .3rem .6rem;
-            text-align: center;
-            letter-spacing: .1rem;
-        }
+           input, select {
+                border-radius: .5rem;
+                padding: .3rem .6rem;
+                text-align: center;
+                letter-spacing: .1rem;
+            }
        }
     }
 }

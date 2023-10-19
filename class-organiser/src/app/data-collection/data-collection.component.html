@@ -9,12 +9,13 @@
 
     <div class="survey__display" *ngIf="data">
         <div class="survey__display--title">{{ data.name }}</div>
+        <div class="survey__display--section--desc">Fill in as correcly as possible, this will help place you in the places you are meant to be!</div>
 
         <div class="survey__display--split">
             <div class="survey__display--left">
                 <div class="survey__display--section">
                     <div class="survey__display--section--title">Information about you</div>
-                    <div class="survey__display--section--desc">This is information gathered for the purpose of placing you and communicating with you appropriatele</div>
+                    <div class="survey__display--desc">This is information gathered for the purpose of placing you and communicating with you appropriatele</div>
                     <!-- data here -->
                     <div class="survey__row">
                         <div class="survey__row--text">Forename</div>
@@ -27,6 +28,14 @@
                     <div class="survey__row">
                         <div class="survey__row--text">Email</div>
                         <div class="survey__row--input"><input type="text" [(ngModel)]="student.email"></div>
+                    </div>
+                    <div class="survey__row">
+                        <div class="survey__row--text">Class</div>
+                        <div class="survey__row--input">
+                            <select>
+                                <option value="{{ class.id }}" *ngFor="let class of data.classes">{{ class.teacher }}</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="survey__display--section">
