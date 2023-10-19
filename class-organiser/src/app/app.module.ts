@@ -22,6 +22,7 @@ import { StartComponent } from './start/start.component';
 import { AuthInterceptor } from './interceptors/auth-interceptor';
 import { AuthGuard } from './guards/auth.guard';
 import { SmallLoaderComponent } from './utilities/small-loader/small-loader.component';
+import { DataCollectionComponent } from './data-collection/data-collection.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { SmallLoaderComponent } from './utilities/small-loader/small-loader.comp
     RegisterComponent,
     TimetablesComponent,
     StartComponent,
-    SmallLoaderComponent
+    SmallLoaderComponent,
+    DataCollectionComponent
   ],
   imports: [
     BrowserModule,

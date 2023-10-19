@@ -34,7 +34,7 @@ export interface SingleTimeBlock {
   teachers: number[]; // the ids of the teachers who are on this timeblock
   order: number;
   blocks: SingleBlock[];
-  missingStudents?: number[];
+  missingStudents: number[];
 }
 
 export interface SingleBlock {
@@ -133,6 +133,7 @@ export class TimetableService {
   }
 
   fullSave(updatedTimetable: Timetable): void {
+
     this.updateLocalStorage(updatedTimetable.id, updatedTimetable);
     this.saveToDatabase(updatedTimetable);
   }
@@ -149,9 +150,19 @@ export class TimetableService {
 
   saveToDatabase(newTimetable: Timetable): void {
 
-    this.databaseService.saveTimetable(newTimetable).subscribe({
+    const deletedArray: { courses: number[], classes: number[], restrictions: number[], students: number[] } = {
+      courses: this.deletedUnsavedCourses,
+      classes: this.deletedUnsavedClasses,
+      restrictions: this.deletedUnsavedRestrictions,
+      students: this.deletedUnsavedStudents
+    }
+
+    this.databaseService.saveTimetable(newTimetable, deletedArray).subscribe({
       next: (result: DatabaseReturn) => {
         console.log(result);
+        if(!result.error) {
+          this.clearTemporaryChanges();
+        }
       },
       error: (e: any) => {
         console.log(`Error: ${e}`);
@@ -190,6 +201,7 @@ export class TimetableService {
         newTimetable.id = result.data.id;
         newTimetable.code = result.data.code;
         this.addNewToLocalStorage(newTimetable);
+        this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
       },
       error: (e: any) => { console.log(`Error: ${e}`) }
     })
@@ -207,16 +219,11 @@ export class TimetableService {
         timetable.id = result.data.id;
         timetable.code = result.data.code;
         this.addNewToLocalStorage(timetable);
+        this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
       },
       error: (e: any) => { console.log(`Error: ${e}`) }
     })
   }
-
-
-
-
-
-
 
   // these are arrays of values to dlete from the database as opposed to updated
   // in the case of a save. They only trigger on a full save so a reload can be performed and only the
@@ -227,17 +234,28 @@ export class TimetableService {
   deletedUnsavedRestrictions: number[] = [];
   deletedUnsavedStudents: number[] = [];
 
+  clearTemporaryChanges(): void {
+    this.deletedUnsavedClasses = [];
+    this.deletedUnsavedCourses = [];
+    this.deletedUnsavedStudents = [];
+    this.deletedUnsavedRestrictions = [];
+  }
+
   setupClassDeletion(classId: number): void {
     this.deletedUnsavedClasses.push(classId);
   }
 
-  // WHERE TO RUN THIS? :D
+  setupCourseDeletion(courseId: number): void {
+    this.deletedUnsavedCourses.push(courseId);
+  }
 
+  setupRestrictionDeletion(restriction: number): void {
+    this.deletedUnsavedRestrictions.push(restriction);
+  }
 
-
-
-
-
+  setupStudentDeletion(studentId: number): void {
+    this.deletedUnsavedStudents.push(studentId);
+  }
 
   deleteTimetable(): void {
     console.log(`delete`);

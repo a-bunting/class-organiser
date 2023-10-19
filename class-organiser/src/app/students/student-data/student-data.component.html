@@ -1,6 +1,9 @@
 <div class="studentData">
 
-    <div class="studentData__title">Student Data</div>
+    <div class="studentData__title">
+        <p>Student Data</p>
+        <div class="studentData__add" *ngIf="loadedTimetable.students.length > 0" (click)="addStudentToggle()">Add Student</div>
+    </div>
 
     <div class="studentData__import" *ngIf="loadedTimetable.students.length === 0">
         <div class="studentData__import--title">Import from TSV File</div>
@@ -16,6 +19,7 @@
     <table *ngIf="loadedTimetable">
         <thead *ngIf="loadedTimetable.students.length > 0">
             <tr>
+                <th rowspan="2">Actions</th>
                 <th rowspan="2" (click)="sortByForeName()">Forename</th>
                 <th rowspan="2" (click)="sortBySurname()">Surname</th>
                 <th rowspan="2" (click)="sortByEmail()">Email</th>
@@ -31,8 +35,38 @@
                 <th *ngFor="let course of getOptionalUnits(); let i = index" (click)="sortByPriority(i+1)">{{ i + 1 }}</th>
             </tr>
         </thead>
+
+        <!-- add new sdtuents row -->
+        <!-- all added students row -->
         <tbody>
+            <tr *ngIf="newStudent">
+                <td>
+                    <button class="input__button input__length--veryshort" (click)="deleteNewStudent()" [tooltip]="'Delete New Student'">X</button>
+                    <button class="input__button input__length--veryshort" (click)="submitNewStudent()" [tooltip]="'Add New Student'">1</button>
+                </td>
+                <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.name.forename"></td>
+                <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.name.surname"></td>
+                <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.email"></td>
+                <td>
+                    <select class="input__select input__length--medium">
+                        <option value="{{ class.id }}" *ngFor="let class of loadedTimetable.classes" [selected]="class.id === newStudent.classId">{{ class.teacher }}</option>
+                    </select>
+                </td>
+                <td *ngFor="let restriction of loadedTimetable.restrictions">
+                    <select class="input__select input__length--short" (change)="modifyDataValue(newStudent, restriction.id, $event)">
+                        <option value="{{ option.id }}" *ngFor="let option of restriction.options" [selected]="getStudentRestrictionData(newStudent, restriction).id === option.id">{{ option.value }}</option>
+                    </select>
+                </td>
+                <td *ngFor="let course of getOptionalUnits(); let priority = index">
+                    <select class="input__select input__length--medium" (change)="changeCoursePriority(newStudent, priority + 1, $event)">
+                        <option value="{{ course.id }}" *ngFor="let course of getOptionalUnits(); let i = index" [selected]="getStudentPriorityData(newStudent, priority + 1) === course.id">{{ course.name }}</option>
+                    </select>
+                </td>
+            </tr>
             <tr *ngFor="let student of  loadedTimetable.students">
+                <td>
+                    <button class="input__button input__length--veryshort" (click)="deleteStudent(student.id)" [tooltip]="'Delete ' + student.name.forename">X</button>
+                </td>
                 <td>{{ student.name.forename }}</td>
                 <td>{{ student.name.surname }}</td>
                 <td>{{ student?.email }}</td>
@@ -42,7 +76,7 @@
                     </select>
                 </td>
                 <td *ngFor="let restriction of loadedTimetable.restrictions">
-                    <select class="input__select input__length--medium" (change)="modifyDataValue(student, restriction.id, $event)">
+                    <select class="input__select input__length--short" (change)="modifyDataValue(student, restriction.id, $event)">
                         <option value="{{ option.id }}" *ngFor="let option of restriction.options" [selected]="getStudentRestrictionData(student, restriction).id === option.id">{{ option.value }}</option>
                     </select>
                 </td>

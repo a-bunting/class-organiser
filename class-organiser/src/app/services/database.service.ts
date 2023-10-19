@@ -41,21 +41,25 @@ export class DatabaseService {
   }
 
   // timetable saving etc
-  saveTimetable(timetable: Timetable): Observable<DatabaseReturn> {
-    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/saveTimetable`, { timetable }).pipe(take(1));
+  saveTimetable(timetable: Timetable, deleted?: { courses: number[], classes: number[], restrictions: number[], students: number[] }): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/saveTimetable`, { timetable, deleted }).pipe(take(1));
   }
 
   deleteClass(ttId: number, classId: number[]): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/deleteClass`, { ttId, classId }).pipe(take(1));
   }
-
+  
   // exports
   googleSheet(): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/export/gSheet`, {}).pipe(take(1));
   }
-
-
-
+  
+  
+  // survey
+  getSurvey(code: string): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/survey/get`, { code }).pipe(take(1));
+  }
+  
 
 
 }

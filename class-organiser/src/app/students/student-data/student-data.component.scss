@@ -2,7 +2,25 @@
     padding: 2rem 4rem;
 
     &__title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         font-size: 3rem;
+    }
+
+    &__add {
+        padding: 1rem 2rem;
+        background-color: #009879;
+        font-size: 2rem;
+        transition: all .2s;
+        border-radius: 1rem;
+        box-shadow: .2rem 0 .4rem rgba(black, .5);
+        color: white;
+        
+        &:hover {
+            cursor: pointer;
+            filter: brightness(1.2);
+        }
     }
 
     &__import {
@@ -52,7 +70,8 @@
         margin: 25px 0;
         font-size: 0.9em;
         font-family: sans-serif;
-        min-width: 400px;
+        // min-width: 40rem;
+        width: 100%;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 
         thead {
@@ -76,7 +95,7 @@
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 1.2rem .75rem;
             text-align: center;
             font-size: 1.2rem;
         }

@@ -145,9 +145,13 @@ export class TimetableSettingsComponent implements OnInit {
 
     this.loadedTimetable.students.map((a: SingleStudent) => { a.data = a.data.filter((b: DataValues) => b.restrictionId !== restrictionId); })
 
+    this.timetableService.setupRestrictionDeletion(restrictionId);
     //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
+  /*
+  / deprecated?
+  */
   editRestriction(bypass: boolean, input?: any): void {
     if(bypass) {
       //this.currentTimetableChange.emit(this.loadedTimetable);
@@ -204,8 +208,8 @@ export class TimetableSettingsComponent implements OnInit {
       a.coursePriorities = a.coursePriorities.filter((b: { courseId: number, priority: number }) => b.courseId !== courseId);
     })
 
+    this.timetableService.setupCourseDeletion(courseId);
     this.reSortStudentPriorities();
-    console.log(this.loadedTimetable.students);
 
     //this.currentTimetableChange.emit(this.loadedTimetable);
   }
@@ -349,28 +353,11 @@ export class TimetableSettingsComponent implements OnInit {
     window.print();
   }
 
-  // createNewTimetable(): void {
-  //   this.timetableService.createBlank();
-  // }
-
-  // createDuplicateTimetable(): void {
-  //   this.timetableService.createDuplicate();
-  // }
-
-  // deleteTimetable(): void {
-  //   this.timetableService.deleteTimetable();
-  // }
-
   studentViewMode: boolean = false;
 
   studentEditMode(action: number, value?: any ): void {
     // action 0 is to trigger student/edit modes
-    // action 1 is to save
-    // action 2 is to run
-    // action 3 is to show options
-    // action 4 is for a new timetable
-    // action 5 is to duplicate
-    // action 6 is to delete
+    // action 1 is to highlight students
     if(action === 0 && value === undefined) {
       this.studentViewMode = !this.studentViewMode;
       value = this.studentViewMode;

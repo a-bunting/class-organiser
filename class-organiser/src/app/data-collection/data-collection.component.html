@@ -1,0 +1,54 @@
+<div class="survey">
+
+    <div class="survey__code" *ngIf="!code">
+        <div class="survey__code--title">Enter your code here</div>
+        <input type="text" [(ngModel)]="codeInput">
+        <div class="survey__error" *ngIf="error">{{ error }}</div>
+        <button (click)="submitCode()" [disabled]="codeInput.length !== 5">Complete Survey</button>
+    </div>
+
+    <div class="survey__display" *ngIf="data">
+        <div class="survey__display--title">{{ data.name }}</div>
+
+        <div class="survey__display--split">
+            <div class="survey__display--left">
+                <div class="survey__display--section">
+                    <div class="survey__display--section--title">Information about you</div>
+                    <div class="survey__display--section--desc">This is information gathered for the purpose of placing you and communicating with you appropriatele</div>
+                    <!-- data here -->
+                    <div class="survey__row">
+                        <div class="survey__row--text">Forename</div>
+                        <div class="survey__row--input"><input type="text" [(ngModel)]="student.name.forename"></div>
+                    </div>
+                    <div class="survey__row">
+                        <div class="survey__row--text">Surname</div>
+                        <div class="survey__row--input"><input type="text" [(ngModel)]="student.name.surname"></div>
+                    </div>
+                    <div class="survey__row">
+                        <div class="survey__row--text">Email</div>
+                        <div class="survey__row--input"><input type="text" [(ngModel)]="student.email"></div>
+                    </div>
+                </div>
+                <div class="survey__display--section">
+                    <div class="survey__display--section--title">Requested Data</div>
+                    <div class="survey__display--section--desc">This is extra information to help make sure you are in the correct spot, for example you may be asked your gender so you can be placed in single gender sessions where required.</div>
+                    <!-- restrictions here -->
+                </div>
+            </div>
+            <div class="survey__display--right">
+                <div class="survey__display--section--title">Courses</div>
+                <div class="survey__display--section--desc">Select the courses you most want to take here.</div>
+
+                <div class="survey__row" *ngFor="let course of data.courses; let i = index">
+                    <div class="survey__row--text">{{ i + 1 | ordinal }} priority</div>
+                    <div class="survey__row--input">
+                        <select>
+                            <option value="{{item.id}}" *ngFor="let item of data.courses">{{ item.name }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

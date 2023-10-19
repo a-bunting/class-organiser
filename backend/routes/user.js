@@ -88,7 +88,10 @@ router.post('/login', (req, res, next) => {
 router.post('/saveTimetable', checkAuth, (req, res, next) => {
     const userData = userMethods.getUserDataFromToken(req);
     const timetable = req.body.timetable;
+    const deleted = req.body.deleted ?? { classes: [], courses: [], restrictions: [], students: [] };
     const scores = timetable.schedule.scores ? timetable.schedule.scores : [];
+
+    console.log(deleted);
 
     // break up the timetable into segmenets for the database;
     const code = timetable.code === "" ? stringMethods.generateRandomString(5) : timetable.code;
@@ -98,9 +101,67 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
 
     db.query(timetableQuery, [data], (e, r) => {
         if(!e) {
+            let compoundQuery = ``;
             // build the other parts of the database...
             const timetableId = timetable.id ?? r.insertId;
-    
+
+            // set up any relevant deletions
+            if(deleted.classes.length > 0) {
+                const query = `DELETE FROM timetable__classes WHERE id IN 
+                                (SELECT id
+                                    FROM (
+                                        SELECT timetable__classes.id
+                                        FROM timetable__classes 
+                                        WHERE timetable__classes.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                                        AND timetable__classes.ttId = ${timetableId}
+                                        AND timetable__classes.classId IN (${deleted.classes.join(',')})
+                                    ) AS subquery
+                                )`;
+                compoundQuery += `${query};`;
+            }
+
+            if(deleted.courses.length > 0) {
+                const query = `DELETE FROM timetable__courses WHERE id IN 
+                                (SELECT id
+                                    FROM (
+                                        SELECT timetable__courses.id
+                                        FROM timetable__courses 
+                                        WHERE timetable__courses.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                                        AND timetable__courses.ttId = ${timetableId}
+                                        AND timetable__courses.courseId IN (${deleted.courses.join(',')})
+                                    ) AS subquery
+                                )`;
+                compoundQuery += `${query};`;
+            }
+
+            if(deleted.restrictions.length > 0) {
+                const query = `DELETE FROM timetable__restrictions WHERE id IN 
+                                (SELECT id
+                                    FROM (
+                                        SELECT timetable__restrictions.id
+                                        FROM timetable__restrictions 
+                                        WHERE timetable__restrictions.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                                        AND timetable__restrictions.ttId = ${timetableId}
+                                        AND timetable__restrictions.restrictionId IN (${deleted.restrictions.join(',')})
+                                    ) AS subquery
+                                )`;
+                compoundQuery += `${query};`;
+            }
+
+            if(deleted.students.length > 0) {
+                const query = `DELETE FROM timetable__students WHERE id IN 
+                                (SELECT id
+                                    FROM (
+                                        SELECT timetable__students.id
+                                        FROM timetable__students 
+                                        WHERE timetable__students.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                                        AND timetable__students.ttId = ${timetableId}
+                                        AND timetable__students.studentId IN (${deleted.students.join(',')})
+                                    ) AS subquery
+                                )`;
+                compoundQuery += `${query};`;
+            }
+
             let clDb = [];
             let coDb = [];
             let reDb = [];
@@ -115,7 +176,6 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
             // students
             for(let i = 0 ; i < timetable.students.length ; i++) { stDb.push([timetableId, timetable.students[i].id, timetable.students[i].classId, timetable.students[i].name.forename, timetable.students[i].name.surname, timetable.students[i].email ?? '', JSON.stringify(timetable.students[i].data), JSON.stringify(timetable.students[i].coursePriorities)]) }
 
-            let compoundQuery = ``;
             let argArray = [];
 
             if(clDb.length > 0) { compoundQuery += `INSERT INTO timetable__classes (ttId, classId, teacher) VALUES ? as new_data ON DUPLICATE KEY UPDATE teacher = new_data.teacher;`; argArray.push(clDb); }

@@ -2,7 +2,7 @@ import { Component, OnInit, provideZoneChangeDetection } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService, User } from 'src/app/services/authentication.service';
 import { DatabaseService } from 'src/app/services/database.service';
-import { DataValues, Restriction, SingleClass, SingleCourse, SingleStudent, Timetable, TimetableService } from 'src/app/services/timetable.service';
+import { DataValues, Restriction, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
 interface CsvObject {
   [key: string]: string;
@@ -119,6 +119,57 @@ export class StudentDataComponent implements OnInit {
 
     this.asc = !this.asc;
   }
+  
+  deleteStudent(studentId: number): void {
+    this.loadedTimetable.students = this.loadedTimetable.students.filter((a: SingleStudent) => a.id !== studentId);
+    
+    // remove them from all blocks in the timetable
+    for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
+     let timeBlock: SingleTimeBlock = this.loadedTimetable.schedule.blocks[i];
+
+     timeBlock.missingStudents = timeBlock.missingStudents.filter((a: number) => a !== studentId);
+    
+      for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
+        timeBlock.blocks[o].students = timeBlock.blocks[o].students.filter((a: number) => a !== studentId);
+      }
+    }
+
+    this.timetableService.setupStudentDeletion(studentId);
+  }
+
+  newStudent: SingleStudent = null!;
+  lockNewStudent: boolean = false;
+
+  addStudentToggle(): void {
+
+    // get the first unused id in the series:
+    let id: number = 0;
+
+    while(this.loadedTimetable.students.find((a: SingleStudent) => a.id === id)) {
+      id++;
+    }
+
+    let newStudent: SingleStudent = {
+      id,
+      name: { forename: '', surname: '' },
+      classId: 0, 
+      data: [...this.loadedTimetable.restrictions.map((a: Restriction) => { return { restrictionId: a.id, value: a.options[0].id }})], 
+      coursePriorities: [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })]
+    }
+
+    console.log(newStudent);
+
+    this.newStudent = newStudent;
+  }
+
+  submitNewStudent(): void {
+    this.loadedTimetable.students.push({ ...this.newStudent });
+    this.newStudent = null!;
+  }
+  
+  deleteNewStudent(): void {
+    this.newStudent = null!;
+  }
 
   changeCoursePriority(student: SingleStudent, destinationPriority: number, input: any): void {
     let changeToCourseId: number = +input.target.value;
@@ -140,20 +191,20 @@ export class StudentDataComponent implements OnInit {
 
     let course = student.coursePriorities.find((a: { courseId: number, priority: number }) => a.courseId === changeToCourseId)!;
     course.priority = destinationPriority;
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   modifyDataValue(student: SingleStudent, restrictionId: number, input: any): void {
     let dataValue: DataValues = student.data.find((a: DataValues) => a.restrictionId === restrictionId)!;
     let newValue: number = +input.target.value;
     dataValue.value = newValue;
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   modifyClassTeacher(studentId: number, input: any): void {
     let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === studentId)!;
     student.classId = +input.target.value;
-    this.timetableService.updateSavedTimetable(this.loadedTimetable);
+    //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
 
   content: string = '';
@@ -349,6 +400,5 @@ export class StudentDataComponent implements OnInit {
 
     return restrictionData;
   }
-
 
 }

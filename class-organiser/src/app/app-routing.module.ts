@@ -7,6 +7,7 @@ import { StudentDataComponent } from './students/student-data/student-data.compo
 import { TimetablesComponent } from './timetables/timetables.component';
 import { LoginComponent } from './user/login/login.component';
 import { RegisterComponent } from './user/register/register.component';
+import { DataCollectionComponent } from './data-collection/data-collection.component';
 
 
 const routes: Routes = [
@@ -17,7 +18,9 @@ const routes: Routes = [
   { path: '', component: TimetablesComponent, canActivate: [AuthGuard], children: [
     { path: 'timetables', component: BuildTimetableComponent },
     { path: 'students', component: StudentDataComponent }
-  ]}
+  ]}, 
+  { path: 'survey', component: DataCollectionComponent },
+  { path: 'survey/:code', component: DataCollectionComponent }
 ];
 
 @NgModule({
