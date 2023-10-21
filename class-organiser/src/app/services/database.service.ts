@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Timetable } from './timetable.service';
+import { SingleStudent, Timetable } from './timetable.service';
 import { Observable, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http'
 import { environment } from 'src/environments/environment.development';
@@ -48,18 +48,24 @@ export class DatabaseService {
   deleteClass(ttId: number, classId: number[]): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/deleteClass`, { ttId, classId }).pipe(take(1));
   }
-  
+
   // exports
   googleSheet(): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/export/gSheet`, {}).pipe(take(1));
   }
-  
-  
+
+
   // survey
   getSurvey(code: string): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/survey/get`, { code }).pipe(take(1));
   }
-  
+
+  saveUser(code: string, ttId: number, student: SingleStudent): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/survey/save`, { code, ttId, student }).pipe(take(1));
+  }
+
+
+
 
 
 }

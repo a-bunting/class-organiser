@@ -12,14 +12,13 @@ export class AuthGuard {
   ) {}
 
   canActivate() {
+    console.log(`run`);
     this.dbService.checkAuthStatus().subscribe({
       next: (result: DatabaseReturn) => {
-        console.log(`true`);
         if(!result.error) return true;
         else return false;
       },
       error: (e: any) => {
-        console.log(`false`);
         return this.router.createUrlTree(['/start']);
       }
     })

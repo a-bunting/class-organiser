@@ -24,6 +24,8 @@ import { AuthGuard } from './guards/auth.guard';
 import { SmallLoaderComponent } from './utilities/small-loader/small-loader.component';
 import { DataCollectionComponent } from './data-collection/data-collection.component';
 
+import { ColorPickerModule } from 'ngx-color-picker';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -46,7 +48,8 @@ import { DataCollectionComponent } from './data-collection/data-collection.compo
     HttpClientModule,
     DragDropModule,
     FormsModule,
-    TooltipModule
+    TooltipModule,
+    ColorPickerModule
   ],
   providers: [
     Title,

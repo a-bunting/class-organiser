@@ -67,4 +67,47 @@ router.post('/get', (req, res, next) => {
 
 });
 
+router.post('/save', (req, res, next) => {
+    const code = req.body.code;
+    const ttId = req.body.ttId;
+    const student = req.body.student;
+    const newSid = req.body.student.id === -1 ? true : false;
+
+    const query = `
+        SELECT id, locked FROM timetable WHERE dataCode = '${code}';
+        SELECT COALESCE(max(studentId), maxid + 1) AS NextAvailableId
+        FROM timetable__students CROSS JOIN
+            (SELECT MAX(id) AS maxid FROM timetable__students) x
+        WHERE ttId = ${ttId}
+    `
+    db.query(query, (e, r) => {
+        if(!e && r[0][0].id === ttId) {
+            if(r[0][0].locked === 0) {
+                const insertQuery = `
+                    INSERT INTO timetable__students
+                    (ttId, studentId, classId, forename, surname, email, data, priorities)
+                    VALUES
+                    (?) as new_data
+                    ON DUPLICATE KEY UPDATE
+                    forename = new_data.forename, surname = new_data.surname, data = new_data.data, priorities = new_data.priorities
+                `;
+
+                const nextId = +r[1][0].NextAvailableId + 1;
+                
+                db.query(insertQuery, [[r[0][0].id, newSid ? nextId : req.body.student.id, student.classId, student.name.forename, student.name.surname, student.email, JSON.stringify(student.data), JSON.stringify(student.coursePriorities)]], (e2, r2) => {
+                    if(!e2) {
+                        res.status(200).json({ error: false, message: '', data: { id: nextId } })
+                    } else {
+                        res.status(400).json({ error: true, message: 'Unable to add data.', data: { codeCorrect: true } })
+                    }
+                })
+            } else {
+                res.status(400).json({ error: true, message: 'Data for this course is locked.', data: { codeCorrect: true, locked: true } })
+            }      
+        } else {
+            res.status(400).json({ error: true, message: 'Unable to find timetable with this code.', data: { codeCorrect: false } })
+        }
+    })
+})
+
 module.exports = router;

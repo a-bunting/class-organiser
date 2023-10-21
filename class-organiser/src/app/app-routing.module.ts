@@ -11,6 +11,8 @@ import { DataCollectionComponent } from './data-collection/data-collection.compo
 
 
 const routes: Routes = [
+  { path: 'survey', component: DataCollectionComponent },
+  { path: 'survey/:code', component: DataCollectionComponent },
   { path: 'start', component: StartComponent, children: [
     { path: '', component: LoginComponent },
     { path: 'register', component: RegisterComponent }
@@ -18,9 +20,7 @@ const routes: Routes = [
   { path: '', component: TimetablesComponent, canActivate: [AuthGuard], children: [
     { path: 'timetables', component: BuildTimetableComponent },
     { path: 'students', component: StudentDataComponent }
-  ]}, 
-  { path: 'survey', component: DataCollectionComponent },
-  { path: 'survey/:code', component: DataCollectionComponent }
+  ]},
 ];
 
 @NgModule({

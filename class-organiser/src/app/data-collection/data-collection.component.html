@@ -1,5 +1,7 @@
 <div class="survey">
 
+  <app-small-loader *ngIf="thinking"></app-small-loader>
+
     <div class="survey__code" *ngIf="!code">
         <div class="survey__code--title">Enter your code here</div>
         <input type="text" [(ngModel)]="codeInput">
@@ -7,9 +9,10 @@
         <button (click)="submitCode()" [disabled]="codeInput.length !== 5">Complete Survey</button>
     </div>
 
-    <div class="survey__display" *ngIf="data">
+    <div class="survey__display" *ngIf="data && !complete">
         <div class="survey__display--title">{{ data.name }}</div>
-        <div class="survey__display--section--desc">Fill in as correcly as possible, this will help place you in the places you are meant to be!</div>
+        <div class="survey__display--section--desc">Fill in as correcly as possible, this will help place you in the courses you are meant to be!</div>
+        <div class="survey__error" *ngIf="locked">You are currently updating this form as the email <b>{{ student.email }}</b> has already completed this form.</div>
 
         <div class="survey__display--split">
             <div class="survey__display--left">
@@ -18,21 +21,25 @@
                     <div class="survey__display--desc">This is information gathered for the purpose of placing you and communicating with you appropriatele</div>
                     <!-- data here -->
                     <div class="survey__row">
-                        <div class="survey__row--text">Forename</div>
-                        <div class="survey__row--input"><input type="text" [(ngModel)]="student.name.forename"></div>
+                        <div class="survey__row--text">Forename*</div>
+                        <div class="survey__row--input" [class.survey__row--input--highlight]="highlightRequired"><input type="text" [(ngModel)]="student.name.forename" required></div>
                     </div>
                     <div class="survey__row">
-                        <div class="survey__row--text">Surname</div>
-                        <div class="survey__row--input"><input type="text" [(ngModel)]="student.name.surname"></div>
+                        <div class="survey__row--text">Surname*</div>
+                        <div class="survey__row--input" [class.survey__row--input--highlight]="highlightRequired"><input type="text" [(ngModel)]="student.name.surname" required></div>
                     </div>
-                    <div class="survey__row">
-                        <div class="survey__row--text">Email</div>
-                        <div class="survey__row--input"><input type="text" [(ngModel)]="student.email"></div>
+                    <div class="survey__row" *ngIf="!locked">
+                        <div class="survey__row--text">Email*</div>
+                        <div class="survey__row--input" [class.survey__row--input--highlight]="highlightRequired || highlightEmails"><input type="email" [(ngModel)]="student.email" required></div>
+                    </div>
+                    <div class="survey__row" *ngIf="!locked">
+                        <div class="survey__row--text">Confirm Email*</div>
+                        <div class="survey__row--input" [class.survey__row--input--highlight]="highlightRequired || highlightEmails"><input type="email" [(ngModel)]="confirmedEmail" required></div>
                     </div>
                     <div class="survey__row">
                         <div class="survey__row--text">Class</div>
                         <div class="survey__row--input">
-                            <select>
+                            <select (change)="setClass($event)">
                                 <option value="{{ class.id }}" *ngFor="let class of data.classes">{{ class.teacher }}</option>
                             </select>
                         </div>
@@ -42,6 +49,14 @@
                     <div class="survey__display--section--title">Requested Data</div>
                     <div class="survey__display--section--desc">This is extra information to help make sure you are in the correct spot, for example you may be asked your gender so you can be placed in single gender sessions where required.</div>
                     <!-- restrictions here -->
+                    <div class="survey__row" *ngFor="let restriction of data.restrictions">
+                      <div class="survey__row--text" [tooltip]="restriction.description">{{ restriction.name }}</div>
+                      <div class="survey__row--input">
+                        <select (change)="setDataValue(restriction.id, $event)">
+                          <option value="{{ option.id }}" *ngFor="let option of restriction.options">{{ option.value }}</option>
+                        </select>
+                      </div>
+                    </div>
                 </div>
             </div>
             <div class="survey__display--right">
@@ -51,13 +66,22 @@
                 <div class="survey__row" *ngFor="let course of data.courses; let i = index">
                     <div class="survey__row--text">{{ i + 1 | ordinal }} priority</div>
                     <div class="survey__row--input">
-                        <select>
-                            <option value="{{item.id}}" *ngFor="let item of data.courses">{{ item.name }}</option>
+                        <select (change)="changeCoursePriority(i+1, $event)">
+                            <option value="{{ item.id }}" *ngFor="let item of data.courses" [selected]="getStudentPriorityData(i + 1) === +item.id">{{ item.name }}</option>
                         </select>
                     </div>
                 </div>
+
+                <div class="survey__display--section--title margin__top--medium">Submit Data</div>
+                <div class="survey__display--section--desc">Make sure all of the information you have supplied is correct to give you the best opportunity of getting what you want.</div>
+                <button (click)="save()" [disabled]="!valid()">Submit</button>
+
             </div>
         </div>
+    </div>
+
+    <div class="survey__complete" *ngIf="complete">
+      <div class="survey__complete--title">Thank you, your form has been submitted.</div>
     </div>
 
 </div>

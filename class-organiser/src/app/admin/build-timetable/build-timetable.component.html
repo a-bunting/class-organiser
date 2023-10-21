@@ -91,9 +91,10 @@
             <div cdkDrag class="buildtt__block--student" [cdkDragData]="student.id" *ngFor="let student of getStudentData(block.id)" [class.buildtt__block--student--prio]="block.selectedCourse === getStudentPriority(student.id)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" [class.buildtt__block--student--locked]="isStudentLocked(student.id, block.id)" (click)="highlightStudent(student.id)" (dblclick)="lockStudent(student.id, block.id)">{{ student.name.forename }} {{ student.name.surname }}</div>
           </div>
       </div>
+    </div>
 
-
-
+    <div class="buildtt__col buildtt__col--add" (click)="addTimeBlock()">
+      <p [tooltip]="'Add new time block'">+</p>
     </div>
 
   </div>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthenticationService } from '../services/authentication.service';
 
 @Component({
   selector: 'app-start',
@@ -6,5 +7,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./start.component.scss']
 })
 export class StartComponent {
+  constructor(
+    private authService: AuthenticationService
+  ) {}
 
+  ngOnInit(): void {
+    this.authService.checkLoggedInStatus();
+  }
 }

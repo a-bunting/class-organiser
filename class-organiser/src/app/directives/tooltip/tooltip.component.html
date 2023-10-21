@@ -1,4 +1,4 @@
-<div class="tooltip fadeInTooltip" [ngStyle]="getStyles()">
+<div class="tooltip fadeInTooltip" [ngStyle]="getStyles()" *ngIf="tooltip !== ''">
   {{ tooltip }}
 
   <div class="tooltip__arrow"

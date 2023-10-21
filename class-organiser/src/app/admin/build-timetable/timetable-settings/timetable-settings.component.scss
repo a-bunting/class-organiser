@@ -3,19 +3,19 @@
   padding: .5rem 1rem;
   width: 40rem;
 
-  background-color: rgba(#67BBF0, .6);
+  background-color: rgba(white, .6);
   border-radius: 1rem;
   transition: all .2s;
 
   &:hover {
-    background-color: #67BBF0;
+    background-color: white;
   }
 
   &__title {
     font-size: 2rem;
     font-weight: bold;
     text-align: center;
-    color: white;
+    color: black;
     margin-bottom: 1rem;
 
     display: flex;
@@ -32,7 +32,7 @@
   &__text {
     color: white;
     margin-bottom: 1rem;
-    background-color:#4E82A3;
+    background-color:#009879;
     width: 100%;
     padding: 1rem 2rem;
     font-size: 1.4rem;
@@ -92,7 +92,7 @@
 
     border-radius: .5rem;
     background-color: rgba(lightgray, .5);
-    overflow: hidden;
+    // overflow: hidden;
     // width: max-content;
     transition: all .2s;
     flex: 1;
@@ -108,19 +108,46 @@
   }
 
   &__buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     flex: 1;
+    margin-bottom: 1rem;
 
-    &--row { display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; column-gap: .5rem; margin-bottom: .5rem; }
+    &--left, &--right {
+      display: flex;
+      column-gap: .2rem;
+      padding: .5rem 1rem;
+    }
+
+    &--row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: -1rem;
+    }
+    // &--row { display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; column-gap: .5rem; margin-bottom: .5rem; }
 
     &--action {
       button {
         &:first-of-type { margin-top: 0rem; }
         &:last-of-type { margin-bottom: 1rem; }
         margin: .5rem 1rem .5rem 1rem;
+      }
+    }
+
+    &--button {
+      padding: .5rem 1rem;
+      border-radius: 1rem;
+      background-color: lightblue;
+      transition: all .2s;
+      max-width: 0rem;
+      opacity: 0;
+      animation: madeWide .2s ease-in-out 0s 1 forwards;
+
+      &:hover {
+        cursor: pointer;
+        background-color: #009879;
+      }
+
+      &--disabled {
+
       }
     }
   }
@@ -177,7 +204,7 @@
       left: 50%;
       height: max-content;
       width: max-content;
-      background-color: lightcoral;
+      background-color: white;
       border: 2px solid black;
       padding: 1rem 2rem;
       transform: translate(-50%, -50%);
@@ -208,13 +235,25 @@
 
     table {
       border-collapse: collapse;
-      background-color: rgba(lightblue, .3);
+      background-color: rgba(white, .3);
       padding: 1rem 2rem;
       border-radius: 1rem;
       overflow:hidden;
 
       tr {
         margin-bottom: .5rem;
+
+        th {
+          background-color: #009879;
+          color: white;
+        }
+
+        &:nth-of-type(odd) {
+          background-color: rgba(lightgray, .5);
+        }
+        &:nth-of-type(even) {
+          background-color: rgba(lightgray, .7);
+        }
 
         th, td {
           padding: .3rem .5rem;
@@ -229,9 +268,6 @@
           &:nth-last-of-type(1) { width: 5rem; }
         }
 
-        th {
-          background-color: rgba(lightblue, .6);
-        }
       }
 
     }
@@ -247,11 +283,24 @@
       width: 100%;
       padding: .5rem 1rem;
 
+      &--colour {
+        position: relative;
+        margin-right: 2rem;
+
+        div {
+          width: 2.5rem;
+          height: 2.5rem;
+          cursor: pointer;
+          border-radius: 50%;
+          border: .1rem solid black;
+        }
+      }
+
       &--title {
         flex-basis: 10rem;
         font-weight: bold;
         font-size: 1.4rem;
-        color: white;
+        color: black;
         padding: .5rem 1rem;
 
         &--long {
@@ -274,7 +323,7 @@
       &--text {
         flex: 1;
         font-size: 1.4rem;
-        color: white;
+        color: black;
         padding: .5rem 1rem;
         text-align: right;
       }
@@ -330,4 +379,9 @@
     }
   }
 
+}
+
+@keyframes madeWide {
+  0% { max-width: 0rem; opacity: 0; }
+  100% { max-width: 10rem; opacity: 1; }
 }

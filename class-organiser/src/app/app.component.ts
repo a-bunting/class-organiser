@@ -7,15 +7,6 @@ import { AuthenticationService } from './services/authentication.service';
   styleUrls: ['./app.component.scss']
 })
 
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'class-organiser';
-
-  constructor(
-    private authService: AuthenticationService
-  ) {}
-
-  ngOnInit(): void {
-    this.authService.checkLoggedInStatus();
-  }
-
 }

@@ -14,7 +14,7 @@
     </div>
 
     <nav>
-      <a routerLink="timetables" routerLinkActive="link__active">Timetables</a>
+      <a routerLink="timetables" routerLinkActive="link__active" *ngIf="loadedTimetable">Timetable</a>
       <a routerLink="students" routerLinkActive="link__active" *ngIf="loadedTimetable">Student Data</a>
     </nav>
     <div class="controls__right">

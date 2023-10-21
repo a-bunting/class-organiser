@@ -26,6 +26,16 @@ export class TimetableSettingsComponent implements OnInit {
   showClasses: boolean = true;
   showRestrictions: boolean = true;
 
+
+
+
+  // FINISH THE COLIUR STUFF
+  public color: string = '#2889e9';
+
+
+
+
+
   constructor(
     private timetableService: TimetableService,
     private databaseService: DatabaseService
@@ -302,37 +312,37 @@ export class TimetableSettingsComponent implements OnInit {
     }
   }
 
-  addTimeBlock(): void {
+  // addTimeBlock(): void {
 
-    let newTimeBlock: SingleTimeBlock = {
-      name: 'New Time Block',
-      teachers: [],
-      order: this.loadedTimetable.schedule.blocks.length,
-      blocks: [
-      ],
-      missingStudents: [...this.loadedTimetable.students.map((a: SingleStudent) => { return a.id })]
-    }
+  //   let newTimeBlock: SingleTimeBlock = {
+  //     name: 'New Time Block',
+  //     teachers: [],
+  //     order: this.loadedTimetable.schedule.blocks.length,
+  //     blocks: [
+  //     ],
+  //     missingStudents: [...this.loadedTimetable.students.map((a: SingleStudent) => { return a.id })]
+  //   }
 
-    let highestId: number = 0;
+  //   let highestId: number = 0;
 
-    // get the highest ID already created for a block
-    for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
-      for(let o = 0 ; o < this.loadedTimetable.schedule.blocks[i].blocks.length ; o++) {
-        highestId = highestId > this.loadedTimetable.schedule.blocks[i].blocks[o].id ? highestId : this.loadedTimetable.schedule.blocks[i].blocks[o].id
-      }
-    }
+  //   // get the highest ID already created for a block
+  //   for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
+  //     for(let o = 0 ; o < this.loadedTimetable.schedule.blocks[i].blocks.length ; o++) {
+  //       highestId = highestId > this.loadedTimetable.schedule.blocks[i].blocks[o].id ? highestId : this.loadedTimetable.schedule.blocks[i].blocks[o].id
+  //     }
+  //   }
 
-    highestId += 1; // add 1 to make this the new highest
+  //   highestId += 1; // add 1 to make this the new highest
 
-    // create the blocks
-    for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
-      let newBlock: SingleBlock = { id: highestId + i, name: 'New Block', classId: this.loadedTimetable.classes[i].id, room: this.loadedTimetable.rooms[0].id, maxStudents: 25, classOnly: false, lockedStudents: [], students: [], courses: [], restrictions: [] };
-      newTimeBlock.blocks.push(newBlock);
-    }
+  //   // create the blocks
+  //   for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
+  //     let newBlock: SingleBlock = { id: highestId + i, name: 'New Block', classId: this.loadedTimetable.classes[i].id, room: this.loadedTimetable.rooms[0].id, maxStudents: 25, classOnly: false, lockedStudents: [], students: [], courses: [], restrictions: [] };
+  //     newTimeBlock.blocks.push(newBlock);
+  //   }
 
-    this.loadedTimetable.schedule.blocks.push(newTimeBlock);
-    //this.currentTimetableChange.emit(this.loadedTimetable);
-  }
+  //   this.loadedTimetable.schedule.blocks.push(newTimeBlock);
+  //   //this.currentTimetableChange.emit(this.loadedTimetable);
+  // }
 
   calculateBlocksRequired(): number {
     let total: number = 0;

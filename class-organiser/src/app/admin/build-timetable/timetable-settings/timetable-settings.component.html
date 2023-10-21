@@ -57,17 +57,33 @@
 
   <div class="ttsettings__select ttsettings__buttons" *ngIf="loadedTimetable">
     <div class="ttsettings__text">Controls</div>
+
     <div class="ttsettings__buttons--row">
+      <div class="ttsettings__buttons--left">
+        <div class="ttsettings__buttons--button">
+          <img src="../../../../assets/icons/unlocked.png" alt="Input UnLocked" [tooltip]="'Students can currently input or edit their data, click to lock this.'">
+          <!-- <img src="../../../../assets/icons/lock.png" alt="Input Locked" [tooltip]="'Students cannot current add or change data. Click to unlock this.'"> -->
+        </div>
+        <div class="ttsettings__buttons--button" (click)="googleExport()"><img src="../../../../assets/icons/download.png" alt="Export Data" [tooltip]="'Export this data'"></div>
+        <div class="ttsettings__buttons--button" (click)="print()"><img src="../../../../assets/icons/printer.png" alt="Print Timetable" [tooltip]="'Print this timetable'"></div>
+      </div>
+      <div class="ttsettings__buttons--right">
+        <div class="ttsettings__buttons--button" *ngIf="timetableSelectionData !== null" (click)="timetableSelectionScreenToggle(true)" ><img src="../../../../assets/icons/list-numbered.png" alt="Show options" [tooltip]="'Show the options given by the processor'"></div>
+        <div class="ttsettings__buttons--button" *ngIf="!studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/users.png" alt="Show filled timetable" [tooltip]="'Show the filled timetable with students'"></div>
+        <div class="ttsettings__buttons--button" *ngIf="studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/cogs.png" alt="Show timetable setup" [tooltip]="'Show the timetable setup'"></div>
+        <div class="ttsettings__buttons--button" (click)="run()"><img src="../../../../assets/icons/hammer.png" alt="Crunch the numbers and generate a timetable" [tooltip]="'Crunch the numbers and generate a timetable'"></div>
+      </div>
+    </div>
+
+    <!-- <div class="ttsettings__buttons--row">
       <button class="input__button input__length--medium" (click)="print()">Print</button>
       <button class="input__button input__length--medium" (click)="googleExport()">GoogleIt</button>
       <button class="input__button input__length--medium" (click)="studentEditMode(0)">{{ studentViewMode ? 'Edit' : 'Student' }} Mode</button>
-      <!-- <button class="input__button input__length--medium" (click)="save()" [disabled]="saveButtonDisabled()">Save</button> -->
     </div>
     <div class="ttsettings__buttons--row">
       <button class="input__button input__length--medium" (click)="run()" [disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
       <button class="input__button input__length--medium" (click)="timetableSelectionScreenToggle(true)" [disabled]="timetableSelectionData === null">Options</button>
-      <button class="input__button input__length--medium" (click)="addTimeBlock()" *ngIf="loadedTimetable">Add Timeblock</button>
-    </div>
+    </div> -->
   </div>
 
   <div class="ttsettings__select" *ngIf="loadedTimetable && studentViewMode">
@@ -104,6 +120,9 @@
 
       <div class="ttsettings__stats--bar" *ngFor="let choice of loadedTimetable.schedule.scores.prioritySatisfied; let i = index">
         <div class="ttsettings__stats--bar--title">Priority {{ i + 1 }}</div>
+        <div class="ttsettings__stats--bar--colour">
+          <div [(colorPicker)]="color" [style.background]="color"></div>
+        </div>
         <div class="ttsettings__stats--bar--bar" [ngStyle]="{'background-image': 'repeating-linear-gradient(to right, blue 0%, lightblue ' + (choice/loadedTimetable.students.length)*100 + '%, darkgray ' + (choice/loadedTimetable.students.length)*100 + '%, darkgray 100%)'}">
           <div class="ttsettings__stats--bar--percentage">{{ (choice/loadedTimetable.students.length)*100 | number:"1.2-2" }}%</div>
         </div>
