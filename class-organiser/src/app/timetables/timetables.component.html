@@ -21,9 +21,9 @@
       <div class="controls__icon" (click)="toggleUserMenu($event)"><img src="../assets/icons/user.png" alt="User Menu"></div>
       <div class="dashboard__logo">The PE Thing</div>
 
-      <div class="usermenu" id="usermenu" *ngIf="userMenuOpened">
-        <div class="usermenu__name">Hello {{ authService.forename }}</div>
-        <div class="usermenu__button" (click)="logout()">Logout</div>
+      <div class="menu" id="usermenu" *ngIf="userMenuOpened">
+        <div class="menu__name">Hello {{ authService.forename }}</div>
+        <div class="menu__button" (click)="logout()">Logout</div>
       </div>
     </div>
   </header>

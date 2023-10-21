@@ -64,7 +64,13 @@
           <img src="../../../../assets/icons/unlocked.png" alt="Input UnLocked" [tooltip]="'Students can currently input or edit their data, click to lock this.'">
           <!-- <img src="../../../../assets/icons/lock.png" alt="Input Locked" [tooltip]="'Students cannot current add or change data. Click to unlock this.'"> -->
         </div>
-        <div class="ttsettings__buttons--button" (click)="googleExport()"><img src="../../../../assets/icons/download.png" alt="Export Data" [tooltip]="'Export this data'"></div>
+        <div class="ttsettings__buttons--button" (click)="toggleDownloadMenu($event)">
+          <img src="../../../../assets/icons/download.png" alt="Export Data" [tooltip]="'Export this data'">
+
+        </div>
+        <div class="menu" id="downloadMenu" *ngIf="downloadMenuOpened">
+          <div class="menu__button" (click)="googleExport()">Export to Google Sheets</div>
+        </div>
         <div class="ttsettings__buttons--button" (click)="print()"><img src="../../../../assets/icons/printer.png" alt="Print Timetable" [tooltip]="'Print this timetable'"></div>
       </div>
       <div class="ttsettings__buttons--right">
@@ -121,7 +127,7 @@
       <div class="ttsettings__stats--bar" *ngFor="let choice of loadedTimetable.schedule.scores.prioritySatisfied; let i = index">
         <div class="ttsettings__stats--bar--title">Priority {{ i + 1 }}</div>
         <div class="ttsettings__stats--bar--colour">
-          <div [(colorPicker)]="color" [style.background]="color"></div>
+          <div [(colorPicker)]="loadedTimetable.colorPriority[i]" [cpOutputFormat]="'rgba'" [cpAlphaChannel]="'disabled'" [ngStyle]="{'background': loadedTimetable.colorPriority[i]}"></div>
         </div>
         <div class="ttsettings__stats--bar--bar" [ngStyle]="{'background-image': 'repeating-linear-gradient(to right, blue 0%, lightblue ' + (choice/loadedTimetable.students.length)*100 + '%, darkgray ' + (choice/loadedTimetable.students.length)*100 + '%, darkgray 100%)'}">
           <div class="ttsettings__stats--bar--percentage">{{ (choice/loadedTimetable.students.length)*100 | number:"1.2-2" }}%</div>

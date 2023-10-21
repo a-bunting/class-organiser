@@ -357,5 +357,10 @@ export class BuildTimetableComponent implements OnInit {
     this.loadedTimetable.schedule.blocks.push(newTimeBlock);
     //this.currentTimetableChange.emit(this.loadedTimetable);
   }
+
+  getPriorityColor(courseId: number, studentPriorities: { courseId: number, priority: number }[]): string {
+    let priority: number = studentPriorities.find((a: { courseId: number, priority: number }) => a.courseId === courseId)!.priority;
+    return this.loadedTimetable.colorPriority[priority - 1];
+  }
 }
 

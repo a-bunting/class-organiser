@@ -88,7 +88,8 @@
           </div>
 
           <div class="buildtt__block--students" *ngIf="studentView">
-            <div cdkDrag class="buildtt__block--student" [cdkDragData]="student.id" *ngFor="let student of getStudentData(block.id)" [class.buildtt__block--student--prio]="block.selectedCourse === getStudentPriority(student.id)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" [class.buildtt__block--student--locked]="isStudentLocked(student.id, block.id)" (click)="highlightStudent(student.id)" (dblclick)="lockStudent(student.id, block.id)">{{ student.name.forename }} {{ student.name.surname }}</div>
+            <!-- <div cdkDrag class="buildtt__block--student" [cdkDragData]="student.id" *ngFor="let student of getStudentData(block.id)" [class.buildtt__block--student--prio]="block.selectedCourse === getStudentPriority(student.id)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" [class.buildtt__block--student--locked]="isStudentLocked(student.id, block.id)" (click)="highlightStudent(student.id)" (dblclick)="lockStudent(student.id, block.id)">{{ student.name.forename }} {{ student.name.surname }}</div> -->
+            <div cdkDrag class="buildtt__block--student" [cdkDragData]="student.id" *ngFor="let student of getStudentData(block.id)" [ngStyle]="{'background-color': getPriorityColor(block.selectedCourse!, student.coursePriorities)}" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" [class.buildtt__block--student--locked]="isStudentLocked(student.id, block.id)" (click)="highlightStudent(student.id)" (dblclick)="lockStudent(student.id, block.id)">{{ student.name.forename }} {{ student.name.surname }}</div>
           </div>
       </div>
     </div>

@@ -90,13 +90,14 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
     const timetable = req.body.timetable;
     const deleted = req.body.deleted ?? { classes: [], courses: [], restrictions: [], students: [] };
     const scores = timetable.schedule.scores ? timetable.schedule.scores : [];
+    const colors = timetable.colorPriority ? timetable.colorPriority : [];
 
     console.log(deleted);
 
     // break up the timetable into segmenets for the database;
     const code = timetable.code === "" ? stringMethods.generateRandomString(5) : timetable.code;
-    const timetableQuery = `INSERT INTO timetable (dataCode, userId, name, rooms, blocks, scores) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores`;
-    const data = [code, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores)];
+    const timetableQuery = `INSERT INTO timetable (dataCode, userId, name, rooms, blocks, scores, colors) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores, colors = new_data.colors`;
+    const data = [code, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores), JSON.stringify(colors)];
     // console.log(timetableQuery);
 
     db.query(timetableQuery, [data], (e, r) => {

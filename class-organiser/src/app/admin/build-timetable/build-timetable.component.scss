@@ -347,9 +347,9 @@
       padding: .2rem .3rem;
       border: .1rem dashed transparent;
 
-      &--highlight { background-color: yellow !important; }
+      &--highlight { background-color: lightskyblue !important; }
       &--prio { border: .1rem solid red; background-color: white;}
-      &--locked { background-color: black; color: white; }
+      &--locked { background-color: black !important; color: white; }
 
       &:hover {
         cursor: grab;

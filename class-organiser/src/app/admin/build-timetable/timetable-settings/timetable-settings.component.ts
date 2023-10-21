@@ -26,20 +26,12 @@ export class TimetableSettingsComponent implements OnInit {
   showClasses: boolean = true;
   showRestrictions: boolean = true;
 
-
-
-
-  // FINISH THE COLIUR STUFF
-  public color: string = '#2889e9';
-
-
-
-
-
   constructor(
     private timetableService: TimetableService,
     private databaseService: DatabaseService
-  ) {}
+  ) {
+    this.boundRemoveDownloadMenu = this.removeDownloadMenu.bind(this);
+  }
 
   ngOnInit(): void {
 
@@ -421,5 +413,30 @@ export class TimetableSettingsComponent implements OnInit {
       },
       error: (e: any) => { console.log(e); }
     })
+  }
+
+
+  private boundRemoveDownloadMenu: (event: Event) => void;
+  downloadMenuOpened: boolean = false;
+
+  toggleDownloadMenu(event: Event): void {
+    if(!this.downloadMenuOpened) {
+      this.downloadMenuOpened = true;
+      window.addEventListener('click', this.boundRemoveDownloadMenu);
+      event.stopPropagation();
+    } else {
+      this.removeDownloadMenu();
+    }
+  }
+
+  removeDownloadMenu(): void {
+    window.removeEventListener('click', this.boundRemoveDownloadMenu);
+
+    let usermenuElement: HTMLElement = document.getElementById('downloadMenu')!;
+    usermenuElement.classList.add('menu__unload');
+
+    setTimeout(() => {
+      this.downloadMenuOpened = false;
+    }, 500);
   }
 }

@@ -1,7 +1,6 @@
-import { NumberSymbol } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, last, Observable } from 'rxjs';
-import { SelectionData, TimetableStatistics } from '../admin/build-timetable/build-timetable.component';
+import { BehaviorSubject } from 'rxjs';
+import { TimetableStatistics } from '../admin/build-timetable/build-timetable.component';
 import { DatabaseReturn, DatabaseService } from './database.service';
 
 export interface Timetable {
@@ -14,6 +13,7 @@ export interface Timetable {
   restrictions: Restriction[];
   students: SingleStudent[];
   rooms: { id: number, name: string }[];
+  colorPriority: string[]
 }
 
 export interface SingleCourse {
@@ -112,9 +112,35 @@ export class TimetableService {
 
   newTimetableData(blocks: Timetable): void {
     this.loaded = blocks;
+    this.generateColors();
     this.updateLocalStorage(this.loaded.id, this.loaded);
     this.loadedTimetable.next(this.loaded);
   }
+
+  generateColors(): void {
+    const courseNumber: number = this.loaded.students[0].coursePriorities.length;
+    this.loaded.colorPriority = this.getColors(courseNumber);
+  }
+
+  getColors(values: number): string[] {
+    let red: number = 0;
+    let green: number = 255;
+    let stepsize: number = (255 * 2) / values;
+    let returnString = [];
+
+    while(red < 255) {
+      red += stepsize;
+      if(red > 255) red = 255;
+      returnString.push(`rgb(${red},${green},0)`)
+    }
+    while(green > 0) {
+      green -= stepsize;
+      if(green < 0) green = 0;
+      returnString.push(`rgb(${red},${green},0)`)
+    }
+
+    return returnString;
+}
 
   updateSavedTimetable(updatedTimetable: Timetable): void {
     this.loaded = updatedTimetable;
@@ -193,7 +219,8 @@ export class TimetableService {
       rooms: [{ id: 0, name: 'New Room' }],
       restrictions: [
       ],
-      schedule: { blocks: [] }
+      schedule: { blocks: [] },
+      colorPriority: []
     }
 
     this.databaseService.saveTimetable(newTimetable).subscribe({
