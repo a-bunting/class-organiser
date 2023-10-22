@@ -85,6 +85,78 @@ router.post('/login', (req, res, next) => {
   })
 })
 
+router.post('/lockTimetable', checkAuth, (req, res, next) => {
+    const userData = userMethods.getUserDataFromToken(req);
+    const ttId = req.body.ttId;
+    const lock = req.body.lock;
+
+    const query = `UPDATE timetable SET locked = ${lock} WHERE id = ${ttId} and userId = ${userData.id}`;
+
+    db.query(query, (e, r) => {
+        if(!e) {
+            res.status(200).json({ error: false, message: '', data: { } })
+        } else {
+            res.status(400).json({ error: true, message: `Unable to alter lock`, data: {} })
+        }
+    })
+});
+
+router.post('/deleteTimetable', checkAuth, (req, res, next) => {
+    const userData = userMethods.getUserDataFromToken(req);
+    const ttId = req.body.ttId;
+
+    console.log(`deleting timetable ${ttId} for user ${userData.id}`);
+
+    const query = `
+    
+    DELETE FROM timetable__classes WHERE id IN 
+            (SELECT id FROM (
+                SELECT timetable__classes.id
+                FROM timetable__classes 
+                WHERE timetable__classes.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                AND timetable__classes.ttId = ${ttId}
+                ) AS subquery
+                );
+                
+                DELETE FROM timetable__courses WHERE id IN 
+                (SELECT id FROM (
+                SELECT timetable__courses.id
+                FROM timetable__courses 
+                WHERE timetable__courses.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                AND timetable__courses.ttId = ${ttId}
+                ) AS subquery
+        );
+
+        DELETE FROM timetable__restrictions WHERE id IN 
+        (SELECT id FROM (
+                SELECT timetable__restrictions.id
+                FROM timetable__restrictions 
+                WHERE timetable__restrictions.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                AND timetable__restrictions.ttId = ${ttId}
+                ) AS subquery
+                );
+                
+        DELETE FROM timetable__students WHERE id IN 
+            (SELECT id FROM (
+                SELECT timetable__students.id
+                FROM timetable__students 
+                WHERE timetable__students.ttId IN (SELECT timetable.id FROM timetable WHERE userId = ${userData.id})
+                AND timetable__students.ttId = ${ttId}
+                ) AS subquery
+            );
+        
+            DELETE FROM timetable WHERE id = ${ttId};
+    `;
+
+    db.query(query, (e, r) => {
+        if(!e) {
+            res.status(200).json({ error: false, message: '', data: { } })
+        } else {
+            res.status(400).json({ error: true, message: `Unable to delete`, data: {} })
+        }
+    })
+});
+
 router.post('/saveTimetable', checkAuth, (req, res, next) => {
     const userData = userMethods.getUserDataFromToken(req);
     const timetable = req.body.timetable;
@@ -92,12 +164,12 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
     const scores = timetable.schedule.scores ? timetable.schedule.scores : [];
     const colors = timetable.colorPriority ? timetable.colorPriority : [];
 
-    console.log(deleted);
+    console.log(timetable.id);
 
     // break up the timetable into segmenets for the database;
     const code = timetable.code === "" ? stringMethods.generateRandomString(5) : timetable.code;
-    const timetableQuery = `INSERT INTO timetable (dataCode, userId, name, rooms, blocks, scores, colors) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores, colors = new_data.colors`;
-    const data = [code, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores), JSON.stringify(colors)];
+    const timetableQuery = `INSERT INTO timetable (dataCode, saveCode, userId, name, rooms, blocks, scores, colors) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, saveCode = new_data.saveCode, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores, colors = new_data.colors`;
+    const data = [code, timetable.saveCode, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores), JSON.stringify(colors)];
     // console.log(timetableQuery);
 
     db.query(timetableQuery, [data], (e, r) => {
@@ -187,7 +259,7 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
             if(compoundQuery !== '') {
                 db.query(compoundQuery, argArray, (e, rAll) => {
                     if(!e) {
-                        res.status(200).json({ error: false, message: ``, data: { id: timetableId, code } })
+                        res.status(200).json({ error: false, message: ``, data: { id: timetableId, code, saveCode: timetable.saveCode } })
                     } else {
                         console.log(e);
                         res.status(400).json({ error: true, message: `Unable to save timetable components.`, data: {} })
@@ -232,14 +304,12 @@ router.post('/getTimetable', checkAuth, (req, res, next) => {
     const userData = userMethods.getUserDataFromToken(req);
     const ttId = req.body.ttId;
 
-    console.log(userData.id, ttId);
-
     const query = `
     SELECT
     timetable.id, timetable.dataCode, timetable.saveCode, timetable.locked, timetable.name, timetable.rooms, timetable.blocks, timetable.scores, timetable.colors,
-    GROUP_CONCAT(CONCAT(timetable__classes.classId, "|", timetable__classes.teacher) SEPARATOR '$') as classes,
-    GROUP_CONCAT(CONCAT(timetable__courses.courseId, "|", timetable__courses.name, "|", timetable__courses.classSize, "|", timetable__courses.required, "|", timetable__courses.times) SEPARATOR '$') as courses,
-    GROUP_CONCAT(CONCAT(timetable__restrictions.restrictionId, "|", timetable__restrictions.name, "|", timetable__restrictions.description, "|", timetable__restrictions.options, "|", timetable__restrictions.pollInclude) SEPARATOR '$') as restrictions
+    GROUP_CONCAT(DISTINCT CONCAT(timetable__classes.classId, "|", timetable__classes.teacher) SEPARATOR '$') as classes,
+    GROUP_CONCAT(DISTINCT CONCAT(timetable__courses.courseId, "|", timetable__courses.name, "|", timetable__courses.classSize, "|", timetable__courses.required, "|", timetable__courses.times) SEPARATOR '$') as courses,
+    GROUP_CONCAT(DISTINCT CONCAT(timetable__restrictions.restrictionId, "|", timetable__restrictions.name, "|", timetable__restrictions.description, "|", timetable__restrictions.options, "|", timetable__restrictions.pollInclude) SEPARATOR '$') as restrictions
     FROM
     timetable
     LEFT JOIN timetable__classes ON timetable__classes.ttId = timetable.id
@@ -259,24 +329,33 @@ router.post('/getTimetable', checkAuth, (req, res, next) => {
     db.query(query, (e, r) => {
         if(!e) {
             
-            console.log(r);
-
-            let classes = r[0][0].classes === undefined ? [] : r[0][0].classes.split('$').map(a => {
+            let classes = r[0][0].classes === null ? [] : r[0][0].classes.split('$').map(a => {
                 let data = a.split('|');
                 return { id: +data[0], teacher: data[1] }
             })
-            let courses = r[0][0].courses === undefined ? [] : r[0][0].courses.split('$').map(a => {
+            let courses = r[0][0].courses === null ? [] : r[0][0].courses.split('$').map(a => {
                 let data = a.split('|');
-                return { id: +data[0], name: data[1], classSize: +data[2], requirement: { required: data[3] === 0 ? false : true, times: +data[4] } }
+                return { id: +data[0], name: data[1], classSize: +data[2], requirement: { required: +data[3] === 0 ? false : true, times: +data[4] } }
             })
-            let restrictions = r[0][0].restrictions === undefined ? [] : r[0][0].restrictions.split('$').map(a => {
+            let restrictions = r[0][0].restrictions === null ? [] : r[0][0].restrictions.split('$').map(a => {
                 let data = a.split('|');
-                return { id: +data[0], name: data[1], description: data[3], options: JSON.parse(data[4]), poll: data[4] === 0 ? false : true }
+                return { id: +data[0], name: data[1], description: data[2], options: JSON.parse(data[3]), poll: +data[4] === 0 ? false : true }
+            })
+            let students = r[1].length === 0 ? [] : r[1].map(a => {
+                return {
+                    id: a.studentId, 
+                    classId: a.classId, 
+                    email: a.email, 
+                    name: { forename: a.forename, surname: a.surname },
+                    data: a.data,
+                    coursePriorities: a.priorities
+                }
             })
 
-            console.log(classes);
-            console.log(courses);
-            console.log(restrictions);
+            let blocks = r[0][0].blocks ?? [];
+            let scores = r[0][0].scores ?? [];
+            let colors = r[0][0].colors ?? [];
+            let rooms = r[0][0].rooms ?? [];
 
             let foundTimetable = {
                 id: r[0][0].id,
@@ -284,13 +363,13 @@ router.post('/getTimetable', checkAuth, (req, res, next) => {
                 name: r[0][0].name, 
                 code: r[0][0].dataCode,
                 classes: classes,
-                schedule: { blocks: r[0][0].blocks !== undefined ? JSON.parse(r[0][0].blocks) : [], scores: r[0][0].scores !== undefined ? JSON.parse(r[0][0].scores) : [] },
+                schedule: { blocks: blocks, scores: scores },
                 courses: courses,
                 restrictions: restrictions,
-                students: r[1],
+                students: students,
                 locked: r[0][0].locked, 
-                rooms: r[0][0].rooms !== undefined ? JSON.parse(r[0][0].rooms) : [],
-                colorPriority: r[0][0].colors === undefined ? [] : JSON.parse(r[0][0].colors)
+                rooms: rooms,
+                colorPriority: colors
             }
 
             res.status(200).json({ error: false, message: ``, data: foundTimetable })

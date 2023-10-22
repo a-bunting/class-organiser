@@ -1,10 +1,12 @@
 <div class="structure__background"></div>
+<app-small-loader *ngIf="loading"></app-small-loader>
+
 <div class="structure">
   <header>
 
     <div class="controls">
       <select (change)="loadTimetable($event)">
-        <option selected disabled>Choose your timetable</option>
+        <option [selected]="!loadedTimetable" disabled>Choose your timetable</option>
         <option value="{{ timetable.id }}" *ngFor="let timetable of timetables" [selected]="loadedTimetable ? loadedTimetable.id === timetable.id : false">{{ timetable.name }}</option>
       </select>
       <div class="controls__icon" (click)="createNewTimetable()" [tooltip]="'Create blank timetable'"><img src="../assets/icons/file-empty.png" alt="Create Blank Timetable"></div>

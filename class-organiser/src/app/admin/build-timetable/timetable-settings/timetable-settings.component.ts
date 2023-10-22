@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { DataValues, Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 import { SelectionData } from '../build-timetable.component';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-timetable-settings',
@@ -35,13 +36,6 @@ export class TimetableSettingsComponent implements OnInit {
     // subscribe to chnages in the loaded timetable.
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => { this.loadedTimetable = tt; },
-      error: (e: any) => { console.log(`Error: ${e}`)}
-    })
-    // subscribe to chnages in the all timetable.
-    this.timetableService.timetables.subscribe({
-      next: (tt: Timetable[]) => {
-        this.timetables = tt;
-      },
       error: (e: any) => { console.log(`Error: ${e}`)}
     })
 
@@ -294,38 +288,6 @@ export class TimetableSettingsComponent implements OnInit {
     }
   }
 
-  // addTimeBlock(): void {
-
-  //   let newTimeBlock: SingleTimeBlock = {
-  //     name: 'New Time Block',
-  //     teachers: [],
-  //     order: this.loadedTimetable.schedule.blocks.length,
-  //     blocks: [
-  //     ],
-  //     missingStudents: [...this.loadedTimetable.students.map((a: SingleStudent) => { return a.id })]
-  //   }
-
-  //   let highestId: number = 0;
-
-  //   // get the highest ID already created for a block
-  //   for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
-  //     for(let o = 0 ; o < this.loadedTimetable.schedule.blocks[i].blocks.length ; o++) {
-  //       highestId = highestId > this.loadedTimetable.schedule.blocks[i].blocks[o].id ? highestId : this.loadedTimetable.schedule.blocks[i].blocks[o].id
-  //     }
-  //   }
-
-  //   highestId += 1; // add 1 to make this the new highest
-
-  //   // create the blocks
-  //   for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
-  //     let newBlock: SingleBlock = { id: highestId + i, name: 'New Block', classId: this.loadedTimetable.classes[i].id, room: this.loadedTimetable.rooms[0].id, maxStudents: 25, classOnly: false, lockedStudents: [], students: [], courses: [], restrictions: [] };
-  //     newTimeBlock.blocks.push(newBlock);
-  //   }
-
-  //   this.loadedTimetable.schedule.blocks.push(newTimeBlock);
-  //   //this.currentTimetableChange.emit(this.loadedTimetable);
-  // }
-
   calculateBlocksRequired(): number {
     let total: number = 0;
 
@@ -428,5 +390,9 @@ export class TimetableSettingsComponent implements OnInit {
     setTimeout(() => {
       this.downloadMenuOpened = false;
     }, 500);
+  }
+
+  lockTimetable(value: boolean): void {
+    this.timetableService.lockTimetable(value);
   }
 }

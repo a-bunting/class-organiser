@@ -15,6 +15,7 @@ export class TimetablesComponent {
   loadedTimetable: Timetable = null!;
   user: User = null!;
   userMenuOpened: boolean = false;
+  loading: boolean = false;
 
   constructor(
     private router: Router,
@@ -22,6 +23,7 @@ export class TimetablesComponent {
     private timetableService: TimetableService,
   ) {
     this.boundRemoveUserMenu = this.removeUserMenu.bind(this);
+    this.preloadImages();
   }
 
   ngOnInit(): void {
@@ -48,9 +50,15 @@ export class TimetablesComponent {
         if(tt) {
           this.loadedTimetable = tt;
           this.router.navigate(['timetables']);
+        } else {
+          this.loadedTimetable = null!;
         }
       },
       error: (e: any) => { console.log(`Error: ${e}`)}
+    })
+
+    this.timetableService.loading.subscribe({
+      next: (value: boolean) => { this.loading = value; }
     })
 
     this.timetableService.getTimetableList();
@@ -102,5 +110,19 @@ export class TimetablesComponent {
 
   logout(): void {
     this.authService.logOut();
+  }
+
+  
+  preloadImages(): void {
+    const preload = (src: string) => {
+      let img: HTMLImageElement = new Image();
+      img.src = `../../assets/icons/${src}.png`;
+    } 
+
+    const fileNames: string[] = [
+      'bin2', 'circle-down','circle-up','cogs','copy','download','file-empty','floppy-disk','hammer','list-numbered','lock','paste','printer','unlocked','user','users'
+    ]
+
+    for(let i = 0 ; i < fileNames.length ; i++) preload(fileNames[i]);
   }
 }

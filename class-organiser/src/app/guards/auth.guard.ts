@@ -12,7 +12,6 @@ export class AuthGuard {
   ) {}
 
   canActivate() {
-    console.log(`run`);
     this.dbService.checkAuthStatus().subscribe({
       next: (result: DatabaseReturn) => {
         if(!result.error) return true;

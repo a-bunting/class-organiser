@@ -60,24 +60,24 @@
 
     <div class="ttsettings__buttons--row">
       <div class="ttsettings__buttons--left">
-        <div class="ttsettings__buttons--button">
-          <img src="../../../../assets/icons/unlocked.png" alt="Input UnLocked" [tooltip]="'Students can currently input or edit their data, click to lock this.'">
-          <!-- <img src="../../../../assets/icons/lock.png" alt="Input Locked" [tooltip]="'Students cannot current add or change data. Click to unlock this.'"> -->
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled">
+          <img src="../../../../assets/icons/unlocked.png" alt="Input UnLocked" (click)="lockTimetable(true)" *ngIf="!loadedTimetable.locked" [tooltip]="'Students can currently input or edit their data, click to lock this.'">
+          <img src="../../../../assets/icons/lock.png" alt="Input Locked" (click)="lockTimetable(false)" *ngIf="loadedTimetable.locked" [tooltip]="'Students cannot current add or change data. Click to unlock this.'">
         </div>
-        <div class="ttsettings__buttons--button" (click)="toggleDownloadMenu($event)">
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" (click)="toggleDownloadMenu($event)">
           <img src="../../../../assets/icons/download.png" alt="Export Data" [tooltip]="'Export this data'">
 
         </div>
         <div class="menu" id="downloadMenu" *ngIf="downloadMenuOpened">
           <div class="menu__button" (click)="googleExport()">Export to Google Sheets</div>
         </div>
-        <div class="ttsettings__buttons--button" (click)="print()"><img src="../../../../assets/icons/printer.png" alt="Print Timetable" [tooltip]="'Print this timetable'"></div>
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" (click)="print()"><img src="../../../../assets/icons/printer.png" alt="Print Timetable" [tooltip]="'Print this timetable'"></div>
       </div>
       <div class="ttsettings__buttons--right">
-        <div class="ttsettings__buttons--button" *ngIf="timetableSelectionData !== null" (click)="timetableSelectionScreenToggle(true)" ><img src="../../../../assets/icons/list-numbered.png" alt="Show options" [tooltip]="'Show the options given by the processor'"></div>
-        <div class="ttsettings__buttons--button" *ngIf="!studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/users.png" alt="Show filled timetable" [tooltip]="'Show the filled timetable with students'"></div>
-        <div class="ttsettings__buttons--button" *ngIf="studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/cogs.png" alt="Show timetable setup" [tooltip]="'Show the timetable setup'"></div>
-        <div class="ttsettings__buttons--button" (click)="run()"><img src="../../../../assets/icons/hammer.png" alt="Crunch the numbers and generate a timetable" [tooltip]="'Crunch the numbers and generate a timetable'"></div>
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="timetableSelectionData !== null" (click)="timetableSelectionScreenToggle(true)" ><img src="../../../../assets/icons/list-numbered.png" alt="Show options" [tooltip]="'Show the options given by the processor'"></div>
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="!studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/users.png" alt="Show filled timetable" [tooltip]="'Show the filled timetable with students'"></div>
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/cogs.png" alt="Show timetable setup" [tooltip]="'Show the timetable setup'"></div>
+        <div class="ttsettings__buttons--button" (click)="run()" [class.ttsettings__buttons--button--enabled]="loadedTimetable.students.length > 0 && loadedTimetable.schedule.blocks.length > 0" [class.ttsettings__buttons--button--disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0"><img src="../../../../assets/icons/hammer.png" alt="Crunch the numbers and generate a timetable" [tooltip]="'Crunch the numbers and generate a timetable'"></div>
       </div>
     </div>
 

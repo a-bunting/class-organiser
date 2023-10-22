@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SingleStudent, Timetable } from './timetable.service';
-import { Observable, take } from 'rxjs';
+import { BehaviorSubject, Observable, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http'
 import { environment } from 'src/environments/environment.development';
 
@@ -38,6 +38,10 @@ export class DatabaseService {
   getTimetable(ttId: number): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/getTimetable`, { ttId }).pipe(take(1));
   }
+  
+  setTimetableLock(ttId: number, lock: boolean): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/lockTimetable`, { ttId, lock }).pipe(take(1));
+  }
 
   // timetable stuff
   processTimetable(timetable: Timetable): Observable<DatabaseReturn> {
@@ -53,9 +57,13 @@ export class DatabaseService {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/saveTimetable`, { timetable, deleted }).pipe(take(1));
   }
 
-  deleteClass(ttId: number, classId: number[]): Observable<DatabaseReturn> {
-    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/deleteClass`, { ttId, classId }).pipe(take(1));
+  deleteTimetable(ttId: number): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/deleteTimetable`, { ttId }).pipe(take(1));
   }
+
+  // deleteClass(ttId: number, classId: number[]): Observable<DatabaseReturn> {
+  //   return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/deleteClass`, { ttId, classId }).pipe(take(1));
+  // }
 
   // exports
   googleSheet(): Observable<DatabaseReturn> {

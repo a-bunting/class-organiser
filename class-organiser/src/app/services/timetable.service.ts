@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, take, map } from 'rxjs';
 import { TimetableStatistics } from '../admin/build-timetable/build-timetable.component';
 import { DatabaseReturn, DatabaseService } from './database.service';
+import { Time } from '@angular/common';
 
 export interface Timetable {
   id: number;
@@ -92,16 +93,17 @@ export interface TimetableList {
 export class TimetableService {
 
   loadedTimetable: BehaviorSubject<Timetable> = new BehaviorSubject<Timetable>(null!);
-  timetables: BehaviorSubject<Timetable[]> = new BehaviorSubject<Timetable[]>(null!);
   timetableList: BehaviorSubject<TimetableList[]> = new BehaviorSubject<TimetableList[]>(null!);
-
+  loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  
   loaded: Timetable = null!;
+  timetables: Timetable[] = [];
 
   constructor(
     private databaseService: DatabaseService
   ) {
     // get the LOCAL timetables tyo start with
-    this.timetables.next(this.getFromLocalStorage());
+    this.timetables = this.getFromLocalStorage();
   }
 
   /**
@@ -118,11 +120,19 @@ export class TimetableService {
    * This is only a list of ids, savecodes and names
    */
   getTimetableList(): void {
+    this.loading.next(true);
+
     this.databaseService.getTimetablesList().subscribe({
       next: (result: DatabaseReturn) => {
         this.timetableList.next(result.data);
+
+        // now if anything exists in the local that is NOT in this list then purge it!
+        let ids: number[] = result.data.map((a: TimetableList) => { return a.id });
+        let local: Timetable[] = this.getFromLocalStorage().filter((a: Timetable) => ids.includes(a.id) );
+        window.localStorage.setItem('classOrganiser', JSON.stringify(local));
       },
-      error: (e: any) => { console.log(e)}
+      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      complete: () => { this.loading.next(false); }
     })
   }
 
@@ -132,16 +142,13 @@ export class TimetableService {
    * @returns
    */
   loadTimetableById(ttId: number): void {
-    const timetable: Timetable = this.timetables.value.find((a: Timetable) => a.id === ttId)!;
+    const timetable: Timetable = this.timetables.find((a: Timetable) => a.id === ttId)!;
     const timetableLoad: TimetableList = this.timetableList.value.find((a: TimetableList) => a.id === ttId)!;
-    console.log(timetable, timetableLoad);
 
     if(timetable && timetableLoad) {
-      console.log(`1`);
       // this is in the timetable array already, but it MIGHT have just come from a local copy
       // compare the loaded savecode to the downloaded database savecode
       if(timetable.saveCode === timetableLoad.saveCode) {
-        console.log(`2`);
         // save codes match so the local version is the BEST version to send.
         // return of(timetable);
         this.loadTimetable(timetable);
@@ -151,21 +158,45 @@ export class TimetableService {
 
     // now either the timetable doesnt exist locally or the savecodes didnt matchg
     // download from the database.
-    console.log(`3`);
+    this.loading.next(true);
+
     this.databaseService.getTimetable(ttId).subscribe({
       next: (result: DatabaseReturn) => {
-        console.log(result);
-        this.updateLocalStorage(result.data.id, result.data);
+        if(!timetable) {
+          // doesnt exist so add it
+          this.addNewToLocalStorage(result.data);
+        } else {
+          // savecodes didnt match so update it
+          this.updateLocalStorage(result.data.id, result.data);
+        }
+
         this.loadTimetable(result.data);
       },
-      error: (e: any) => { console.log(e); }
+      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      complete: () => { this.loading.next(false); }
     })
+    
+  }
 
+  errorThrown(e: any): void {
+
+  }
+
+  lockTimetable(value: boolean): void {   
+    this.loading.next(true);
+    
+    this.databaseService.setTimetableLock(this.loaded.id, value).subscribe({
+      next: (result: DatabaseReturn) => {
+        // lock it locally too
+        this.loaded.locked = value;
+      }, 
+      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      complete: () => { this.loading.next(false); }
+    })
   }
 
   // literally just called by loadTimetableById to load the tmetable into the system
   loadTimetable(timetable: Timetable): void {
-    console.log(timetable);
     this.loaded = timetable;
     this.loadedTimetable.next(timetable);
   }
@@ -194,7 +225,8 @@ export class TimetableService {
   }
 
   fullSave(updatedTimetable: Timetable): void {
-
+    const newCode: string = this.generateRandomString(10);
+    updatedTimetable.saveCode = newCode;
     this.updateLocalStorage(updatedTimetable.id, updatedTimetable);
     this.saveToDatabase(updatedTimetable);
   }
@@ -206,7 +238,7 @@ export class TimetableService {
     // set the new timetable as the loaded one.
     this.loaded = newTimetable;
     this.loadedTimetable.next(newTimetable);
-    this.timetables.next(localStorage);
+    this.timetables = localStorage;
   }
 
   saveToDatabase(newTimetable: Timetable): void {
@@ -218,6 +250,8 @@ export class TimetableService {
       students: this.deletedUnsavedStudents
     }
 
+    this.loading.next(true);
+
     this.databaseService.saveTimetable(newTimetable, deletedArray).subscribe({
       next: (result: DatabaseReturn) => {
         console.log(result);
@@ -225,25 +259,48 @@ export class TimetableService {
           this.clearTemporaryChanges();
         }
       },
-      error: (e: any) => {
-        console.log(`Error: ${e}`);
-      }
+      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      complete: () => { this.loading.next(false); }
     })
   }
 
   deleteTimetable(): void {
-    console.log(`delete`);
-    let localStorage: Timetable[] = this.getFromLocalStorage();
-    let index: number = localStorage.findIndex((a: Timetable) => a.id === this.loadedTimetable.value.id);
-    localStorage.splice(index, 1);
-    // update the local storage
-    window.localStorage.setItem('classOrganiser', JSON.stringify(localStorage));
-    this.timetables.next(localStorage);
+    let ttId: number = this.loaded.id;
+    this.loading.next(true);
+    
+    // now make sure its gone from the database, and if it is delete from local and finish up
+    this.databaseService.deleteTimetable(ttId).subscribe({
+      next: (result: DatabaseReturn) => {
+        let localStorage: Timetable[] = this.getFromLocalStorage();
+        let index: number = localStorage.findIndex((a: Timetable) => a.id === this.loadedTimetable.value.id);
+    
+        if(index === -1) {
+          localStorage.splice(index, 1);
+          // update the local storage
+          window.localStorage.setItem('classOrganiser', JSON.stringify(localStorage));
+          this.timetables = localStorage;
+        }
 
-    if(this.timetables.value.length > 0) {
-      this.loaded = this.timetables.value[0];
-      this.loadedTimetable.next(this.timetables.value[0]);
-    }
+        // update timetables list
+        let ttIndex: number = this.timetableList.value.findIndex((a: TimetableList) => a.id === ttId)!;
+
+        if(ttIndex !== -1) {
+          let ttList: TimetableList[] = [...this.timetableList.value];
+          ttList.splice(ttIndex, 1);
+          this.timetableList.next(ttList);
+        }
+
+        this.loaded = null!;
+        this.loadedTimetable.next(null!);
+      },
+      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      complete: () => { this.loading.next(false); }
+    })
+
+    // if(this.timetables.value.length > 0) {
+    //   this.loaded = this.timetables.value[0];
+    //   this.loadedTimetable.next(this.timetables.value[0]);
+    // }
   }
 
   /**
@@ -263,39 +320,81 @@ export class TimetableService {
       students: [],
       rooms: [{ id: 0, name: 'New Room' }],
       restrictions: [
-      ],
-      locked: false,
+    ],
+    locked: false,
       schedule: { blocks: [] },
       colorPriority: []
     }
 
+    this.loading.next(true);
+
     this.databaseService.saveTimetable(newTimetable).subscribe({
       next: (result: DatabaseReturn) => {
-        newTimetable.id = result.data.id;
-        newTimetable.code = result.data.code;
-        this.addNewToLocalStorage(newTimetable);
-        this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
-      },
-      error: (e: any) => { console.log(`Error: ${e}`) }
-    })
+        // newTimetable.id = result.data.id;
+        // newTimetable.code = result.data.code;
+        // newTimetable.saveCode = result.data.saveCode;
+        // newTimetable.locked = false;
 
+        // // update timetables list
+        // let timetableValues: TimetableList[] = [...this.timetableList.value, {id: newTimetable.id, name: newTimetable.name, saveCode: newTimetable.saveCode}];
+        // this.timetableList.next(timetableValues);
+
+        // this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
+        // this.loadTimetable(newTimetable);
+        // this.addNewToLocalStorage(newTimetable);
+        // this.fullSave(newTimetable);
+        this.timeTableCreated(result, newTimetable);
+      },
+      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      complete: () => { this.loading.next(false); }
+    })
+    
+  }
+
+  timeTableCreated(result: DatabaseReturn, timetable: Timetable): void {
+    timetable.id = result.data.id;
+    timetable.code = result.data.code;
+    timetable.saveCode = result.data.saveCode;
+    timetable.locked = false;
+
+    // update timetables list
+    let timetableValues: TimetableList[] = [...this.timetableList.value, {id: timetable.id, name: timetable.name, saveCode: timetable.saveCode}];
+    this.timetableList.next(timetableValues);
+
+    this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
+    this.loadTimetable(timetable);
+    this.addNewToLocalStorage(timetable);
+    this.fullSave(timetable);
   }
 
   createDuplicate(): void {
     // duplicate the loaded timetable
-    const timetable: Timetable = JSON.parse(JSON.stringify(this.loadedTimetable.value));
+    const timetable: Timetable = JSON.parse(JSON.stringify(this.loaded));
     timetable.code = ""; // force a new entry in the db
     timetable.name = timetable.name + ' (Copy)';
-
+    timetable.id = undefined!;
+    
+    this.loading.next(true);
+    
     this.databaseService.saveTimetable(timetable).subscribe({
       next: (result: DatabaseReturn) => {
-        timetable.id = result.data.id;
-        timetable.code = result.data.code;
-        timetable.locked = false;
-        this.addNewToLocalStorage(timetable);
-        this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
+        // timetable.id = result.data.id;
+        // timetable.code = result.data.code;
+        // timetable.saveCode = result.data.saveCode;
+        // timetable.locked = false;
+
+        // // update timetables list
+        // let timetableValues: TimetableList[] = [...this.timetableList.value, {id: timetable.id, name: timetable.name, saveCode: timetable.saveCode}];
+        // this.timetableList.next(timetableValues);
+
+        // this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
+        // this.addNewToLocalStorage(timetable);
+        // this.loadTimetable(timetable);
+        // this.fullSave(timetable);
+        this.timeTableCreated(result, timetable);
       },
-      error: (e: any) => { console.log(`Error: ${e}`) }
+      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      complete: () => { this.loading.next(false); }
     })
   }
 

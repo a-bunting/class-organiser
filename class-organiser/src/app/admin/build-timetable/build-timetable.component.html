@@ -4,7 +4,7 @@
 
   <div class="buildtt__settings">
     <!-- <app-timetable-settings [timetables]="timetables" [selectionData]="timetableSelectionData" (triggerAction)="actionFromSettings($event)" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings> -->
-    <app-timetable-settings (triggerAction)="actionFromSettings($event)"></app-timetable-settings>
+    <app-timetable-settings (triggerAction)="actionFromSettings($event)" *ngIf="loadedTimetable"></app-timetable-settings>
   </div>
 
   <div class="buildtt__display">
