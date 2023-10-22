@@ -228,6 +228,96 @@ router.post('/deleteClass', checkAuth, (req, res, next) => {
     })
 })
 
+router.post('/getTimetable', checkAuth, (req, res, next) => {
+    const userData = userMethods.getUserDataFromToken(req);
+    const ttId = req.body.ttId;
+
+    console.log(userData.id, ttId);
+
+    const query = `
+    SELECT
+    timetable.id, timetable.dataCode, timetable.saveCode, timetable.locked, timetable.name, timetable.rooms, timetable.blocks, timetable.scores, timetable.colors,
+    GROUP_CONCAT(CONCAT(timetable__classes.classId, "|", timetable__classes.teacher) SEPARATOR '$') as classes,
+    GROUP_CONCAT(CONCAT(timetable__courses.courseId, "|", timetable__courses.name, "|", timetable__courses.classSize, "|", timetable__courses.required, "|", timetable__courses.times) SEPARATOR '$') as courses,
+    GROUP_CONCAT(CONCAT(timetable__restrictions.restrictionId, "|", timetable__restrictions.name, "|", timetable__restrictions.description, "|", timetable__restrictions.options, "|", timetable__restrictions.pollInclude) SEPARATOR '$') as restrictions
+    FROM
+    timetable
+    LEFT JOIN timetable__classes ON timetable__classes.ttId = timetable.id
+    LEFT JOIN timetable__courses ON timetable__courses.ttId = timetable.id
+    LEFT JOIN timetable__restrictions ON timetable__restrictions.ttId = timetable.id
+    WHERE 
+    timetable.id = ${ttId} AND timetable.userId = ${userData.id}
+    GROUP BY timetable.id;
+
+    SELECT * FROM timetable__students WHERE timetable__students.ttId IN 
+	(SELECT id
+		FROM ( SELECT timetable.id FROM timetable WHERE timetable.userId = ${userData.id}) AS subquery
+	)
+    AND timetable__students.ttId = ${ttId}    
+    `
+
+    db.query(query, (e, r) => {
+        if(!e) {
+            
+            console.log(r);
+
+            let classes = r[0][0].classes === undefined ? [] : r[0][0].classes.split('$').map(a => {
+                let data = a.split('|');
+                return { id: +data[0], teacher: data[1] }
+            })
+            let courses = r[0][0].courses === undefined ? [] : r[0][0].courses.split('$').map(a => {
+                let data = a.split('|');
+                return { id: +data[0], name: data[1], classSize: +data[2], requirement: { required: data[3] === 0 ? false : true, times: +data[4] } }
+            })
+            let restrictions = r[0][0].restrictions === undefined ? [] : r[0][0].restrictions.split('$').map(a => {
+                let data = a.split('|');
+                return { id: +data[0], name: data[1], description: data[3], options: JSON.parse(data[4]), poll: data[4] === 0 ? false : true }
+            })
+
+            console.log(classes);
+            console.log(courses);
+            console.log(restrictions);
+
+            let foundTimetable = {
+                id: r[0][0].id,
+                saveCode: r[0][0].saveCode,
+                name: r[0][0].name, 
+                code: r[0][0].dataCode,
+                classes: classes,
+                schedule: { blocks: r[0][0].blocks !== undefined ? JSON.parse(r[0][0].blocks) : [], scores: r[0][0].scores !== undefined ? JSON.parse(r[0][0].scores) : [] },
+                courses: courses,
+                restrictions: restrictions,
+                students: r[1],
+                locked: r[0][0].locked, 
+                rooms: r[0][0].rooms !== undefined ? JSON.parse(r[0][0].rooms) : [],
+                colorPriority: r[0][0].colors === undefined ? [] : JSON.parse(r[0][0].colors)
+            }
+
+            res.status(200).json({ error: false, message: ``, data: foundTimetable })
+
+        } else {
+            console.log(e);
+            res.status(400).json({ error: true, message: ``, data: {} })
+        }
+    })
+})
+
+router.get('/getList', checkAuth, (req, res, next) => {
+    const userData = userMethods.getUserDataFromToken(req);
+    const query = `SELECT id, saveCode, name FROM timetable WHERE userId = ${userData.id}`;
+
+    db.query(query, (e, r) => {
+        if(!e) {
+            res.status(200).json({ error: false, message: ``, data: r })
+        } else {
+            console.log(e);
+            res.status(400).json({ error: true, message: `Unable to find users timetables`, data: {} })  
+        }
+    })
+
+})
+
+
 router.post('/emailEnquiry', (req, res, next) => {
     const email = req.body.from;
     const message = req.body.message;

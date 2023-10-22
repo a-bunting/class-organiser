@@ -31,6 +31,14 @@ export class DatabaseService {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/emailEnquiry`, { from, message }).pipe(take(1));
   }
 
+  getTimetablesList(): Observable<DatabaseReturn> {
+    return this.http.get<DatabaseReturn>(`${environment.apiUrl}/user/getList`).pipe(take(1));
+  }
+
+  getTimetable(ttId: number): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/getTimetable`, { ttId }).pipe(take(1));
+  }
+
   // timetable stuff
   processTimetable(timetable: Timetable): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/process/timetable`, { timetable }).pipe(take(1));

@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService, User } from '../services/authentication.service';
-import { DatabaseService } from '../services/database.service';
-import { Timetable, TimetableService } from '../services/timetable.service';
+import { DatabaseReturn, DatabaseService } from '../services/database.service';
+import { Timetable, TimetableList, TimetableService } from '../services/timetable.service';
 
 @Component({
   selector: 'app-timetables',
@@ -10,17 +10,16 @@ import { Timetable, TimetableService } from '../services/timetable.service';
   styleUrls: ['./timetables.component.scss']
 })
 export class TimetablesComponent {
-  timetables: Timetable[] = [];
+
+  timetables: TimetableList[] = [];
   loadedTimetable: Timetable = null!;
   user: User = null!;
   userMenuOpened: boolean = false;
 
   constructor(
     private router: Router,
-    private activeRoute: ActivatedRoute,
     public authService: AuthenticationService,
     private timetableService: TimetableService,
-    private databaseService: DatabaseService
   ) {
     this.boundRemoveUserMenu = this.removeUserMenu.bind(this);
   }
@@ -36,13 +35,13 @@ export class TimetablesComponent {
       error: (e: any) => { console.log(`Error with your login: ${e}`)}
     })
 
-    // subscribe to chnages in the all timetable.
-    this.timetableService.timetables.subscribe({
-      next: (tt: Timetable[]) => {
-        this.timetables = tt;
+    this.timetableService.timetableList.subscribe({
+      next: (result: TimetableList[]) => {
+        this.timetables = result;
       },
-      error: (e: any) => { console.log(`Error: ${e}`)}
+      error: (e: any) => { console.log(`Error getting timetables list: ${e}`)}
     })
+
     // subscribe to chnages in the loaded timetable.
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => {
@@ -53,16 +52,18 @@ export class TimetablesComponent {
       },
       error: (e: any) => { console.log(`Error: ${e}`)}
     })
+
+    this.timetableService.getTimetableList();
+  }
+
+  loadTimetable(input: any): void {
+    this.timetableService.loadTimetableById(+input.target.value);
   }
 
   saveTimetable(): void {
     this.timetableService.fullSave(this.loadedTimetable);
   }
 
-  loadTimetable(input: any): void {
-    console.log(`loading ${+input.target.value}`);
-    this.timetableService.loadTimetable(+input.target.value);
-  }
 
   createNewTimetable(): void {
     this.timetableService.createBlank();

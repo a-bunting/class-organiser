@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of, take, map } from 'rxjs';
 import { TimetableStatistics } from '../admin/build-timetable/build-timetable.component';
 import { DatabaseReturn, DatabaseService } from './database.service';
 
 export interface Timetable {
   id: number;
+  saveCode: string,
   name: string;
   code: string;
   classes: SingleClass[];
@@ -12,6 +13,7 @@ export interface Timetable {
   courses: SingleCourse[];
   restrictions: Restriction[];
   students: SingleStudent[];
+  locked: boolean;
   rooms: { id: number, name: string }[];
   colorPriority: string[]
 }
@@ -80,6 +82,10 @@ export interface DataValues {
   critical?: boolean; // if true, this MUST be met for you to be placed
 }
 
+export interface TimetableList {
+  id: number, name: string, saveCode: string
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -87,25 +93,79 @@ export class TimetableService {
 
   loadedTimetable: BehaviorSubject<Timetable> = new BehaviorSubject<Timetable>(null!);
   timetables: BehaviorSubject<Timetable[]> = new BehaviorSubject<Timetable[]>(null!);
+  timetableList: BehaviorSubject<TimetableList[]> = new BehaviorSubject<TimetableList[]>(null!);
 
   loaded: Timetable = null!;
 
   constructor(
     private databaseService: DatabaseService
   ) {
-    this.timetables.next(this.getTimetables());
+    // get the LOCAL timetables tyo start with
+    this.timetables.next(this.getFromLocalStorage());
   }
 
-  getTimetables(): Timetable[] {
-    return this.getFromLocalStorage();
+  /**
+   * Populate the timetables array with either an empty array or the contents of local.
+   * @returns
+   */
+  getFromLocalStorage(): Timetable[] {
+    let fromLocal: Timetable[] = JSON.parse(window.localStorage.getItem('classOrganiser')!);
+    return fromLocal ?? [];
   }
 
-  getTimetableById(ttId: number): Timetable {
-    return this.timetables.value.find((a: Timetable) => a.id === ttId)!;
+  /**
+   * Step 1 in loading, get a list from the database of the timetables attributed to this person
+   * This is only a list of ids, savecodes and names
+   */
+  getTimetableList(): void {
+    this.databaseService.getTimetablesList().subscribe({
+      next: (result: DatabaseReturn) => {
+        this.timetableList.next(result.data);
+      },
+      error: (e: any) => { console.log(e)}
+    })
   }
 
-  loadTimetable(ttId: number): void {
-    const timetable: Timetable = this.getTimetableById(ttId);
+  /**
+   * Step 2 is when loading a timetable...
+   * @param ttId
+   * @returns
+   */
+  loadTimetableById(ttId: number): void {
+    const timetable: Timetable = this.timetables.value.find((a: Timetable) => a.id === ttId)!;
+    const timetableLoad: TimetableList = this.timetableList.value.find((a: TimetableList) => a.id === ttId)!;
+    console.log(timetable, timetableLoad);
+
+    if(timetable && timetableLoad) {
+      console.log(`1`);
+      // this is in the timetable array already, but it MIGHT have just come from a local copy
+      // compare the loaded savecode to the downloaded database savecode
+      if(timetable.saveCode === timetableLoad.saveCode) {
+        console.log(`2`);
+        // save codes match so the local version is the BEST version to send.
+        // return of(timetable);
+        this.loadTimetable(timetable);
+        return;
+      }
+    }
+
+    // now either the timetable doesnt exist locally or the savecodes didnt matchg
+    // download from the database.
+    console.log(`3`);
+    this.databaseService.getTimetable(ttId).subscribe({
+      next: (result: DatabaseReturn) => {
+        console.log(result);
+        this.updateLocalStorage(result.data.id, result.data);
+        this.loadTimetable(result.data);
+      },
+      error: (e: any) => { console.log(e); }
+    })
+
+  }
+
+  // literally just called by loadTimetableById to load the tmetable into the system
+  loadTimetable(timetable: Timetable): void {
+    console.log(timetable);
     this.loaded = timetable;
     this.loadedTimetable.next(timetable);
   }
@@ -116,31 +176,6 @@ export class TimetableService {
     this.updateLocalStorage(this.loaded.id, this.loaded);
     this.loadedTimetable.next(this.loaded);
   }
-
-  generateColors(): void {
-    const courseNumber: number = this.loaded.students[0].coursePriorities.length;
-    this.loaded.colorPriority = this.getColors(courseNumber);
-  }
-
-  getColors(values: number): string[] {
-    let red: number = 0;
-    let green: number = 255;
-    let stepsize: number = (255 * 2) / values;
-    let returnString = [];
-
-    while(red < 255) {
-      red += stepsize;
-      if(red > 255) red = 255;
-      returnString.push(`rgb(${red},${green},0)`)
-    }
-    while(green > 0) {
-      green -= stepsize;
-      if(green < 0) green = 0;
-      returnString.push(`rgb(${red},${green},0)`)
-    }
-
-    return returnString;
-}
 
   updateSavedTimetable(updatedTimetable: Timetable): void {
     this.loaded = updatedTimetable;
@@ -196,11 +231,20 @@ export class TimetableService {
     })
   }
 
-  getFromLocalStorage(): Timetable[] {
-    let fromLocal: Timetable[] = JSON.parse(window.localStorage.getItem('classOrganiser')!);
-    return fromLocal ?? [];
-  }
+  deleteTimetable(): void {
+    console.log(`delete`);
+    let localStorage: Timetable[] = this.getFromLocalStorage();
+    let index: number = localStorage.findIndex((a: Timetable) => a.id === this.loadedTimetable.value.id);
+    localStorage.splice(index, 1);
+    // update the local storage
+    window.localStorage.setItem('classOrganiser', JSON.stringify(localStorage));
+    this.timetables.next(localStorage);
 
+    if(this.timetables.value.length > 0) {
+      this.loaded = this.timetables.value[0];
+      this.loadedTimetable.next(this.timetables.value[0]);
+    }
+  }
 
   /**
    * Creation and Deletion of timetables
@@ -212,6 +256,7 @@ export class TimetableService {
     let newTimetable: Timetable = {
       id: undefined!,
       code: "",
+      saveCode: this.generateRandomString(10),
       name: "New Timetable",
       classes: [],
       courses: [],
@@ -219,6 +264,7 @@ export class TimetableService {
       rooms: [{ id: 0, name: 'New Room' }],
       restrictions: [
       ],
+      locked: false,
       schedule: { blocks: [] },
       colorPriority: []
     }
@@ -245,6 +291,7 @@ export class TimetableService {
       next: (result: DatabaseReturn) => {
         timetable.id = result.data.id;
         timetable.code = result.data.code;
+        timetable.locked = false;
         this.addNewToLocalStorage(timetable);
         this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
       },
@@ -284,19 +331,42 @@ export class TimetableService {
     this.deletedUnsavedStudents.push(studentId);
   }
 
-  deleteTimetable(): void {
-    console.log(`delete`);
-    let localStorage: Timetable[] = this.getFromLocalStorage();
-    let index: number = localStorage.findIndex((a: Timetable) => a.id === this.loadedTimetable.value.id);
-    localStorage.splice(index, 1);
-    // update the local storage
-    window.localStorage.setItem('classOrganiser', JSON.stringify(localStorage));
-    this.timetables.next(localStorage);
+  // colours
 
-    if(this.timetables.value.length > 0) {
-      this.loaded = this.timetables.value[0];
-      this.loadedTimetable.next(this.timetables.value[0]);
-    }
+  generateColors(): void {
+    const courseNumber: number = this.loaded.students[0].coursePriorities.length;
+    this.loaded.colorPriority = this.getColors(courseNumber);
   }
+
+  getColors(values: number): string[] {
+    let red: number = 0;
+    let green: number = 255;
+    let stepsize: number = (255 * 2) / values;
+    let returnString = [];
+
+    while(red < 255) {
+      red += stepsize;
+      if(red > 255) red = 255;
+      returnString.push(`rgb(${red},${green},0)`)
+    }
+    while(green > 0) {
+      green -= stepsize;
+      if(green < 0) green = 0;
+      returnString.push(`rgb(${red},${green},0)`)
+    }
+
+    return returnString;
+  }
+
+  generateRandomString(characterCount: number = 10, randomWords: string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'): string {
+    let newCode: string = '';
+    // generate an id
+    for(let i = 0 ; i < characterCount ; i++) {
+        let randomNumber = Math.floor(Math.random() * randomWords.length)
+        newCode += randomWords.charAt(randomNumber);
+    }
+    return newCode;
+  }
+
 
 }

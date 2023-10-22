@@ -10,12 +10,9 @@ import { SelectionData } from '../build-timetable.component';
 })
 export class TimetableSettingsComponent implements OnInit {
 
-  // @Input() timetables: Timetable[] = [];
   timetables: Timetable[] = [];
   selectionData: SelectionData = null!;
 
-  // @Output() selectedTimetable: EventEmitter<Timetable> = new EventEmitter<Timetable>;
-  // @Output() currentTimetableChange: EventEmitter<Timetable> = new EventEmitter<Timetable>;
   @Output() triggerAction: EventEmitter<{ action: number, value: boolean }> = new EventEmitter<{ action: number, value: boolean }>;
 
   savedTimetable: Timetable = null!;
@@ -100,13 +97,6 @@ export class TimetableSettingsComponent implements OnInit {
 
   timetableSelectionScreenToggle(status: boolean): void {
     this.timetableSelectionScreen = status;
-  }
-
-
-
-  selectTimetable(input: any, val?: number): void {
-      let value: number = input ? +input.target.value : val ? val : 0;
-      this.timetableService.loadTimetable(value);
   }
 
   changeRequired(courseId: number, input: any) : void {
