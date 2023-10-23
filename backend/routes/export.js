@@ -7,11 +7,15 @@ const userMethods = require('../methods/user');
 const googleExport = require('../exports/google-spreadsheet');
 
 router.post('/gSheet', checkAuth, (req, res, next) => {
-
-    const newSpreadsheet = googleExport.createNewSpreadsheet();
-
-    res.status(200).json({ error: false, message: '', data: newSpreadsheet })
-
+    googleSheetExport(res, req);    
 });
+
+async function googleSheetExport(res, req) {
+    // run the processor then return the results.
+    const timetable = req.body.timetable;
+    const newSpreadsheet = await googleExport.createNewSpreadsheet(timetable);
+    res.status(200).json({ error: false, message: '', data: newSpreadsheet })
+}
+
 
 module.exports = router;

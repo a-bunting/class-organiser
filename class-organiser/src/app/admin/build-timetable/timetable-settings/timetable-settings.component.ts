@@ -135,6 +135,18 @@ export class TimetableSettingsComponent implements OnInit {
     //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
+  editingRestriction: Restriction = null!;
+
+  setEditRestriction(restrictionId: number): void {
+    // check if we are closing
+    if(this.editingRestriction) {
+      if(this.editingRestriction.id === restrictionId) { this.editingRestriction = null!; return; }
+    }
+    // otherwise new one beign added
+    let restriction: Restriction = this.loadedTimetable.restrictions.find((a: Restriction) => a.id === restrictionId)!;
+    if(restriction) this.editingRestriction = restriction;
+  }
+
   /*
   / deprecated?
   */
@@ -153,6 +165,14 @@ export class TimetableSettingsComponent implements OnInit {
     let restriction: Restriction = this.loadedTimetable.restrictions.find((a: Restriction) => +a.id === restrictionId)!;
     let value: string = (document.getElementById(`restrictionOption${restrictionId}`)! as HTMLInputElement).value;
     restriction.options.push({ id: restriction.options.length, value });
+  }
+
+  deleteOption(optionId: number): void {
+    let optionIndex: number = this.editingRestriction.options.findIndex(((a: { id: number, value: string }) => a.id === optionId ))!;
+
+    if(optionIndex !== -1) {
+      this.editingRestriction.options.splice(optionIndex, 1);
+    }
   }
 
   addCourse(): void {
@@ -357,15 +377,30 @@ export class TimetableSettingsComponent implements OnInit {
    * Experimental
    */
 
+  downloadLink: string = '';
+  downloadMessage: string = '';
+  processingDownloadLink: boolean = false;
+
   googleExport(): void {
 
-    this.databaseService.googleSheet().subscribe({
+    this.processingDownloadLink = true;
+    this.downloadMessage = `Working on it, this might take a minute...`;
+
+    this.databaseService.googleSheet(this.loadedTimetable).subscribe({
       next: (result: DatabaseReturn) => {
-        console.log(result);
+        this.processingDownloadLink = false;
+        this.downloadLink = (result.data as string).slice(0, -4) + "copy";
+        this.downloadMessage = '';
       },
-      error: (e: any) => { console.log(e); }
+      error: (e: any) => {
+        console.log(e);
+        this.processingDownloadLink = false;
+        this.downloadMessage = `I failed to make the sheet, try again soon or report it to me at <a href="mailto:alex.bunting@gmail.com">alex.bunting@gmail.com</a>.`;
+      }
     })
   }
+
+  closeDownloadLink(): void { this.downloadLink = ''; this.downloadMessage = ''; }
 
 
   private boundRemoveDownloadMenu: (event: Event) => void;
@@ -394,5 +429,9 @@ export class TimetableSettingsComponent implements OnInit {
 
   lockTimetable(value: boolean): void {
     this.timetableService.lockTimetable(value);
+  }
+
+  copyLink(): void {
+    navigator.clipboard.writeText(`https://pe.sweeto.co.uk/survey/${this.loadedTimetable.code}`)
   }
 }

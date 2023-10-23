@@ -112,15 +112,15 @@ export class TimetablesComponent {
     this.authService.logOut();
   }
 
-  
+
   preloadImages(): void {
     const preload = (src: string) => {
       let img: HTMLImageElement = new Image();
       img.src = `../../assets/icons/${src}.png`;
-    } 
+    }
 
     const fileNames: string[] = [
-      'bin2', 'circle-down','circle-up','cogs','copy','download','file-empty','floppy-disk','hammer','list-numbered','lock','paste','printer','unlocked','user','users'
+      'bin2', 'circle-down','link','circle-up','cogs','copy','download','file-empty','floppy-disk','hammer','list-numbered','lock','paste','printer','unlocked','user','users'
     ]
 
     for(let i = 0 ; i < fileNames.length ; i++) preload(fileNames[i]);

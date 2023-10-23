@@ -38,7 +38,7 @@ export class DatabaseService {
   getTimetable(ttId: number): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/getTimetable`, { ttId }).pipe(take(1));
   }
-  
+
   setTimetableLock(ttId: number, lock: boolean): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/lockTimetable`, { ttId, lock }).pipe(take(1));
   }
@@ -66,8 +66,8 @@ export class DatabaseService {
   // }
 
   // exports
-  googleSheet(): Observable<DatabaseReturn> {
-    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/export/gSheet`, {}).pipe(take(1));
+  googleSheet(timetable: Timetable): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/export/gSheet`, { timetable }).pipe(take(1));
   }
 
 

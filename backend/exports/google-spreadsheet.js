@@ -1,8 +1,7 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
-// const creds = require('../class-organiser-google.json');
 
-async function createNewSpreadsheet() {
+async function createNewSpreadsheet(timetable) {
 
     const SCOPES = [
         'https://www.googleapis.com/auth/spreadsheets',
@@ -15,26 +14,42 @@ async function createNewSpreadsheet() {
         scopes: SCOPES,
       });
 
-    //   const jwt = new JWT({
-    //     email: creds.client_email,
-    //     key: creds.private_key,
-    //     scopes: SCOPES,
-    //   });
-        
-    const newSpreadsheet = await GoogleSpreadsheet.createNewSpreadsheetDocument(jwt, { title: 'This is new!'});
+    const newSpreadsheet = await GoogleSpreadsheet.createNewSpreadsheetDocument(jwt, { title: timetable.name });
     newSpreadsheet.setPublicAccessLevel('reader');
-    let firstSheet = newSpreadsheet.addSheet({ title: 'one' });
+    
+    let sheets = [];
 
-    await (await firstSheet).loadCells('A1:D5');
-    const cellA1 = (await firstSheet).getCell(0, 0);
+    // create the sheets
+    for(let i = 0 ; i < timetable.schedule.blocks.length ; i++) {
+        const blockName = timetable.schedule.blocks[i].name;
 
-    cellA1.value = 1359;
+        for(let o = 0 ; o < timetable.schedule.blocks[i].blocks.length ; o++) {
+            const block = timetable.schedule.blocks[i].blocks[o];
+            let course = timetable.courses.find(a => a.id === block.selectedCourse);
+            let teacher = timetable.classes.find(a => a.id === block.classId);
+            let room = timetable.rooms.find(a => a.id === block.room);
 
-    await (await firstSheet).saveUpdatedCells();
+            if(course && block && teacher && room) {
+                let newSheet = await newSpreadsheet.addSheet({ title: `${blockName} ${course.name} - ${room.name} (${teacher.teacher})` });
+                
+                await (await newSheet).loadCells();
 
-    console.log(newSpreadsheet._spreadsheetUrl);
+                for(let p = 0 ; p < block.students.length ; p++) {
+                    let cell = (await newSheet).getCell(p, 0);
+                    let student = timetable.students.find(a => a.id === block.students[p]);
+                    cell.value = `${student.name.forename} ${student.name.surname}`;
+                }
+                
+                await  (await newSheet).saveUpdatedCells();
+                sheets.push(newSheet);
+            }
+        }
+    }
 
-    return newSpreadsheet;
+    // delete number 1
+    newSpreadsheet.deleteSheet(0);
+
+    return newSpreadsheet._spreadsheetUrl;
 }
 
 module.exports.createNewSpreadsheet = createNewSpreadsheet;

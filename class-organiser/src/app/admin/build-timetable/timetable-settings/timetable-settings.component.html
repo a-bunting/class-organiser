@@ -37,23 +37,10 @@
 
 <div class="ttsettings">
 
-
   <div class="ttsettings__title">
     <p>Settings</p>
     <input type="text" class="input__text input__length--long" *ngIf="loadedTimetable" [(ngModel)]="loadedTimetable.name">
   </div>
-
-  <!-- <div class="ttsettings__flex">
-
-    <div class="ttsettings__flex--col">
-
-      <div class="ttsettings__select" *ngIf="loadedTimetable">
-        <div class="ttsettings__text">Rename Timetable</div>
-        <div class="ttsettings__timetable">
-        </div>
-      </div>
-    </div>
-  </div> -->
 
   <div class="ttsettings__select ttsettings__buttons" *ngIf="loadedTimetable">
     <div class="ttsettings__text">Controls</div>
@@ -64,9 +51,11 @@
           <img src="../../../../assets/icons/unlocked.png" alt="Input UnLocked" (click)="lockTimetable(true)" *ngIf="!loadedTimetable.locked" [tooltip]="'Students can currently input or edit their data, click to lock this.'">
           <img src="../../../../assets/icons/lock.png" alt="Input Locked" (click)="lockTimetable(false)" *ngIf="loadedTimetable.locked" [tooltip]="'Students cannot current add or change data. Click to unlock this.'">
         </div>
-        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" (click)="toggleDownloadMenu($event)">
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="!loadedTimetable.locked"  (click)="copyLink()">
+          <img src="../../../../assets/icons/link.png" alt="Copy Survey Link" [tooltip]="'Copy survey link'">
+        </div>
+        <div class="ttsettings__buttons--button" (click)="toggleDownloadMenu($event)" [class.ttsettings__buttons--button--enabled]="!processingDownloadLink" [class.ttsettings__buttons--button--disabled]="processingDownloadLink" >
           <img src="../../../../assets/icons/download.png" alt="Export Data" [tooltip]="'Export this data'">
-
         </div>
         <div class="menu" id="downloadMenu" *ngIf="downloadMenuOpened">
           <div class="menu__button" (click)="googleExport()">Export to Google Sheets</div>
@@ -75,21 +64,21 @@
       </div>
       <div class="ttsettings__buttons--right">
         <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="timetableSelectionData !== null" (click)="timetableSelectionScreenToggle(true)" ><img src="../../../../assets/icons/list-numbered.png" alt="Show options" [tooltip]="'Show the options given by the processor'"></div>
-        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="!studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/users.png" alt="Show filled timetable" [tooltip]="'Show the filled timetable with students'"></div>
-        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="studentViewMode" (click)="studentEditMode(0)"><img src="../../../../assets/icons/cogs.png" alt="Show timetable setup" [tooltip]="'Show the timetable setup'"></div>
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" (click)="studentEditMode(0)">
+          <img src="../../../../assets/icons/users.png" alt="Show filled timetable" *ngIf="!studentViewMode" [tooltip]="'Show the filled timetable with students'">
+          <img src="../../../../assets/icons/cogs.png" alt="Show timetable setup" *ngIf="studentViewMode" [tooltip]="'Show the timetable setup'">
+        </div>
         <div class="ttsettings__buttons--button" (click)="run()" [class.ttsettings__buttons--button--enabled]="loadedTimetable.students.length > 0 && loadedTimetable.schedule.blocks.length > 0" [class.ttsettings__buttons--button--disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0"><img src="../../../../assets/icons/hammer.png" alt="Crunch the numbers and generate a timetable" [tooltip]="'Crunch the numbers and generate a timetable'"></div>
       </div>
     </div>
+  </div>
 
-    <!-- <div class="ttsettings__buttons--row">
-      <button class="input__button input__length--medium" (click)="print()">Print</button>
-      <button class="input__button input__length--medium" (click)="googleExport()">GoogleIt</button>
-      <button class="input__button input__length--medium" (click)="studentEditMode(0)">{{ studentViewMode ? 'Edit' : 'Student' }} Mode</button>
+  <div class="ttsettings__downloadLink" *ngIf="processingDownloadLink || downloadLink">
+    <div class="ttsettings__downloadLink--link">
+      <a href="{{ downloadLink }}" target="_blank" *ngIf="downloadLink">Click here to make a copy of your sheet</a>
+      <p *ngIf="downloadMessage && !downloadLink">{{ downloadMessage }}</p>
     </div>
-    <div class="ttsettings__buttons--row">
-      <button class="input__button input__length--medium" (click)="run()" [disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0">{{ !selectionData ? 'Process' : 'Reprocess' }}</button>
-      <button class="input__button input__length--medium" (click)="timetableSelectionScreenToggle(true)" [disabled]="timetableSelectionData === null">Options</button>
-    </div> -->
+    <div class="ttsettings__downloadLink--close" (click)="closeDownloadLink()">X</div>
   </div>
 
   <div class="ttsettings__select" *ngIf="loadedTimetable && studentViewMode">
@@ -150,7 +139,7 @@
         <th>Name</th>
         <th [tooltip]="'Is this a required coure?'">Required</th>
         <th [tooltip]="'How many times the students is required to take this course'">Times</th>
-        <th [tooltip]="'How many students can be placed in one block (can be overridden in the block view)'">Max Class Size</th>
+        <th [tooltip]="'How many students can be placed in one block (can be overridden in the block view)'">Max Size</th>
         <th [tooltip]="'Delete this course'">Delete</th>
       </tr>
       <tr *ngFor="let course of loadedTimetable.courses">
@@ -176,38 +165,62 @@
       </div>
     </div>
 
-    <table class="ttsettings__courses" *ngIf="showRestrictions">
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Poll</th>
-        <th>Delete</th>
-      </tr>
-      <tbody *ngFor="let restriction of loadedTimetable.restrictions">
-        <tr>
-          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="restriction.name" placeholder="Data Name" (blur)="editRestriction(true)" (keyup)="editRestriction(false, $event)"></td>
-          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="restriction.description"></td>
-          <td><input type="checkbox" [(ngModel)]="restriction.poll"></td>
-          <td><button class="input__button input__length--veryshort" (click)="deleteRestriction(restriction.id)">X</button></td>
-        </tr>
-        <tr>
-          <td colspan="1">Add Option</td>
-          <td colspan="1">
-            <input type="text" class="input___text input__length--medium" id="restrictionOption{{restriction.id}}">
-          </td>
-          <td>
-            <select>
-              <option *ngFor="let option of restriction.options">{{ option.value }}</option>
-            </select>
-          </td>
-          <td colspan="1">
-            <button class="input__button input__length--veryshort" (click)="addOption(restriction.id)">1</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="ttsettings__restrictions" *ngIf="showRestrictions">
+      <div *ngFor="let restriction of loadedTimetable.restrictions">
 
-    <div class="ttsettings__courses--buttons" *ngIf="showRestrictions">
+        <div class="ttsettings__restrictions--restriction">
+          <div class="ttsettings__restrictions--restriction--name">{{ restriction.name }}</div>
+          <div class="ttsettings__restrictions--restriction--buttons">
+            <button class="input__button input__length--short" (click)="setEditRestriction(restriction.id)">{{ editingRestriction && editingRestriction.id === restriction.id ? 'Close' : 'Edit' }}</button>
+            <button class="input__button input__length--veryshort" (click)="deleteRestriction(restriction.id)">X</button>
+          </div>
+        </div>
+
+        <div class="ttsettings__restrictions--edit" *ngIf="editingRestriction && editingRestriction.id === restriction.id">
+          <div class="ttsettings__restrictions--row">
+            <div class="ttsettings__restrictions--row--text">Name</div>
+            <div class="ttsettings__restrictions--row--input">
+              <input type="text" class="input__text input__length--full" [(ngModel)]="editingRestriction.name">
+            </div>
+          </div>
+
+          <div class="ttsettings__restrictions--row">
+            <div class="ttsettings__restrictions--row--text">Description</div>
+            <div class="ttsettings__restrictions--row--input">
+              <textarea class="input__textarea input__length--full" [(ngModel)]="editingRestriction.description"></textarea>
+            </div>
+          </div>
+
+          <div class="ttsettings__restrictions--row">
+            <div class="ttsettings__restrictions--row--text">Poll Students</div>
+            <div class="ttsettings__restrictions--row--input" style="justify-content: flex-start;">
+              <input type="checkbox" [(ngModel)]="editingRestriction.poll">
+            </div>
+          </div>
+
+
+          <div class="ttsettings__restrictions--row">
+            <div class="ttsettings__restrictions--row--text">Add Options</div>
+            <div class="ttsettings__restrictions--row--input">
+              <input type="text" class="input__text input__length--medium"  id="restrictionOption{{restriction.id}}">
+              <button class="input__button input__length--medium" (click)="addOption(restriction.id)">Add</button>
+            </div>
+          </div>
+
+          <div class="ttsettings__restrictions--row" style="justify-content: flex-start;">
+            <div class="ttsettings__restrictions--option" *ngFor="let option of editingRestriction.options">
+              <div class="ttsettings__restrictions--option--value">{{ option.value }}</div>
+              <div class="ttsettings__restrictions--option--delete" (click)="deleteOption(option.id)">X</div>
+            </div>
+          </div>
+
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="ttsettings__restrictions--buttons" *ngIf="showRestrictions">
       <button class="input__button input__length--full" (click)="addRestriction()">Add Data</button>
     </div>
   </div>
