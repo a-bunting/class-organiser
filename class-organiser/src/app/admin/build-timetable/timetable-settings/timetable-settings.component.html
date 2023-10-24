@@ -71,6 +71,14 @@
         <div class="ttsettings__buttons--button" (click)="run()" [class.ttsettings__buttons--button--enabled]="loadedTimetable.students.length > 0 && loadedTimetable.schedule.blocks.length > 0" [class.ttsettings__buttons--button--disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0"><img src="../../../../assets/icons/hammer.png" alt="Crunch the numbers and generate a timetable" [tooltip]="'Crunch the numbers and generate a timetable'"></div>
       </div>
     </div>
+    <hr>
+    <div class="ttsettings__buttons--row">
+      <select (change)="changeSortingMethod($event)">
+        <option value="0" [selected]="loadedTimetable.sortMethod === 0">Course Priority</option>
+        <option value="1" [selected]="loadedTimetable.sortMethod === 1">Student Priority</option>
+        <option value="2" [selected]="loadedTimetable.sortMethod === 2">Both Course and Student Priority</option>
+      </select>
+    </div>
   </div>
 
   <div class="ttsettings__downloadLink" *ngIf="processingDownloadLink || downloadLink">
@@ -145,7 +153,7 @@
       <tr *ngFor="let course of loadedTimetable.courses">
         <td><input type="text" class="input__text input__length--medium" [(ngModel)]="course.name" placeholder="Name of Course" (blur)="editCourse(true)" (keyup)="editCourse(false, $event)"></td>
         <td><input type="checkbox" [(ngModel)]="course.requirement.required" (change)="changeRequired(course.id, $event)"></td>
-        <td><input type="text" class="input__text input__length--short" [(ngModel)]="course.requirement.times"></td>
+        <td><input type="text" class="input__text input__length--short" (change)="changeCourseTimes(course.id, $event)" value="{{ course.requirement.times }}"></td>
         <td><input type="text" class="input__text input__length--short" [(ngModel)]="course.classSize"></td>
         <td><button class="input__button input__length--veryshort" (click)="deleteCourse(course.id)">X</button></td>
       </tr>
@@ -185,14 +193,14 @@
           </div>
 
           <div class="ttsettings__restrictions--row">
-            <div class="ttsettings__restrictions--row--text">Description</div>
+            <div class="ttsettings__restrictions--row--text" [tooltip]="'A description accompanying this data point.'">Description</div>
             <div class="ttsettings__restrictions--row--input">
               <textarea class="input__textarea input__length--full" [(ngModel)]="editingRestriction.description"></textarea>
             </div>
           </div>
 
           <div class="ttsettings__restrictions--row">
-            <div class="ttsettings__restrictions--row--text">Poll Students</div>
+            <div class="ttsettings__restrictions--row--text" [tooltip]="'Should the students be asked this? If no, you will set it manually in the student data form.'">Poll Students</div>
             <div class="ttsettings__restrictions--row--input" style="justify-content: flex-start;">
               <input type="checkbox" [(ngModel)]="editingRestriction.poll">
             </div>
@@ -200,7 +208,7 @@
 
 
           <div class="ttsettings__restrictions--row">
-            <div class="ttsettings__restrictions--row--text">Add Options</div>
+            <div class="ttsettings__restrictions--row--text" [tooltip]="'What options can the students pick from?'">Add Options</div>
             <div class="ttsettings__restrictions--row--input">
               <input type="text" class="input__text input__length--medium"  id="restrictionOption{{restriction.id}}">
               <button class="input__button input__length--medium" (click)="addOption(restriction.id)">Add</button>

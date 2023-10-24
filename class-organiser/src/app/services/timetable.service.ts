@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, take, map } from 'rxjs';
 import { TimetableStatistics } from '../admin/build-timetable/build-timetable.component';
 import { DatabaseReturn, DatabaseService } from './database.service';
-import { Time } from '@angular/common';
 
 export interface Timetable {
   id: number;
@@ -15,6 +14,7 @@ export interface Timetable {
   restrictions: Restriction[];
   students: SingleStudent[];
   locked: boolean;
+  sortMethod: number; // 0 = coursePriority, 1 = studentPriority, 2 = both
   rooms: { id: number, name: string }[];
   colorPriority: string[]
 }
@@ -74,7 +74,8 @@ export interface SingleStudent {
   email?: string;
   name: { forename: string; surname: string; };
   data: DataValues[];
-  coursePriorities: { courseId: number, priority: number }[];
+  coursePriorities?: { courseId: number, priority: number }[];
+  studentPriorities?: { studentId: number, priority: number }[];
 }
 
 export interface DataValues {
@@ -313,6 +314,7 @@ export class TimetableService {
     let newTimetable: Timetable = {
       id: undefined!,
       code: "",
+      sortMethod: 0,
       saveCode: this.generateRandomString(10),
       name: "New Timetable",
       classes: [],
@@ -433,8 +435,11 @@ export class TimetableService {
   // colours
 
   generateColors(): void {
-    const courseNumber: number = this.loaded.students[0].coursePriorities.length;
-    this.loaded.colorPriority = this.getColors(courseNumber);
+    const courseNumber: number = this.loaded.students[0].coursePriorities!.length;
+
+    if(courseNumber) {
+      this.loaded.colorPriority = this.getColors(courseNumber);
+    }
   }
 
   getColors(values: number): string[] {

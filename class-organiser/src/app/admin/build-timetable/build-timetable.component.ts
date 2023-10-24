@@ -230,7 +230,7 @@ export class BuildTimetableComponent implements OnInit {
 
   getTopPriorityClass(studentId: number): string {
     let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => +a.id === studentId)!;
-    let topPriorityId: number = student.coursePriorities.filter((a: { courseId: number, priority: number }) => a.priority !== 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
+    let topPriorityId: number = student.coursePriorities!.filter((a: { courseId: number, priority: number }) => a.priority !== 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
     return this.loadedTimetable.courses.find((a: SingleCourse) => a.id === topPriorityId)!.name;
   }
 
@@ -244,7 +244,7 @@ export class BuildTimetableComponent implements OnInit {
 
   getStudentPriority(studentId: number): number {
     let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === studentId)!;
-    let topPriority: number = student.coursePriorities.filter((a: { courseId: number, priority: number }) => a.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
+    let topPriority: number = student.coursePriorities!.filter((a: { courseId: number, priority: number }) => a.priority > 0).sort((a: { courseId: number, priority: number }, b: { courseId: number, priority: number }) => a.priority - b.priority)[0].courseId;
     return topPriority;
   }
 
@@ -361,6 +361,18 @@ export class BuildTimetableComponent implements OnInit {
   getPriorityColor(courseId: number, studentPriorities: { courseId: number, priority: number }[]): string {
     let priority: number = studentPriorities.find((a: { courseId: number, priority: number }) => a.courseId === courseId)!.priority;
     return this.loadedTimetable.colorPriority[priority - 1];
+  }
+  unlockTimeblock(timeblockId: number): void {
+    let timeblock: SingleTimeBlock = this.loadedTimetable.schedule.blocks[timeblockId]!;
+    timeblock.blocks.map((a: SingleBlock) => a.lockedStudents = []);
+  }
+
+  lockTimeblock(timeblockId: number): void {
+    let timeblock: SingleTimeBlock = this.loadedTimetable.schedule.blocks[timeblockId]!;
+
+    if(timeblock) {
+      timeblock.blocks.map((a: SingleBlock) => a.lockedStudents = [...a.students] )
+    }
   }
 }
 

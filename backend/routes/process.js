@@ -47,7 +47,7 @@ function geneticProcessor(timetable, req) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 100;
+        const MAX_ITERATIONS = 1;
         const ALL_REQUIRED_SCORE = 200;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = timetable.students.length * ALL_REQUIRED_SCORE + timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
@@ -82,11 +82,11 @@ function geneticProcessor(timetable, req) {
             let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
 
             // test to see if there is a perfect fit, if so end
-            if((scores.score / MAX_THEORETICAL_SCORE) >= 1) {
-                resolve({ timetable: timetableProcessed, scores })
-            } else {
+            // if((scores.score / MAX_THEORETICAL_SCORE) >= 1) {
+            //     resolve({ timetable: timetableProcessed, scores })
+            // } else {
                 generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
-            }
+            // }
 
             // every 500 iterations reduce the generated schedules to the top 500
             // if this ever goes full genetic this will need to be removed for breeding purposes
@@ -166,43 +166,6 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
     let blockList = timetable.schedule.blocks.map(a => { return a.blocks }).map((a,index) => { return [].concat(a.map(b => { return { block: b, timeBlockIndex: index }} )) }).flat();
     iterationStudentList = [...iterationStudentList].map(a => { return { ...a, timeBlocksFilled: []}});
 
-    // this function will test whether or not this is the most appropriate time for this student to do this class
-    // the MOST appropriate block is the one in which the requirements are most rigorously met
-    const appropriatenessTest = (blockList, courseId, student) => {
-        // get the other blocks this might appear in
-        // let blockWithCourse = blockList.filter(a => +a.block.courses[0] === +courseId);
-        let blockWithCourse = blockList.filter(a => +a.block.selectedCourse === +courseId);
-        let contenders = [];
-
-        // and for each test the restrictions and if the student met them. 
-        for(let i = 0 ; i < blockWithCourse.length ; i++) {
-            let restrictions = blockWithCourse[i].block.restrictions;
-            let passedRestrictions = 0;
-            let restrictionsTestFailed = false;
-
-            // test if the student already has something in this timeblock and if so fail it.
-            // this breaks it - i am not sure why but it does so... I must account for it elsewhere?
-            // let inTb = student.timeBlocksFilled.find(a => +a.timeBlockId === +blockWithCourse[i].timeBlockIndex);
-            // if(inTb) { console.log(+blockWithCourse[i].timeBlockIndex, inTb); restrictionsTestFailed = true; break; }
-            // if(inTb) { restrictionsTestFailed = true; break; }
-
-            if(student.requiredCourses.find(a => +a.id === +courseId).timesLeft === 0) { restrictionsTestFailed = true; break; }
-
-            for(let r = 0 ; r < restrictions.length ; r++) {
-                let studentRestriction = student.data.find(a => +a.restrictionId === +restrictions[r].restrictionId);
-                
-                if(+studentRestriction.value !== +restrictions[r].optionId) {
-                    restrictionsTestFailed = true;
-                    break;
-                } else passedRestrictions++;
-            }
-
-            if(!restrictionsTestFailed) { contenders.push({ id: blockWithCourse[i].block.id, timeBlock: blockWithCourse[i].timeBlockIndex, value: passedRestrictions })};
-        }
-        let sortedContenders = contenders.sort((a, b) => Math.random() - 0.5).sort((a, b) => b.value - a.value);
-        return sortedContenders;
-    }
-
     /**
      * This does a few things
      * - get a course for each of the blocks from the options available
@@ -222,7 +185,9 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
             let foundCourse = timetable.courses.find(a => +a.id === +courseId);
             b.block.name = foundCourse.name;
             // and set the max students in that block
-            b.block.maxStudents = +foundCourse.classSize;
+            // commented out to take the max size from the block irectly again
+            // b.block.maxStudents = +foundCourse.classSize;
+
             // make sure the locked students are in this class
             b.block.students = [...b.block.lockedStudents];
             // now go through the locked students and make sure they are flagged for this course and time period
@@ -266,6 +231,62 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
         }
     })
 
+    // when courses are priorities use this function
+    // THIS ONE WORKS BUT HAS NO STUDENT FALL BACK!
+    // prioritiseByCourse(timetable, iterationStudentList, blockList);
+
+    // when students prioritise working with other students
+    // THIS IS THE TEST ONE
+    prioritiseByStudent(timetable, iterationStudentList, blockList);
+    
+    // finally, for each timeblock add a list of students who are not assigned to any class, room or group
+    for(let i = 0 ; i < timetable.schedule.blocks.length ; i++) {
+        let studentIds = iterationStudentList.map(a => a.id );
+        for(let o = 0 ; o < timetable.schedule.blocks[i].blocks.length ; o++) {
+            for(let p = 0 ; p < timetable.schedule.blocks[i].blocks[o].students.length ; p++) {
+                let index = studentIds.findIndex(a => +a === +timetable.schedule.blocks[i].blocks[o].students[p]);
+                studentIds.splice(index, 1);
+            }
+        }
+        timetable.schedule.blocks[i].missingStudents = [...studentIds];
+    }
+
+    return timetable;
+
+}
+
+function prioritiseByCourse(timetable, iterationStudentList, blockList) {
+
+    // this function will test whether or not this is the most appropriate time for this student to do this class
+    // the MOST appropriate block is the one in which the requirements are most rigorously met
+    const appropriatenessTest = (blockList, courseId, student) => {
+        // get the other blocks this might appear in
+        // let blockWithCourse = blockList.filter(a => +a.block.courses[0] === +courseId);
+        let blockWithCourse = blockList.filter(a => +a.block.selectedCourse === +courseId);
+        let contenders = [];
+
+        // and for each test the restrictions and if the student met them. 
+        for(let i = 0 ; i < blockWithCourse.length ; i++) {
+            let restrictions = blockWithCourse[i].block.restrictions;
+            let passedRestrictions = 0;
+            let restrictionsTestFailed = false;
+
+            if(student.requiredCourses.find(a => +a.id === +courseId).timesLeft === 0) { restrictionsTestFailed = true; break; }
+
+            for(let r = 0 ; r < restrictions.length ; r++) {
+                let studentRestriction = student.data.find(a => +a.restrictionId === +restrictions[r].restrictionId);
+                
+                if(+studentRestriction.value !== +restrictions[r].optionId) {
+                    restrictionsTestFailed = true;
+                    break;
+                } else passedRestrictions++;
+            }
+
+            if(!restrictionsTestFailed) { contenders.push({ id: blockWithCourse[i].block.id, timeBlock: blockWithCourse[i].timeBlockIndex, value: passedRestrictions })};
+        }
+        let sortedContenders = contenders.sort((a, b) => Math.random() - 0.5).sort((a, b) => b.value - a.value);
+        return sortedContenders;
+    }
 
 
     // what we need is a list of items to run through in order, which is all the students 1st priorities, then 2nd, then 3rd etc.
@@ -276,11 +297,141 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
         for(let o = 0 ; o < iterationStudentList[i].coursePriorities.length ; o++) {
             let listing = priorityListed.find(a => +a.priority === +iterationStudentList[i].coursePriorities[o].priority);
             let studentListing = { student: iterationStudentList[i], courseId: +iterationStudentList[i].coursePriorities[o].courseId };
+            let count = timetable.courses.find(a => +a.id === +iterationStudentList[i].coursePriorities[o].courseId).requirement.times;
 
             if(!listing) {
-                priorityListed.push({ priority: +iterationStudentList[i].coursePriorities[o].priority, list: [studentListing]})
+                priorityListed.push({ priority: +iterationStudentList[i].coursePriorities[o].priority, list: [studentListing]});
+                listing = priorityListed.find(a => +a.priority === +iterationStudentList[i].coursePriorities[o].priority);
+                for(let c = 0 ; c < count - 1 ; c++) listing.list.push(studentListing); // new 
             } else {
-                listing.list.push(studentListing);
+                for(let c = 0 ; c < count ; c++) listing.list.push(studentListing); // tae me out for loop
+            }
+        }
+    }
+
+    // now iterate over the lists, going with the first priority first, then second etc.
+    for(let i = 0 ; i < priorityListed.length ; i++) {
+
+        priorityListed[i].list = priorityListed[i].list.sort((a, b) => Math.random() - 0.5); // { student: singslistudent object, courseid: courseid }
+        
+        for(let o = 0 ; o < priorityListed[i].list.length ; o++) {
+            iteration = o + i * priorityListed[i].list.length;
+
+            let list = priorityListed[i].list[o];
+            // get the options for this
+            let contendingBlocks = appropriatenessTest(blockList, list.courseId, list.student).filter(a => {
+                // filter out timeBlocks the student is currently in.
+                let finder = list.student.timeBlocksFilled.find(c => +c.timeBlockId === +a.timeBlock);
+                if(finder) return false;
+                else return true;
+            });
+
+            // now try and put the student into these blocks in order
+            for(let p = 0 ; p < contendingBlocks.length ; p++) {
+                let contendingBlock = blockList.find(a => +a.block.id === contendingBlocks[p].id);
+
+                if(+contendingBlock.block.students.length === +contendingBlock.block.maxStudents) { continue; } // block is full
+
+                // else it should be fine?
+                contendingBlock.block.students.push(list.student.id);
+                // add the student to the timeblock
+                list.student.timeBlocksFilled.push({ timeBlockId: contendingBlocks[p].timeBlock, filled: true });
+                // log that they are now in this course
+                let req = list.student.requiredCourses.find(a => +a.id === +list.courseId);
+                req.timesLeft = req.timesLeft - 1;
+                break;
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// starting as a carbon copy of the above for testing!
+
+function prioritiseByStudent(timetable, iterationStudentList, blockList) {
+// this function will test whether or not this is the most appropriate time for this student to do this class
+    // the MOST appropriate block is the one in which the requirements are most rigorously met
+    const appropriatenessTest = (blockList, courseId, student) => {
+        // get the other blocks this might appear in
+        // let blockWithCourse = blockList.filter(a => +a.block.courses[0] === +courseId);
+        let blockWithCourse = blockList.filter(a => +a.block.selectedCourse === +courseId);
+        let contenders = [];
+
+        // and for each test the restrictions and if the student met them. 
+        for(let i = 0 ; i < blockWithCourse.length ; i++) {
+            let restrictions = blockWithCourse[i].block.restrictions;
+            let passedRestrictions = 0;
+            let restrictionsTestFailed = false;
+
+            if(student.requiredCourses.find(a => +a.id === +courseId).timesLeft === 0) { restrictionsTestFailed = true; break; }
+
+            for(let r = 0 ; r < restrictions.length ; r++) {
+                let studentRestriction = student.data.find(a => +a.restrictionId === +restrictions[r].restrictionId);
+                
+                if(+studentRestriction.value !== +restrictions[r].optionId) {
+                    restrictionsTestFailed = true;
+                    break;
+                } else passedRestrictions++;
+            }
+
+
+
+
+            // check who else is in the class and if there are people the student want to be with, add them too
+            let studentChoices = student.studentPriorities;
+            let choiceTotal = 0;
+
+            for(let s = 0 ; s < studentChoices.length ; s++) {
+                let friendsInCourse = blocksWithCourse[i].block.students.includes(studentChoices[s].studentId);
+
+                if(friendsInCourse) {
+                    choiceTotal += 1 / studentChoices[s].priority;
+                }
+            }
+
+
+
+
+            if(!restrictionsTestFailed) { contenders.push({ id: blockWithCourse[i].block.id, timeBlock: blockWithCourse[i].timeBlockIndex, value: passedRestrictions + choiceTotal })};
+            // if(!restrictionsTestFailed) { contenders.push({ id: blockWithCourse[i].block.id, timeBlock: blockWithCourse[i].timeBlockIndex, value: passedRestrictions })};
+        }
+        let sortedContenders = contenders.sort((a, b) => Math.random() - 0.5).sort((a, b) => b.value - a.value);
+        return sortedContenders;
+    }
+
+
+    // what we need is a list of items to run through in order, which is all the students 1st priorities, then 2nd, then 3rd etc.
+    let priorityListed = [ ...timetable.courses.map((a, i) => { return { priority: i, list: []}}) ];
+
+    // iterate over the students to assign their priorities intot he right places
+    for(let i = 0 ; i < iterationStudentList.length ; i++) {
+        for(let o = 0 ; o < iterationStudentList[i].coursePriorities.length ; o++) {
+            let listing = priorityListed.find(a => +a.priority === +iterationStudentList[i].coursePriorities[o].priority);
+            let studentListing = { student: iterationStudentList[i], courseId: +iterationStudentList[i].coursePriorities[o].courseId };
+            let count = timetable.courses.find(a => +a.id === +iterationStudentList[i].coursePriorities[o].courseId).requirement.times;
+
+            if(!listing) {
+                priorityListed.push({ priority: +iterationStudentList[i].coursePriorities[o].priority, list: [studentListing]});
+                listing = priorityListed.find(a => +a.priority === +iterationStudentList[i].coursePriorities[o].priority);
+                for(let c = 0 ; c < count - 1 ; c++) listing.list.push(studentListing); // new 
+            } else {
+                for(let c = 0 ; c < count ; c++) listing.list.push(studentListing); // tae me out for loop
             }
         }
     }
@@ -320,22 +471,26 @@ function processTimetableBasedUponPriorityIterateOverPriority(timetable, iterati
         }
     }
 
-    
-    // for each timeblock add a list of students who are not assigned to any class
-    for(let i = 0 ; i < timetable.schedule.blocks.length ; i++) {
-        let studentIds = iterationStudentList.map(a => a.id );
-        for(let o = 0 ; o < timetable.schedule.blocks[i].blocks.length ; o++) {
-            for(let p = 0 ; p < timetable.schedule.blocks[i].blocks[o].students.length ; p++) {
-                let index = studentIds.findIndex(a => +a === +timetable.schedule.blocks[i].blocks[o].students[p]);
-                studentIds.splice(index, 1);
-            }
-        }
-        timetable.schedule.blocks[i].missingStudents = [...studentIds];
-    }
-
-    return timetable;
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function getFitnessRating(timetable, PRIORITY_SCORING, ALL_REQUIRED_SCORE) {
 

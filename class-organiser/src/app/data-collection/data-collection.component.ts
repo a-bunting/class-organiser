@@ -5,10 +5,12 @@ import { SingleCourse, SingleStudent } from '../services/timetable.service';
 
 interface SurveyData {
   id: number,
+  studentPriorityCount: number,
   name: string,
   classes: { id: number, teacher: string }[],
   courses: { id: number, name: string }[],
-  restrictions: { id: number, name: string, description: string, options: { id: number, value: string }[] }[]
+  restrictions: { id: number, name: string, description: string, options: { id: number, value: string }[] }[],
+  students: { id: number, name: { forename: string, surname: string } }[]
 }
 
 @Component({
@@ -123,17 +125,19 @@ export class DataCollectionComponent implements OnInit {
 
       if(surveysDone) {
         let foundObject: { code: string, complete: boolean, object: SingleStudent } = surveysDone.find((a: { code: string, complete: boolean, object: SingleStudent }) => a.code === this.codeInput)!;
+        this.error = '';
 
         if(foundObject) {
-          this.error = '';
           this.student = foundObject.object;
           this.confirmedEmail = this.student.email!;
           this.locked = true;
-          this.loadNewSurvey(this.code, true);
+          this.loadNewSurvey(this.codeInput, true);
+        } else {
+          this.loadNewSurvey(this.codeInput, true);          
         }
       } else {
         this.error = '';
-        this.loadNewSurvey(this.code, true);
+        this.loadNewSurvey(this.codeInput, true);
       }
     }
 
@@ -181,6 +185,8 @@ export class DataCollectionComponent implements OnInit {
       coursePriorities: [
         ...this.data.courses.map((a: { id: number, name: string }, i: number) => { return { courseId: +a.id, priority: i + 1 }})
       ],
+      studentPriorities: Array.from({ length: this.data.studentPriorityCount }, (_, i) => ({ studentId: i, priority: i + 1 }))
+      ,
       data: [
         ...this.data.restrictions.map((a: { id: number, name: string, description: string, options: { id: number, value: string }[] }) => { return { restrictionId: +a.id, value: 0 }})
       ]
@@ -200,27 +206,41 @@ export class DataCollectionComponent implements OnInit {
 
   changeCoursePriority(destinationPriority: number, input: any): void {
     let changeToCourseId: number = +input.target.value;
-    let currentPriorityOfChangingCourse: { courseId: number, priority: number } = this.student.coursePriorities.find((a: { courseId: number, priority: number }) => changeToCourseId === +a.courseId)!;
+    let currentPriorityOfChangingCourse: { courseId: number, priority: number } = this.student.coursePriorities!.find((a: { courseId: number, priority: number }) => changeToCourseId === +a.courseId)!;
     let between: [number, number] = [currentPriorityOfChangingCourse.priority, destinationPriority];
 
     if(between[0] > between[1]) {
       // its getting a higher priority
-      let filtered = this.student.coursePriorities.filter((a: { courseId: number, priority: number }) => +a.priority >= between[1] && +a.priority < between[0] )
+      let filtered = this.student.coursePriorities!.filter((a: { courseId: number, priority: number }) => +a.priority >= between[1] && +a.priority < between[0] )
       filtered.map((a: { courseId: number, priority: number }) => a.priority++ );
     }
 
     if(between[1] > between[0]) {
       // its getting a lower priority
-      let filtered = this.student.coursePriorities.filter((a: { courseId: number, priority: number }) => +a.priority > between[0] && +a.priority <= between[1] )
+      let filtered = this.student.coursePriorities!.filter((a: { courseId: number, priority: number }) => +a.priority > between[0] && +a.priority <= between[1] )
       filtered.map((a: { courseId: number, priority: number }) => a.priority-- );
     }
 
-    let course = this.student.coursePriorities.find((a: { courseId: number, priority: number }) => a.courseId === changeToCourseId)!;
+    let course = this.student.coursePriorities!.find((a: { courseId: number, priority: number }) => a.courseId === changeToCourseId)!;
     course.priority = destinationPriority;
   }
 
+  setStudentPriority(priority: number, input: any): void {
+    let studentId: number = +input.target.value;
+    let studPrio: { studentId: number, priority: number } = this.student.studentPriorities!.find((a: { studentId: number, priority: number }) => +a.priority === +priority)!;
+    studPrio.studentId = studentId;
+  }
+
+  studentAlreadySelected(studentId: number): boolean {
+    return this.student.studentPriorities?.map((a: { studentId: number, priority: number }) => { return a.studentId }).includes(studentId) ?? false;
+  }
+  
+  isStudentSelected(studentId: number, priority: number): boolean {
+    return this.student.studentPriorities?.find((a: { studentId: number, priority: number }) => a.priority === priority)?.studentId === studentId ?? false;
+  }
+
   getStudentPriorityData(priority: number): number {
-    let studentData: number = this.student.coursePriorities.find((a: { courseId: number, priority: number }) => a.priority === priority)!.courseId;
+    let studentData: number = this.student.coursePriorities!.find((a: { courseId: number, priority: number }) => a.priority === priority)!.courseId;
     return studentData;
   }
 

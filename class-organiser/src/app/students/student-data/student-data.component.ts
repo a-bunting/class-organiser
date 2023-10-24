@@ -56,7 +56,7 @@ export class StudentDataComponent implements OnInit {
   }
 
   getStudentPriorityData(student: SingleStudent, priority: number): number {
-    let studentData: number = student.coursePriorities.find((a: { courseId: number, priority: number }) => a.priority === priority)!.courseId;
+    let studentData: number = student.coursePriorities!.find((a: { courseId: number, priority: number }) => a.priority === priority)!.courseId;
     let courseName: SingleCourse = this.loadedTimetable.courses.find((a: SingleCourse) => a.id === studentData)!;
     return courseName.id;
   }
@@ -111,8 +111,8 @@ export class StudentDataComponent implements OnInit {
 
   sortByPriority(priority: number): void {
     this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
-      let aD: number = a.coursePriorities.find((c: { courseId: number, priority: number }) => c.priority === priority)!.courseId;
-      let bD: number = b.coursePriorities.find((c: { courseId: number, priority: number }) => c.priority === priority)!.courseId;
+      let aD: number = a.coursePriorities!.find((c: { courseId: number, priority: number }) => c.priority === priority)!.courseId;
+      let bD: number = b.coursePriorities!.find((c: { courseId: number, priority: number }) => c.priority === priority)!.courseId;
       if(this.asc) return aD - bD;
       else return bD - aD;
     })
@@ -154,7 +154,8 @@ export class StudentDataComponent implements OnInit {
       name: { forename: '', surname: '' },
       classId: 0, 
       data: [...this.loadedTimetable.restrictions.map((a: Restriction) => { return { restrictionId: a.id, value: a.options[0].id }})], 
-      coursePriorities: [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })]
+      coursePriorities: [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })],
+      studentPriorities: []
     }
 
     console.log(newStudent);
@@ -173,23 +174,23 @@ export class StudentDataComponent implements OnInit {
 
   changeCoursePriority(student: SingleStudent, destinationPriority: number, input: any): void {
     let changeToCourseId: number = +input.target.value;
-    let currentPriorityOfChangingCourse: { courseId: number, priority: number } = student.coursePriorities.find((a: { courseId: number, priority: number }) => changeToCourseId === a.courseId)!;
+    let currentPriorityOfChangingCourse: { courseId: number, priority: number } = student.coursePriorities!.find((a: { courseId: number, priority: number }) => changeToCourseId === a.courseId)!;
 
     let between: [number, number] = [currentPriorityOfChangingCourse.priority, destinationPriority];
 
     if(between[0] > between[1]) {
       // its getting a higher priority
-      let filtered = student.coursePriorities.filter((a: { courseId: number, priority: number }) => +a.priority >= between[1] && +a.priority < between[0] )
+      let filtered = student.coursePriorities!.filter((a: { courseId: number, priority: number }) => +a.priority >= between[1] && +a.priority < between[0] )
       filtered.map((a: { courseId: number, priority: number }) => a.priority++ );
     }
 
     if(between[1] > between[0]) {
       // its getting a lower priority
-      let filtered = student.coursePriorities.filter((a: { courseId: number, priority: number }) => +a.priority > between[0] && +a.priority <= between[1] )
+      let filtered = student.coursePriorities!.filter((a: { courseId: number, priority: number }) => +a.priority > between[0] && +a.priority <= between[1] )
       filtered.map((a: { courseId: number, priority: number }) => a.priority-- );
     }
 
-    let course = student.coursePriorities.find((a: { courseId: number, priority: number }) => a.courseId === changeToCourseId)!;
+    let course = student.coursePriorities!.find((a: { courseId: number, priority: number }) => a.courseId === changeToCourseId)!;
     course.priority = destinationPriority;
     //this.timetableService.updateSavedTimetable(this.loadedTimetable);
   }
@@ -276,7 +277,8 @@ export class StudentDataComponent implements OnInit {
         name: { forename: a['name'].split(' ')[0], surname: a['name'].split(' ')[1] },
         email: a['email'],
         data: this.getStudentRestrictionDataValues(a),
-        coursePriorities: this.getCoursePriorities(a)
+        coursePriorities: this.getCoursePriorities(a),
+        studentPriorities: []
       }
     })
 
