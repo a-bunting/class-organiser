@@ -71,13 +71,18 @@
         <div class="ttsettings__buttons--button" (click)="run()" [class.ttsettings__buttons--button--enabled]="loadedTimetable.students.length > 0 && loadedTimetable.schedule.blocks.length > 0" [class.ttsettings__buttons--button--disabled]="loadedTimetable.students.length === 0 || loadedTimetable.schedule.blocks.length === 0"><img src="../../../../assets/icons/hammer.png" alt="Crunch the numbers and generate a timetable" [tooltip]="'Crunch the numbers and generate a timetable'"></div>
       </div>
     </div>
-    <hr>
+
     <div class="ttsettings__buttons--row">
-      <select (change)="changeSortingMethod($event)">
-        <option value="0" [selected]="loadedTimetable.sortMethod === 0">Course Priority</option>
-        <option value="1" [selected]="loadedTimetable.sortMethod === 1">Student Priority</option>
-        <option value="2" [selected]="loadedTimetable.sortMethod === 2">Both Course and Student Priority</option>
-      </select>
+      <div class="ttsettings__buttons--left">
+        <p [tooltip]="'This allows you set to set whether students should be placed upon their priority for particular courses, for being with the peers of their choosing, or both.'">Prioritise:</p>
+      </div>
+      <div class="ttsettings__buttons--right">
+        <select class="input__select--large" (change)="changeSortingMethod($event)">
+          <option value="0" [selected]="loadedTimetable.sortMethod === 0">Course Choices Only</option>
+          <option value="1" [selected]="loadedTimetable.sortMethod === 1">Student Choices Only</option>
+          <option value="2" [selected]="loadedTimetable.sortMethod === 2">Both Course and Student Choices</option>
+        </select>
+      </div>
     </div>
   </div>
 

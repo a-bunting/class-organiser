@@ -74,8 +74,8 @@ export interface SingleStudent {
   email?: string;
   name: { forename: string; surname: string; };
   data: DataValues[];
-  coursePriorities?: { courseId: number, priority: number }[];
-  studentPriorities?: { studentId: number, priority: number }[];
+  coursePriorities: { courseId: number, priority: number }[];
+  studentPriorities: { studentId: number, priority: number }[];
 }
 
 export interface DataValues {
@@ -96,7 +96,7 @@ export class TimetableService {
   loadedTimetable: BehaviorSubject<Timetable> = new BehaviorSubject<Timetable>(null!);
   timetableList: BehaviorSubject<TimetableList[]> = new BehaviorSubject<TimetableList[]>(null!);
   loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  
+
   loaded: Timetable = null!;
   timetables: Timetable[] = [];
 
@@ -176,21 +176,21 @@ export class TimetableService {
       error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
-    
+
   }
 
   errorThrown(e: any): void {
 
   }
 
-  lockTimetable(value: boolean): void {   
+  lockTimetable(value: boolean): void {
     this.loading.next(true);
-    
+
     this.databaseService.setTimetableLock(this.loaded.id, value).subscribe({
       next: (result: DatabaseReturn) => {
         // lock it locally too
         this.loaded.locked = value;
-      }, 
+      },
       error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
@@ -268,13 +268,13 @@ export class TimetableService {
   deleteTimetable(): void {
     let ttId: number = this.loaded.id;
     this.loading.next(true);
-    
+
     // now make sure its gone from the database, and if it is delete from local and finish up
     this.databaseService.deleteTimetable(ttId).subscribe({
       next: (result: DatabaseReturn) => {
         let localStorage: Timetable[] = this.getFromLocalStorage();
         let index: number = localStorage.findIndex((a: Timetable) => a.id === this.loadedTimetable.value.id);
-    
+
         if(index === -1) {
           localStorage.splice(index, 1);
           // update the local storage
@@ -350,7 +350,7 @@ export class TimetableService {
       error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
-    
+
   }
 
   timeTableCreated(result: DatabaseReturn, timetable: Timetable): void {
@@ -375,9 +375,9 @@ export class TimetableService {
     timetable.code = ""; // force a new entry in the db
     timetable.name = timetable.name + ' (Copy)';
     timetable.id = undefined!;
-    
+
     this.loading.next(true);
-    
+
     this.databaseService.saveTimetable(timetable).subscribe({
       next: (result: DatabaseReturn) => {
         // timetable.id = result.data.id;

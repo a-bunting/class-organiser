@@ -118,10 +118,14 @@
       padding: .5rem 1rem;
     }
 
+    &--left {
+      font-size: 1.4rem;
+    }
+
     &--row {
       display: flex;
       justify-content: space-between;
-      margin-top: -1rem;
+      align-items: center;
     }
     // &--row { display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; column-gap: .5rem; margin-bottom: .5rem; }
 
