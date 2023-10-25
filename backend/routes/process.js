@@ -47,7 +47,7 @@ function geneticProcessor(timetable, req) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 1;
+        const MAX_ITERATIONS = 150;
         const ALL_REQUIRED_SCORE = 200;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = timetable.students.length * ALL_REQUIRED_SCORE + timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
@@ -79,8 +79,8 @@ function geneticProcessor(timetable, req) {
             let timetableProcessed = processTimetableBasedUponPriorityIterateOverPriority(iterationTimetable, iterationStudentList);
 
             // then measure how well each one fits the timetable, returns { score: totalScore, prioritySatisfied };
-            let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
-            getFitnessRatingByStudentPriority(timetable);
+            // let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
+            let scores = getFitnessRatingByStudentPriority(timetable);
 
             // test to see if there is a perfect fit, if so end
             // if((scores.score / MAX_THEORETICAL_SCORE) >= 1) {
@@ -132,25 +132,22 @@ function geneticProcessor(timetable, req) {
 
         // print out the best three
         generatedSchedules.forEach((a, i) => {
-            // do the stats
-            // let stats = { nonOneOrTwo: a.scores.nonOneOrTwo, unplaced: a.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0), missed: a.scores.nonOneOrTwo.length, oneTwo: ((a.scores.priorityOneOrTwo / studentList.length)).toFixed(2) * 100, one: ((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100, two: ((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100, three: ((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100, four: ((a.scores.prioritySatisfied[3] / studentList.length)).toFixed(2) * 100, notAllRequired: a.scores.notAllRequired }
             // sort the blocks properly as intended
             a.blocks.map(a => { return a.blocks.sort((a, b) => +a.id - +b.id ) });
             a.blocks.sort((a, b) => +a.order - +b.order);
             // strip out the data used by the backend but not part of the front end.
             timetable.students.map((b => { return { id: b.id, classId: b.classId, name: b.name, data: b.data, coursePriorities: b.coursePriorities, studentPriorities: b.studentPriorities }}));
             // save the data to be retrieved
+            console.log(a.scores.prioritySatisfied);
             statistics.push({ index: i, stats: a.scores });
             // add to saved data
             savedData.push({ code, token, index: i, data: { ...timetable, schedule: a }});
             // setup a timer to get rid of the data after 20 mins
             setTimeout(() => { removeSavedItem(code); console.log(`deleting ${code}`); }, 1000*60*60);
-            // log to node console
-            // console.log(`(${i+1}) Total score: ${a.scores.score} - 1st or 2nd (${((a.scores.priorityOneOrTwo / studentList.length)).toFixed(2) * 100}%, ${a.scores.nonOneOrTwo.length} missed out), 1st Prio (${((a.scores.prioritySatisfied[0] / studentList.length)).toFixed(2) * 100}%), 2nd Prio (${((a.scores.prioritySatisfied[1] / studentList.length)).toFixed(2) * 100}%), 3rd Prio (${((a.scores.prioritySatisfied[2] / studentList.length)).toFixed(2) * 100}%), Missing students (${stats.unplaced})`);
         })
 
-        console.log(`Max score: ${MAX_THEORETICAL_SCORE}`);
-        console.log(`Iterations: ${MAX_ITERATIONS}`);
+        // console.log(`Max score: ${MAX_THEORETICAL_SCORE}`);
+        // console.log(`Iterations: ${MAX_ITERATIONS}`);
         
         resolve({ code, statistics }); //finished properly
     })
@@ -513,9 +510,7 @@ function getFitnessRatingByStudentPriority(timetable) {
             for(let p = 0 ; p < student.studentPriorities.length ; p++) {
                 if(blocksWithStudent[o].students.includes(student.studentPriorities[p].studentId)) {
                     // this student is in the same block hurray
-                    console.log(student);
                     let log = studentsInRoomWithNthPriority.find(a => +a.priority === +student.studentPriorities[p].priority);
-                    console.log(log);
                     log.number++;
                 } else {
                     // they are not in the same block, keep this comment for reference for now
@@ -524,8 +519,8 @@ function getFitnessRatingByStudentPriority(timetable) {
         }
     }
 
-    console.log(studentsInRoomWithNthPriority);
-
+    totalScore = studentsInRoomWithNthPriority.reduce((tot, a) => +tot + +PRIORITY_SCORES[a.priority - 1] * a.number, 0).toFixed(0);
+    return { score: totalScore, prioritySatisfied: studentsInRoomWithNthPriority };
 }
 
 function getFitnessRating(timetable, PRIORITY_SCORING, ALL_REQUIRED_SCORE) {
