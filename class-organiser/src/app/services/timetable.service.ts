@@ -407,10 +407,10 @@ export class TimetableService {
   // colours
 
   generateColors(): void {
-    const courseNumber: number = this.loaded.students[0].coursePriorities!.length;
+    const colorRangeQuantity: number = this.loaded.sortMethod === 0 ? this.loaded.students[0].coursePriorities!.length : this.loaded.students[0].studentPriorities!.length;
 
-    if(courseNumber) {
-      this.loaded.colorPriority = this.getColors(courseNumber);
+    if(colorRangeQuantity) {
+      this.loaded.colorPriority = this.getColors(colorRangeQuantity);
     }
   }
 

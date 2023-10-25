@@ -361,9 +361,28 @@ export class BuildTimetableComponent implements OnInit {
     //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
-  getPriorityColor(courseId: number, studentPriorities: { courseId: number, priority: number }[]): string {
-    let priority: number = studentPriorities.find((a: { courseId: number, priority: number }) => a.courseId === courseId)!.priority;
-    return this.loadedTimetable.colorPriority[priority - 1];
+  // getPriorityColor(courseId: number, studentPriorities: { courseId: number, priority: number }[]): string {
+  //   let priority: number = studentPriorities.find((a: { courseId: number, priority: number }) => a.courseId === courseId)!.priority;
+  //   return this.loadedTimetable.colorPriority[priority - 1];
+  // }
+
+  getPriorityColor(block: SingleBlock, student: SingleStudent): string {
+    // course sorting
+    if(this.loadedTimetable.sortMethod === 0) {
+      let priority: number = student.coursePriorities.find((a: { courseId: number, priority: number }) => a.courseId === block.selectedCourse)!.priority;
+      return this.loadedTimetable.colorPriority[priority - 1];
+    }
+    // student sorting
+    if(this.loadedTimetable.sortMethod === 1) {
+      student.studentPriorities.sort((a: { studentId: number, priority: number }, b: { studentId: number, priority: number }) => a.priority - b.priority );
+      
+      for(let i = 0 ; i < student.studentPriorities.length ; i++) {
+        if(block.students.includes(student.studentPriorities[i].studentId)) {
+          return this.loadedTimetable.colorPriority[student.studentPriorities[i].priority - 1];
+        }
+      }
+    }
+    return '';
   }
   unlockTimeblock(timeblockId: number): void {
     let timeblock: SingleTimeBlock = this.loadedTimetable.schedule.blocks[timeblockId]!;

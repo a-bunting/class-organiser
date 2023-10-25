@@ -494,8 +494,10 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
 function getFitnessRatingByStudentPriority(timetable) {
 
     // score is based on priorities being matched.
-    totalScore = 0;
-    studentsInRoomWithNthPriority = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return { priority: i + 1, number: 0 }});
+    let totalScore = 0;
+    let studentPrioritiesSatisfied = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return 0 });
+    let priorityOneOrTwo = 0;
+    let nonOneOrTwo = [];
     const PRIORITY_SCORES = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return 200 / (i + 1) });
 
     // get a list of all the blocks, each block has a list of students
@@ -504,23 +506,32 @@ function getFitnessRatingByStudentPriority(timetable) {
     for(let i = 0 ; i < timetable.students.length ; i++) {
         let student = timetable.students[i];
         let blocksWithStudent = blocks.filter(a => a.students.includes(student.id));
+        let studentPoneOrPtwo = false;
 
         for(let o = 0 ; o < blocksWithStudent.length ; o++) {
             // for each block the student is in see if their nth priority is in it too
             for(let p = 0 ; p < student.studentPriorities.length ; p++) {
                 if(blocksWithStudent[o].students.includes(student.studentPriorities[p].studentId)) {
                     // this student is in the same block hurray
-                    let log = studentsInRoomWithNthPriority.find(a => +a.priority === +student.studentPriorities[p].priority);
-                    log.number++;
+                    studentPrioritiesSatisfied[student.studentPriorities[p].priority - 1]++;
+
+                    if(student.studentPriorities[p].priority <= 2) studentPoneOrPtwo = true;
                 } else {
                     // they are not in the same block, keep this comment for reference for now
                 }
             }
         }
+
+        if(studentPoneOrPtwo) {
+            priorityOneOrTwo++;
+        } else {
+            nonOneOrTwo.push(student.id);
+        }
     }
 
-    totalScore = studentsInRoomWithNthPriority.reduce((tot, a) => +tot + +PRIORITY_SCORES[a.priority - 1] * a.number, 0).toFixed(0);
-    return { score: totalScore, prioritySatisfied: studentsInRoomWithNthPriority };
+    // return { score: totalScore, prioritySatisfied, priorityOneOrTwo, nonOneOrTwo, notAllRequired, unplaced: timetable.schedule.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0) };
+    totalScore = studentPrioritiesSatisfied.reduce((tot, a, i) => +tot + (+PRIORITY_SCORES[i] * a), 0).toFixed(0);
+    return { score: +totalScore, prioritySatisfied: studentPrioritiesSatisfied, priorityOneOrTwo, nonOneOrTwo: [], notAllRequired: [], unplaced: timetable.schedule.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0)};
 }
 
 function getFitnessRating(timetable, PRIORITY_SCORING, ALL_REQUIRED_SCORE) {
