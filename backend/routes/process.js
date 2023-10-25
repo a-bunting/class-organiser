@@ -80,6 +80,7 @@ function geneticProcessor(timetable, req) {
 
             // then measure how well each one fits the timetable, returns { score: totalScore, prioritySatisfied };
             let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
+            getFitnessRatingByStudentPriority(timetable);
 
             // test to see if there is a perfect fit, if so end
             // if((scores.score / MAX_THEORETICAL_SCORE) >= 1) {
@@ -137,7 +138,7 @@ function geneticProcessor(timetable, req) {
             a.blocks.map(a => { return a.blocks.sort((a, b) => +a.id - +b.id ) });
             a.blocks.sort((a, b) => +a.order - +b.order);
             // strip out the data used by the backend but not part of the front end.
-            timetable.students.map((b => { return { id: b.id, classId: b.classId, name: b.name, data: b.data, coursePriorities: b.coursePriorities }}));
+            timetable.students.map((b => { return { id: b.id, classId: b.classId, name: b.name, data: b.data, coursePriorities: b.coursePriorities, studentPriorities: b.studentPriorities }}));
             // save the data to be retrieved
             statistics.push({ index: i, stats: a.scores });
             // add to saved data
@@ -371,6 +372,7 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
         // get the other blocks this might appear in
         // let blockWithCourse = blockList.filter(a => +a.block.courses[0] === +courseId);
         let blockWithCourse = blockList.filter(a => +a.block.selectedCourse === +courseId);
+        // console.log(blockList, blockWithCourse, courseId);
         let contenders = [];
 
         // and for each test the restrictions and if the student met them. 
@@ -393,13 +395,13 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
 
 
 
-            // check who else is in the class and if there are people the student want to be with, add them too
+            // // check who else is in the class and if there are people the student want to be with, add them too
             let studentChoices = student.studentPriorities;
+            // console.log(student);
             let choiceTotal = 0;
 
             for(let s = 0 ; s < studentChoices.length ; s++) {
-                let friendsInCourse = blocksWithCourse[i].block.students.includes(studentChoices[s].studentId);
-
+                let friendsInCourse = blockWithCourse[i].block.students.includes(studentChoices[s].studentId);
                 if(friendsInCourse) {
                     choiceTotal += 1 / studentChoices[s].priority;
                 }
@@ -491,6 +493,40 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
 
 
 
+
+function getFitnessRatingByStudentPriority(timetable) {
+
+    // score is based on priorities being matched.
+    totalScore = 0;
+    studentsInRoomWithNthPriority = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return { priority: i + 1, number: 0 }});
+    const PRIORITY_SCORES = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return 200 / (i + 1) });
+
+    // get a list of all the blocks, each block has a list of students
+    const blocks = [].concat(...timetable.schedule.blocks.map(a => { return a.blocks.map(b => { return b }) }));
+
+    for(let i = 0 ; i < timetable.students.length ; i++) {
+        let student = timetable.students[i];
+        let blocksWithStudent = blocks.filter(a => a.students.includes(student.id));
+
+        for(let o = 0 ; o < blocksWithStudent.length ; o++) {
+            // for each block the student is in see if their nth priority is in it too
+            for(let p = 0 ; p < student.studentPriorities.length ; p++) {
+                if(blocksWithStudent[o].students.includes(student.studentPriorities[p].studentId)) {
+                    // this student is in the same block hurray
+                    console.log(student);
+                    let log = studentsInRoomWithNthPriority.find(a => +a.priority === +student.studentPriorities[p].priority);
+                    console.log(log);
+                    log.number++;
+                } else {
+                    // they are not in the same block, keep this comment for reference for now
+                }
+            }
+        }
+    }
+
+    console.log(studentsInRoomWithNthPriority);
+
+}
 
 function getFitnessRating(timetable, PRIORITY_SCORING, ALL_REQUIRED_SCORE) {
 

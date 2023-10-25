@@ -5,6 +5,8 @@
         <div class="studentData__add" *ngIf="loadedTimetable.students.length > 0" (click)="addStudentToggle()">Add Student</div>
     </div>
 
+    <button (click)="generateRandomDataForStudentPriority()">GENERATE DATA</button>
+
     <div class="studentData__import" *ngIf="loadedTimetable.students.length === 0">
         <div class="studentData__import--title">Import from TSV File</div>
         <div class="studentData__import--box">
@@ -47,7 +49,7 @@
                 <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.name.forename"></td>
                 <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.name.surname"></td>
                 <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.email"></td>
-                <td>
+                <td *ngIf="loadedTimetable.classes.length > 0">
                     <select class="input__select input__length--medium">
                         <option value="{{ class.id }}" *ngFor="let class of loadedTimetable.classes" [selected]="class.id === newStudent.classId">{{ class.teacher }}</option>
                     </select>

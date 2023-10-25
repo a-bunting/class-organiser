@@ -8,6 +8,7 @@ import { TimetablesComponent } from './timetables/timetables.component';
 import { LoginComponent } from './user/login/login.component';
 import { RegisterComponent } from './user/register/register.component';
 import { DataCollectionComponent } from './data-collection/data-collection.component';
+import { SelectTimetableTypeComponent } from './timetables/select-timetable-type/select-timetable-type.component';
 
 
 const routes: Routes = [

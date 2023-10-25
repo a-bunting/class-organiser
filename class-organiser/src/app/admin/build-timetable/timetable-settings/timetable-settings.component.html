@@ -74,14 +74,7 @@
 
     <div class="ttsettings__buttons--row">
       <div class="ttsettings__buttons--left">
-        <p [tooltip]="'This allows you set to set whether students should be placed upon their priority for particular courses, for being with the peers of their choosing, or both.'">Prioritise:</p>
-      </div>
-      <div class="ttsettings__buttons--right">
-        <select class="input__select--large" (change)="changeSortingMethod($event)">
-          <option value="0" [selected]="loadedTimetable.sortMethod === 0">Course Choices Only</option>
-          <option value="1" [selected]="loadedTimetable.sortMethod === 1">Student Choices Only</option>
-          <option value="2" [selected]="loadedTimetable.sortMethod === 2">Both Course and Student Choices</option>
-        </select>
+        <p>You have prioritised {{ loadedTimetable.sortMethod === 0 ? 'courses only.' : loadedTimetable.sortMethod === 1 ? 'students only.' : 'both courses and students.' }}</p>
       </div>
     </div>
   </div>
@@ -267,7 +260,7 @@
 
     <div class="ttsettings__select" *ngIf="loadedTimetable">
       <div class="ttsettings__text">
-        <p>Classes</p>
+        <p>Groups</p>
         <div class="ttsettings__text--minmax" (click)="toggleSection('classes')">
           <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showClasses">
           <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showClasses">
@@ -276,7 +269,7 @@
 
       <table class="ttsettings__rooms" *ngIf="showClasses">
         <tr>
-          <th>Class Teacher</th>
+          <th>Group Name</th>
           <th>Delete</th>
         </tr>
         <tr *ngFor="let class of loadedTimetable.classes">
@@ -286,7 +279,7 @@
       </table>
 
       <div class="ttsettings__courses--buttons" *ngIf="showClasses">
-        <button class="input__button input__length--full" (click)="addClass()">Add Class</button>
+        <button class="input__button input__length--full" (click)="addClass()">Add Group</button>
       </div>
     </div>
 

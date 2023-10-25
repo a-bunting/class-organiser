@@ -16,6 +16,7 @@ export class TimetablesComponent {
   user: User = null!;
   userMenuOpened: boolean = false;
   loading: boolean = false;
+  createNew: boolean = false;
 
   constructor(
     private router: Router,
@@ -72,9 +73,13 @@ export class TimetablesComponent {
     this.timetableService.fullSave(this.loadedTimetable);
   }
 
-
   createNewTimetable(): void {
-    this.timetableService.createBlank();
+    // this.timetableService.createBlank();
+    this.createNew = true;
+  }
+
+  newTimetableCreated(value: boolean): void {
+    this.createNew = value;
   }
 
   createDuplicateTimetable(): void {

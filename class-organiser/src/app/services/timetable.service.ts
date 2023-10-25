@@ -308,13 +308,13 @@ export class TimetableService {
    * Creation and Deletion of timetables
    */
 
-  createBlank(): void {
+  createBlank(sortMethod: number): void {
     const timetables: Timetable[] = this.getFromLocalStorage();
 
     let newTimetable: Timetable = {
       id: undefined!,
       code: "",
-      sortMethod: 0,
+      sortMethod: sortMethod,
       saveCode: this.generateRandomString(10),
       name: "New Timetable",
       classes: [],
@@ -332,19 +332,6 @@ export class TimetableService {
 
     this.databaseService.saveTimetable(newTimetable).subscribe({
       next: (result: DatabaseReturn) => {
-        // newTimetable.id = result.data.id;
-        // newTimetable.code = result.data.code;
-        // newTimetable.saveCode = result.data.saveCode;
-        // newTimetable.locked = false;
-
-        // // update timetables list
-        // let timetableValues: TimetableList[] = [...this.timetableList.value, {id: newTimetable.id, name: newTimetable.name, saveCode: newTimetable.saveCode}];
-        // this.timetableList.next(timetableValues);
-
-        // this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
-        // this.loadTimetable(newTimetable);
-        // this.addNewToLocalStorage(newTimetable);
-        // this.fullSave(newTimetable);
         this.timeTableCreated(result, newTimetable);
       },
       error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
@@ -379,22 +366,7 @@ export class TimetableService {
     this.loading.next(true);
 
     this.databaseService.saveTimetable(timetable).subscribe({
-      next: (result: DatabaseReturn) => {
-        // timetable.id = result.data.id;
-        // timetable.code = result.data.code;
-        // timetable.saveCode = result.data.saveCode;
-        // timetable.locked = false;
-
-        // // update timetables list
-        // let timetableValues: TimetableList[] = [...this.timetableList.value, {id: timetable.id, name: timetable.name, saveCode: timetable.saveCode}];
-        // this.timetableList.next(timetableValues);
-
-        // this.clearTemporaryChanges(); // clear changes made in the old loaded sheet
-        // this.addNewToLocalStorage(timetable);
-        // this.loadTimetable(timetable);
-        // this.fullSave(timetable);
-        this.timeTableCreated(result, timetable);
-      },
+      next: (result: DatabaseReturn) => { this.timeTableCreated(result, timetable);  },
       error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })

@@ -69,7 +69,7 @@ export class BuildTimetableComponent implements OnInit {
   pasteData(toBlock: number): void {
     let pasteBlock: SingleBlock = this.findBlockFromId(toBlock);
     pasteBlock.courses = [...this.copyData.courses];
-    pasteBlock.restrictions = [...this.copyData.restrictions];
+    pasteBlock.restrictions = JSON.parse(JSON.stringify(this.copyData.restrictions));
     pasteBlock.classOnly = this.copyData.classOnly;
     pasteBlock.maxStudents = this.copyData.maxStudents;
     pasteBlock.room = this.copyData.room;
@@ -126,13 +126,16 @@ export class BuildTimetableComponent implements OnInit {
    */
   selectBlockProperty(blockId: number, input: any) : void {
 
+    
     const data: string[] = input.target.value.split(',').map((a: string) => +a );
     console.log(data);
-
+    
     if(+data[0] === 0) {
       this.selectCourse(blockId, null, +data[1]);
+      console.log(blockId, data[1]);
     } else {
       this.selectRestriction(blockId, null, +data[1]);
+      console.log(blockId, data[1]);
     }
 
     //this.timetableService.updateSavedTimetable(this.loadedTimetable);

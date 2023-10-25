@@ -247,7 +247,7 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
             // restrictions
             for(let i = 0 ; i < timetable.restrictions.length ; i++) { reDb.push([timetableId, timetable.restrictions[i].id, timetable.restrictions[i].name, timetable.restrictions[i].description, JSON.stringify(timetable.restrictions[i].options), timetable.restrictions[i].poll ]) }
             // students
-            for(let i = 0 ; i < timetable.students.length ; i++) { stDb.push([timetableId, timetable.students[i].id, timetable.students[i].classId, timetable.students[i].name.forename, timetable.students[i].name.surname, timetable.students[i].email ?? '', JSON.stringify(timetable.students[i].data), JSON.stringify(timetable.sortMethod !== 1 ? timetable.students[i].coursePriorities : []), JSON.stringify(timetable.sortMethod > 0 ? timetable.students[i].studentPriorities : [])]) }
+            for(let i = 0 ; i < timetable.students.length ; i++) { stDb.push([timetableId, timetable.students[i].id, timetable.students[i].classId, timetable.students[i].name.forename, timetable.students[i].name.surname, timetable.students[i].email ?? '', JSON.stringify(timetable.students[i].data), JSON.stringify(timetable.students[i].coursePriorities.length > 0 ? timetable.students[i].coursePriorities : []), JSON.stringify(timetable.students[i].studentPriorities.length > 0 ? timetable.students[i].studentPriorities : [])]) }
 
             let argArray = [];
 

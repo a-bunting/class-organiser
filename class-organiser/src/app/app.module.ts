@@ -25,6 +25,7 @@ import { SmallLoaderComponent } from './utilities/small-loader/small-loader.comp
 import { DataCollectionComponent } from './data-collection/data-collection.component';
 
 import { ColorPickerModule } from 'ngx-color-picker';
+import { SelectTimetableTypeComponent } from './timetables/select-timetable-type/select-timetable-type.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { ColorPickerModule } from 'ngx-color-picker';
     TimetablesComponent,
     StartComponent,
     SmallLoaderComponent,
-    DataCollectionComponent
+    DataCollectionComponent,
+    SelectTimetableTypeComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,36 @@
+.selectType {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 2rem;
+
+    &__button {
+        padding: 2rem 4rem;
+        border-radius: 1rem;
+        width: 25rem;
+        height: 20rem;
+        font-size: 1.4rem;
+        text-align: center;
+        line-height: 2rem;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:nth-of-type(1) { background-color: lightgoldenrodyellow; }
+        &:nth-of-type(2) { background-color: lightblue; }
+        &:nth-of-type(3) { background-color: lightgreen; }
+
+        box-shadow: .3rem 0 .6rem rgba(black, .6);
+        transition: all .2s;
+
+        &:hover {
+            cursor: pointer;
+            transform: translateY(-.3rem);
+            box-shadow: .2rem 0 .4rem rgba(black, .4);
+        }
+    }
+}

@@ -26,6 +26,58 @@ export class StudentDataComponent implements OnInit {
   ) {
   }
 
+  generateRandomDataForStudentPriority(): void {
+    let studentCount = 40;
+    let forenamesMale = ['albus','harry','ron','fred','george','neville','finneus','sirius','remus','lord','arthur','charlie','bill'];
+    let forenamesFemale = ['hermione','molly','fleur','minerva','ginny','cho','lavender','parvata','padma','lilly'];
+    let surnames = ['dumbledore','mcgonagall','weasley','longbottom','sprout','flitwick','black','lupin','voldemort','delacour'];
+
+    let genderReestriction: Restriction = {
+      id: 0,
+      options: [
+        {id: 0, value: 'Male'},
+        {id: 1, value: 'Female'}
+      ],
+      name: 'Gender',
+      description: 'a desription', 
+      poll: true
+    }
+
+    
+    for(let i = 0 ; i < studentCount ; i++) {
+      
+      let gender = Math.floor(Math.random() * 2);
+      let forename = gender === 0 ? forenamesMale[Math.floor(Math.random() * forenamesMale.length)] : forenamesFemale[Math.floor(Math.random() * forenamesFemale.length)].toUpperCase();
+      let surname = surnames[Math.floor(Math.random() * surnames.length)];
+      
+      let newStudent: SingleStudent = {
+        id: i, classId: -1,
+        name: { forename: forename, surname: surname },
+        email: `${forename}.${surname}@hogwarts.com`,
+        data: [{ restrictionId: 0, value: gender }],
+        coursePriorities: [],
+        studentPriorities: []
+      }
+      
+      this.loadedTimetable.students.push(newStudent);
+    }
+
+    for(let i = 0 ; i < studentCount ; i++) {
+      let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === i )!;
+      let gender: number = +student.data[0].value;
+      let others: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => a.data[0].value === gender && a.id !== i );
+      
+      for(let m = 0 ; m < 4 ; m++) {
+        let random: SingleStudent = others.sort((a: SingleStudent, b:SingleStudent) => Math.random() -0.5 )[0];
+        student.studentPriorities.push({ studentId: random.id, priority: m + 1 });
+        others = others.filter((a: SingleStudent) => a.id !== random.id);
+      }
+    }
+    
+    this.loadedTimetable.restrictions = [genderReestriction];
+    
+  }
+
   ngOnInit(): void {
     // subscribe to users and check if the user is logged in
     this.authService.user.subscribe({
@@ -242,13 +294,15 @@ export class StudentDataComponent implements OnInit {
   parseCsvString(csvData: string): void {
 
     const rows = csvData.trim().split('\n');
-    const headers = rows[0].split('\t');
+    const headers = rows[0].split('\t').map(header => header.trim());
     const results: CsvObject[] = [];
     let students: SingleStudent[] = [];
     let exclusions: string[] = ['','timestamp'];
 
+    console.log(headers);
+
     for (let i = 1; i < rows.length; i++) {
-      const values = rows[i].split('\t').map(header => header.trim());
+      const values = rows[i].split('\t').map(value => value.trim());
       const entry: CsvObject = {};
 
       for (let j = 0; j < headers.length; j++) {
@@ -292,15 +346,18 @@ export class StudentDataComponent implements OnInit {
     let teachers = Array.from(new Set(data.map(a => { return a['teacher'] }))).concat(this.loadedTimetable.classes.map((a: SingleClass) => { return a.teacher }));
     let classesLastId: number = 0;
 
+    if(!teachers) return;
+    
     for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
       if(this.loadedTimetable.classes[i].id >= classesLastId) classesLastId = this.loadedTimetable.classes[i].id + 1;
     }
-
+    
     // makes a list of classes with all teachers, including new ones.
     for(let i = 0 ; i < teachers.length ; i++) {
       this.classes.push({ teacher: teachers[i], id: classesLastId + i });
     }
-
+    
+    console.log(this.classes);
     this.loadedTimetable.classes = this.classes;
   }
 

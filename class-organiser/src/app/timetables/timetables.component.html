@@ -31,7 +31,8 @@
   </header>
 
   <main>
-    <router-outlet></router-outlet>
+    <router-outlet *ngIf="!createNew"></router-outlet>
+    <app-select-timetable-type *ngIf="createNew" (killMenu)="newTimetableCreated($event)"></app-select-timetable-type>
   </main>
 
   <footer>
