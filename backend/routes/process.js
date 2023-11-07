@@ -17,7 +17,6 @@ const userMethods = require('../methods/user');
 let savedData = [];
 
 router.post('/timetable', checkAuth, (req, res, next) => {
-    console.log(userMethods.getUserDataFromToken(req))
     const timetable = req.body.timetable;
     process(timetable, res, req);
 });
@@ -47,7 +46,7 @@ function geneticProcessor(timetable, req) {
     return new Promise((resolve) => {
         // do the stuff
         // first make a bunch of different versions of the schedule, shuffling the students each time.
-        const MAX_ITERATIONS = 150;
+        const MAX_ITERATIONS = 2500;
         const ALL_REQUIRED_SCORE = 200;
         const PRIORITY_SCORING = [200, 100, 25, 20, 15, 10, 5, 4, 3, 2, 1];
         const MAX_THEORETICAL_SCORE = timetable.students.length * ALL_REQUIRED_SCORE + timetable.schedule.blocks.length * 100 + PRIORITY_SCORING.filter((a, i) => i < timetable.students[0].coursePriorities.filter(a => a.priority !== 0).length).reduce((part, a) => part + a, 0) * timetable.students.length;
@@ -79,15 +78,15 @@ function geneticProcessor(timetable, req) {
             let timetableProcessed = processTimetableBasedUponPriorityIterateOverPriority(iterationTimetable, iterationStudentList);
 
             // then measure how well each one fits the timetable, returns { score: totalScore, prioritySatisfied };
-            // let scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
-            let scores = getFitnessRatingByStudentPriority(timetable);
+            let scores;
 
-            // test to see if there is a perfect fit, if so end
-            // if((scores.score / MAX_THEORETICAL_SCORE) >= 1) {
-            //     resolve({ timetable: timetableProcessed, scores })
-            // } else {
-                generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
-            // }
+            if(timetable.sortMethod === 0) {
+                scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
+            } else {
+                scores = getFitnessRatingByStudentPriority(timetable);
+            }
+
+            generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
 
             // every 500 iterations reduce the generated schedules to the top 500
             // if this ever goes full genetic this will need to be removed for breeding purposes
@@ -146,9 +145,11 @@ function geneticProcessor(timetable, req) {
             setTimeout(() => { removeSavedItem(code); console.log(`deleting ${code}`); }, 1000*60*60);
         })
 
-        // console.log(`Max score: ${MAX_THEORETICAL_SCORE}`);
-        // console.log(`Iterations: ${MAX_ITERATIONS}`);
-        
+        // record a process has taken place
+        let stats = req.stats;
+        const userData = userMethods.getUserDataFromToken(req);
+        stats.userProcesses(userData.id, MAX_ITERATIONS, statistics[0].stats);
+
         resolve({ code, statistics }); //finished properly
     })
 }
@@ -297,6 +298,8 @@ function prioritiseByCourse(timetable, iterationStudentList, blockList) {
             let studentListing = { student: iterationStudentList[i], courseId: +iterationStudentList[i].coursePriorities[o].courseId };
             let count = timetable.courses.find(a => +a.id === +iterationStudentList[i].coursePriorities[o].courseId).requirement.times;
 
+            if(count > timetable.schedule.blocks.length) count = timetable.schedule.blocks.length;
+
             if(!listing) {
                 priorityListed.push({ priority: +iterationStudentList[i].coursePriorities[o].priority, list: [studentListing]});
                 listing = priorityListed.find(a => +a.priority === +iterationStudentList[i].coursePriorities[o].priority);
@@ -389,9 +392,6 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
                 } else passedRestrictions++;
             }
 
-
-
-
             // // check who else is in the class and if there are people the student want to be with, add them too
             let studentChoices = student.studentPriorities;
             // console.log(student);
@@ -403,9 +403,6 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
                     choiceTotal += 1 / studentChoices[s].priority;
                 }
             }
-
-
-
 
             if(!restrictionsTestFailed) { contenders.push({ id: blockWithCourse[i].block.id, timeBlock: blockWithCourse[i].timeBlockIndex, value: passedRestrictions + choiceTotal })};
             // if(!restrictionsTestFailed) { contenders.push({ id: blockWithCourse[i].block.id, timeBlock: blockWithCourse[i].timeBlockIndex, value: passedRestrictions })};
@@ -424,6 +421,9 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
             let listing = priorityListed.find(a => +a.priority === +iterationStudentList[i].coursePriorities[o].priority);
             let studentListing = { student: iterationStudentList[i], courseId: +iterationStudentList[i].coursePriorities[o].courseId };
             let count = timetable.courses.find(a => +a.id === +iterationStudentList[i].coursePriorities[o].courseId).requirement.times;
+
+            // for student priority times is set super high, so maximise it at the number of time blocks as they cant appear in a timeblock more than once
+            if(count > timetable.schedule.blocks.length) count = timetable.schedule.blocks.length;
 
             if(!listing) {
                 priorityListed.push({ priority: +iterationStudentList[i].coursePriorities[o].priority, list: [studentListing]});
@@ -485,20 +485,19 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
 
 
 
-
-
-
-
-
-
 function getFitnessRatingByStudentPriority(timetable) {
 
     // score is based on priorities being matched.
     let totalScore = 0;
     let studentPrioritiesSatisfied = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return 0 });
     let priorityOneOrTwo = 0;
+    let gotASinglePriority = 0;
     let nonOneOrTwo = [];
+    let shuffle = timetable.shuffleStudents;
+    let shuffleScore = 0;
+
     const PRIORITY_SCORES = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return 200 / (i + 1) });
+    const SHUFFLE_POINTS = 50;
 
     // get a list of all the blocks, each block has a list of students
     const blocks = [].concat(...timetable.schedule.blocks.map(a => { return a.blocks.map(b => { return b }) }));
@@ -507,6 +506,8 @@ function getFitnessRatingByStudentPriority(timetable) {
         let student = timetable.students[i];
         let blocksWithStudent = blocks.filter(a => a.students.includes(student.id));
         let studentPoneOrPtwo = false;
+        let gotAPriority = false;
+        let worksWith = [];
 
         for(let o = 0 ; o < blocksWithStudent.length ; o++) {
             // for each block the student is in see if their nth priority is in it too
@@ -514,24 +515,33 @@ function getFitnessRatingByStudentPriority(timetable) {
                 if(blocksWithStudent[o].students.includes(student.studentPriorities[p].studentId)) {
                     // this student is in the same block hurray
                     studentPrioritiesSatisfied[student.studentPriorities[p].priority - 1]++;
+                    gotAPriority = true;
 
                     if(student.studentPriorities[p].priority <= 2) studentPoneOrPtwo = true;
                 } else {
                     // they are not in the same block, keep this comment for reference for now
                 }
             }
+
+            // if they want the students shuffled then each time a student is not witht he same person is not with someone else add points
+            if(shuffle) worksWith.push(...blocksWithStudent[o].students);
         }
+
+        //-SHUFFLE_POINTS to eliminate user from list, each unique students they work with gets points.
+        if(shuffle) shuffleScore += new Set(worksWith).size * SHUFFLE_POINTS - SHUFFLE_POINTS;
 
         if(studentPoneOrPtwo) {
             priorityOneOrTwo++;
         } else {
             nonOneOrTwo.push(student.id);
         }
+
+        if(gotAPriority) gotASinglePriority++;
     }
 
     // return { score: totalScore, prioritySatisfied, priorityOneOrTwo, nonOneOrTwo, notAllRequired, unplaced: timetable.schedule.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0) };
-    totalScore = studentPrioritiesSatisfied.reduce((tot, a, i) => +tot + (+PRIORITY_SCORES[i] * a), 0).toFixed(0);
-    return { score: +totalScore, prioritySatisfied: studentPrioritiesSatisfied, priorityOneOrTwo, nonOneOrTwo: [], notAllRequired: [], unplaced: timetable.schedule.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0)};
+    totalScore = studentPrioritiesSatisfied.reduce((tot, a, i) => +tot + (+PRIORITY_SCORES[i] * a), 0).toFixed(0) + shuffleScore;
+    return { score: +totalScore, prioritySatisfied: studentPrioritiesSatisfied, priorityOneOrTwo, nonOneOrTwo: [], notAllRequired: [], gotASinglePriority, unplaced: timetable.schedule.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0)};
 }
 
 function getFitnessRating(timetable, PRIORITY_SCORING, ALL_REQUIRED_SCORE) {
@@ -626,7 +636,7 @@ function getFitnessRating(timetable, PRIORITY_SCORING, ALL_REQUIRED_SCORE) {
         totalScore += studentScore;
     }
 
-    return { score: totalScore, prioritySatisfied, priorityOneOrTwo, nonOneOrTwo, notAllRequired, unplaced: timetable.schedule.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0) };
+    return { score: totalScore, prioritySatisfied, priorityOneOrTwo, nonOneOrTwo, gotASinglePriority: 0, notAllRequired, unplaced: timetable.schedule.blocks.reduce((sum, a) => +sum + +a.missingStudents.length, 0) };
 }
 
 module.exports = router;

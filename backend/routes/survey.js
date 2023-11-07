@@ -109,7 +109,11 @@ router.post('/save', (req, res, next) => {
                 const nextId = +r[1][0].NextAvailableId + 1;
                 
                 db.query(insertQuery, [[r[0][0].id, newSid ? nextId : req.body.student.id, student.classId, student.name.forename, student.name.surname, student.email, JSON.stringify(student.data), JSON.stringify(student.coursePriorities), JSON.stringify(student.studentPriorities)]], (e2, r2) => {
+                    console.log(r2); // check to see whether to run update or add
+                    
                     if(!e2) {
+                        let stats = req.stats;
+                        stats.addSurveyData(code);
                         res.status(200).json({ error: false, message: '', data: { id: nextId } })
                     } else {
                         res.status(400).json({ error: true, message: 'Unable to add data.', data: { codeCorrect: true } })

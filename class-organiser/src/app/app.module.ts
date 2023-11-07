@@ -26,6 +26,9 @@ import { DataCollectionComponent } from './data-collection/data-collection.compo
 
 import { ColorPickerModule } from 'ngx-color-picker';
 import { SelectTimetableTypeComponent } from './timetables/select-timetable-type/select-timetable-type.component';
+import { ClassPriorityComponent } from './views/class-priority/class-priority.component';
+import { StudentPriorityComponent } from './views/student-priority/student-priority.component';
+import { UnlockComponent } from './timetables/unlock/unlock.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +45,10 @@ import { SelectTimetableTypeComponent } from './timetables/select-timetable-type
     StartComponent,
     SmallLoaderComponent,
     DataCollectionComponent,
-    SelectTimetableTypeComponent
+    SelectTimetableTypeComponent,
+    ClassPriorityComponent,
+    StudentPriorityComponent,
+    UnlockComponent
   ],
   imports: [
     BrowserModule,

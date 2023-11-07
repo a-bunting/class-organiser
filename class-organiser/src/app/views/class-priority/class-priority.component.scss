@@ -1,0 +1,378 @@
+.buildtt {
+    position: relative;
+    display: flex;
+    height: 100%;
+    margin-left: 2rem;
+  
+    @media print {
+      &__settings { display: none; }
+    }
+  
+    &__settings {
+      flex-basis: max-content;
+      left: 1rem;
+      position: sticky;
+      z-index: 1000;
+      padding: .5rem;
+      padding-left: 0rem;
+      padding-right: 1rem;
+      margin-left: -1rem;
+      filter: drop-shadow(.2rem 0 .4rem rgba(black, .5));
+    }
+  
+    &__info {
+      position: fixed;
+      top: 10rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 35rem;
+      height: max-content;
+      padding: 1rem 2rem;
+      background-color: rgba(white, .6);
+      border: .3rem solid black;
+      z-index: 10000;
+      font-size: 2rem;
+      text-align: center;
+      box-shadow: .2rem 0 .4rem rgba(black, .5);
+      border-radius: 1rem;
+  
+      @media print { position: absolute; }
+    }
+  
+    &__display {
+      position: sticky;
+      top: 0rem;
+      flex: 1;
+      padding: 1rem 2rem;
+  
+    }
+  
+    &__tt {
+      display: flex;
+      column-gap: .3rem;
+      height: 100%;
+    }
+  
+    &__col {
+      display: flex;
+      flex-direction: column;
+      row-gap: .3rem;
+  
+      &--narrow {
+        flex: 0 0 12rem;
+      }
+  
+      &--add {
+        justify-content: center;
+        align-items: center;
+        flex-basis: 3rem;
+        background-color: rgba(white, .6);
+        border-radius: 1rem;
+        font-size: 4rem;
+        transition: all .2s;
+  
+        &:hover {
+          cursor: pointer;
+          filter: brightness(1.2);
+        }
+      }
+  
+      &--normal { flex: 1; }
+  
+      // border-top: .1rem solid black;
+      // border-bottom: .1rem solid black;
+  
+      // &:first-of-type {
+      //   border-left: .1rem solid black;
+  
+      //   &:first-child { border-radius: 1rem 0 0 0; border-top: .1rem solid black; }
+      //   &:last-child { border-radius: 0 0 0 1rem; border-bottom: .1rem solid black;  }
+      // }
+  
+      // &:last-of-type {
+      //   border-right: .1rem solid black;
+  
+      //   &:first-child { border-radius: 0 1rem 0 0; }
+      //   &:last-child { border-radius: 0 0 1rem 0; }
+      // }
+    }
+  
+    &__paste {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: rgba(gray, .5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  
+      img {
+        width: 5rem;
+        height: 5rem;
+        filter: invert(100%) sepia(1%) saturate(2%) hue-rotate(334deg) brightness(112%) contrast(101%);
+        transition: all .2s;
+  
+        &:hover {
+          cursor: pointer;
+          transform: scale(1.4);
+        }
+      }
+    }
+  
+    &__block {
+      position: relative;
+      background-color: rgba(rgba(white, .6), 1);
+      border-radius: .5rem;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: .1rem solid black;
+      transition: all .2s;
+  
+      @media print { overflow: auto; }
+  
+  
+      @media print {
+        background-color: none;
+  
+        &__paste { display: none; }
+  
+        display: grid;
+        grid-template: max-content 1fr / 1fr max-content;
+      }
+  
+      &:hover {
+        background-color: lightblue;
+      }
+  
+      &--title {
+        min-width: 1rem;
+  
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        text-align: center;
+        padding: .5rem 1rem;
+      }
+  
+      &--tbTitle {
+        button {
+          margin-left: .5rem;
+        }
+      }
+  
+      &--textInput {
+  
+        display: flex;
+        // justify-content: space-between;
+        align-items: center;
+        font-size: 1.2rem;
+  
+        &--text {
+          font-weight: bold;
+        }
+  
+        &--input {
+          margin-left: 1rem;
+        }
+      }
+  
+      &--block {
+        min-width: 30rem;
+      }
+  
+      &--short {
+        flex: 0 0 3rem;
+  
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        padding-right: .5rem;
+      }
+  
+      &--missingStudents {
+  
+        height: max-content;
+        max-height: 25%;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+      }
+  
+      &--normal {
+        flex: 1;
+        @media print { flex-basis: max-content;}
+  
+      }
+  
+      &--name, &--room {
+        padding: .5rem 1rem;
+      }
+  
+      &--name {
+        position: sticky;
+        top: 0;
+        background-color: #009879;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: bold;
+  
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+  
+        img {
+          height: 1rem;
+          width: 1rem;
+          filter: invert(100%) sepia(1%) saturate(2%) hue-rotate(334deg) brightness(112%) contrast(101%);
+          transition: all .2s;
+  
+          &:hover {
+            cursor: pointer;
+            transform: scale(1.2);
+          }
+        }
+  
+        @media print {
+          grid-column: 1 / 2;
+          grid-row: 1 / 2;
+        }
+      }
+  
+      &--room {
+        background-color: lightblue;
+        color: black;
+        font-size: 1rem;
+        font-style: italic;
+  
+        @media print {
+          grid-column: 2 / 3;
+          grid-row: 1 / 2;
+          font-size: 1.2rem;
+          font-weight: bold;
+        }
+      }
+  
+      &--courses {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+  
+      &--course {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        background-color: rgba(lightgray, .4);
+        border-radius: .5rem;
+        padding: .3rem .5rem;
+        min-width: 45%;
+        margin-bottom: .2rem;
+  
+        &:not(:last-of-type) {
+          cursor: pointer;
+        }
+  
+        &--name {
+          flex: 1;
+          font-size: 1rem;
+          margin-right: .5rem;
+          align-self: flex-start;
+          text-align: left;
+        }
+  
+        button {
+          font-size: .8rem;
+        }
+      }
+  
+      &--restriction {
+        width: 100%;
+  
+        select { margin: 0 .5rem; }
+      }
+  
+      &--buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: .4rem .3rem;
+      }
+  
+      &--button {
+        padding: .3rem .5rem;
+        width: auto;
+        border-radius: .5rem;
+        transition: all .2s;
+        text-align: center;
+        background-color: rgba(gray, .5);
+  
+        &--selected {
+          background-color: rgba(#67BBF0, .8);
+        }
+  
+        &:hover {
+          cursor: pointer;
+          filter: brightness(1.2);
+        }
+      }
+  
+      &--data {
+        padding: .2rem .3rem;
+      }
+  
+      &--students {
+        display: flex;
+        flex-wrap: wrap;
+        padding: .5rem;
+        row-gap: .1rem;
+        column-gap: .1rem;
+        font-size: 1rem;
+  
+        @media print {
+          grid-column: 1 / 3;
+          grid-row: 2 / 3;
+        }
+      }
+  
+      &--student {
+        background-color: rgba(white, .6);
+        border-radius: .5rem;
+        padding: .2rem .3rem;
+        border: .1rem dashed transparent;
+  
+        &--highlight { background-color: lightskyblue !important; }
+        &--prio { border: .1rem solid red; background-color: white;}
+        &--locked { background-color: black !important; color: white; }
+  
+        &:hover {
+          cursor: grab;
+          background-color: white;
+          border: .1rem dashed rgba(black, .5);
+        }
+  
+      }
+    }
+  
+    &__switch {
+      font-size: 1.2rem;
+  
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  
+  }
+  
+  .cdk-drop-list-receiving, .cdk-drop-list-dragging {
+    background-color: rgba(lightblue, .5);
+  }
+  
+  
+  

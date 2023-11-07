@@ -160,6 +160,9 @@
         pointer-events: none;
       }
     }
+
+    &--on { background-color: green; }
+    &--off { background-color: lightcoral; }
   }
 
   &__rooms {
@@ -521,3 +524,5 @@
   0% { max-height: 0rem; opacity: 0; }
   100% { max-height: 40rem; opacity: 1; }
 }
+
+.dummy { display: none; }

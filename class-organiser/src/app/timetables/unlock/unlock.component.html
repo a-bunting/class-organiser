@@ -1,0 +1,45 @@
+<div class="unlock">
+
+    <div class="unlock__background"></div>
+
+    <div class="unlock__window">
+        <div class="unlock__title">Unlock Data Collection</div>
+        <div class="unlock__description">Make sure that you have done the following before you start collecting data. To miss any one of these checkpoints may mean you need to create a new timetable if you make any changes.</div>
+        <div class="line margin__top--small margin__bottom--small"></div>
+
+        <div class="unlock__checklist" *ngIf="sortMethod === 0">
+            <p>The following items are strongly recommended before unlocking:</p>
+            <ul>
+                <li>All the courses students have to choose from should be defined in the 'courses' section.</li>
+                <li><b>If</b> participants need to be related to a leader, these should also be defined in the 'groups' section.</li>
+            </ul>
+
+            <p>The following items are <b>NOT</b> required before unlocking and can be changed later:</p>
+            <ul>
+                <li>Room or location names can be added at any point.</li>
+                <li>No student data needs to be defined before collecting data.</li>
+                <li>Courses which are checked as 'required' can be added at any time.</li>
+            </ul>
+        </div>
+
+        <div class="unlock__checklist" *ngIf="sortMethod === 1">
+            <p>The following items are strongly recommended before unlocking:</p>
+            <ul>
+                <li>All students must be defined in the 'Student Data'. You do not need data except at least their name.</li>
+            </ul>
+
+            <p>The following items are <b>NOT</b> required before unlocking and can be changed later:</p>
+            <ul>
+                <li>Room or location names can be added at any point.</li>
+            </ul>        
+        </div>
+
+        <div class="line margin__top--small margin__bottom--small"></div>
+
+        <div class="unlock__buttons">
+            <button class="input__button unlock__button unlock__button--unlock" (click)="unlock()">Unlock Data Collection</button>
+            <button class="input__button unlock__button unlock__button--cancel" (click)="close()">Cancel</button>
+        </div>
+    </div>
+    
+</div>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { DataValues, Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 import { SelectionData } from '../build-timetable.component';
@@ -23,6 +23,8 @@ export class TimetableSettingsComponent implements OnInit {
   showRooms: boolean = true;
   showClasses: boolean = true;
   showRestrictions: boolean = true;
+
+  showUnlockScreen: boolean = false;
 
   constructor(
     private timetableService: TimetableService,
@@ -119,7 +121,6 @@ export class TimetableSettingsComponent implements OnInit {
     this.loadedTimetable.students.map((a: SingleStudent) => a.data.push({...dataValue}));
 
     this.loadedTimetable.restrictions.push(newRestriction);
-    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   deleteRestriction(restrictionId: number): void {
@@ -132,7 +133,6 @@ export class TimetableSettingsComponent implements OnInit {
     this.loadedTimetable.students.map((a: SingleStudent) => { a.data = a.data.filter((b: DataValues) => b.restrictionId !== restrictionId); })
 
     this.timetableService.setupRestrictionDeletion(restrictionId);
-    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   editingRestriction: Restriction = null!;
@@ -152,13 +152,11 @@ export class TimetableSettingsComponent implements OnInit {
   */
   editRestriction(bypass: boolean, input?: any): void {
     if(bypass) {
-      //this.currentTimetableChange.emit(this.loadedTimetable);
-      return;
+        return;
     }
 
     if(input.keyCode === 13) {
-      //this.currentTimetableChange.emit(this.loadedTimetable);
-    }
+      }
   }
 
   addOption(restrictionId: number): void {
@@ -189,18 +187,15 @@ export class TimetableSettingsComponent implements OnInit {
     this.loadedTimetable.students.map((a: SingleStudent) => a.coursePriorities!.push({...newCoursePriority}));
 
     this.loadedTimetable.courses.push(newCourse);
-    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   editCourse(bypass: boolean, input?: any): void {
     if(bypass) {
-      //this.currentTimetableChange.emit(this.loadedTimetable);
-      return;
+        return;
     }
 
     if(input.keyCode === 13) {
-      //this.currentTimetableChange.emit(this.loadedTimetable);
-    }
+      }
   }
 
   deleteCourse(courseId: number): void {
@@ -217,7 +212,6 @@ export class TimetableSettingsComponent implements OnInit {
     this.timetableService.setupCourseDeletion(courseId);
     this.reSortStudentPriorities();
 
-    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   // fill in gaps in the student priority list so they go from 1 to x
@@ -240,7 +234,6 @@ export class TimetableSettingsComponent implements OnInit {
     }
 
     this.loadedTimetable.rooms.push(newRoom);
-    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   deleteRoom(roomId: number): void {
@@ -252,7 +245,6 @@ export class TimetableSettingsComponent implements OnInit {
 
     if(this.loadedTimetable.rooms.length === 0) { this.loadedTimetable.rooms.push({ id: 0, name: 'New Room' })};
 
-    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
   addClass(): void {
@@ -278,12 +270,12 @@ export class TimetableSettingsComponent implements OnInit {
     highestId += 1; // add 1 to make this the new highest
 
     for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
-      let newBlock: SingleBlock = { id: highestId + i, name: 'New Block', classId: newClassId, room: this.loadedTimetable.rooms[0].id, maxStudents: 25, classOnly: false, lockedStudents: [], students: [], courses: [], restrictions: [] };
+      let courses: number[] = this.loadedTimetable.sortMethod === 0 ? [] : [0];
+      let newBlock: SingleBlock = { id: highestId + i, name: 'New Block', classId: newClassId, room: this.loadedTimetable.rooms[0].id, maxStudents: 25, classOnly: false, lockedStudents: [], students: [], courses, restrictions: [] };
       this.loadedTimetable.schedule.blocks[i].blocks.push(newBlock);
     }
 
     this.loadedTimetable.classes.push(newClass);
-    //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
 
@@ -435,7 +427,18 @@ export class TimetableSettingsComponent implements OnInit {
   }
 
   lockTimetable(value: boolean): void {
-    this.timetableService.lockTimetable(value);
+    if(!value) {
+      this.showUnlockScreen = true;
+    } else {
+      // just lock it!
+      this.timetableService.lockTimetable(value);
+    }
+  }
+
+  closeUnlockWindow(input: any): void {
+    if(input === true) {
+      this.showUnlockScreen = false;
+    }
   }
 
   copyLink(): void {
@@ -447,4 +450,13 @@ export class TimetableSettingsComponent implements OnInit {
     this.loadedTimetable.sortMethod = +input.target.value;
     console.log(this.loadedTimetable.sortMethod);
   }
+
+  enableShuffle(): void {
+    this.loadedTimetable.shuffleStudents = !this.loadedTimetable.shuffleStudents;
+  }
+
+  setStudentPriorityCount(input: any): void {
+    this.loadedTimetable.studentPriorityCount = +input.target.value;
+  }
+
 }

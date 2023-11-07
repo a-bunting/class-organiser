@@ -54,10 +54,7 @@ router.post('/login', (req, res, next) => {
       // test the password
       bcrypt.compare(password, userDetails[0].password).then(correctPassword => {
 
-        console.log(correctPassword);
-
         if(correctPassword) {
-
           const userData = {
             id: userDetails[0].id,
             token: generateToken(userDetails[0].email, userDetails[0].id, remainLoggedIn),
@@ -72,6 +69,9 @@ router.post('/login', (req, res, next) => {
             }
           };
 
+          let stats = req.stats;
+          stats.userLoggedIn(userData);
+
           // successs
           console.log(`User ${userDetails[0].email} has logged in.`)
           res.status(200).json({ error: false, message: '', data: { ...userData } })
@@ -84,6 +84,13 @@ router.post('/login', (req, res, next) => {
       }
   })
 })
+
+router.get('/logout', (req, res, next) => {
+    const userData = userMethods.getUserDataFromToken(req);
+    let stats = req.stats;
+    stats.userLoggedOut(userData.id);
+    res.status(200).json({ error: false, message: '', data: {} })
+});
 
 router.post('/lockTimetable', checkAuth, (req, res, next) => {
     const userData = userMethods.getUserDataFromToken(req);
@@ -168,8 +175,8 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
 
     // break up the timetable into segmenets for the database;
     const code = timetable.code === "" ? stringMethods.generateRandomString(5) : timetable.code;
-    const timetableQuery = `INSERT INTO timetable (dataCode, saveCode, sortMethod, userId, name, rooms, blocks, scores, colors) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, saveCode = new_data.saveCode, sortMethod = new_data.sortMethod, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores, colors = new_data.colors`;
-    const data = [code, timetable.saveCode, timetable.sortMethod, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores), JSON.stringify(colors)];
+    const timetableQuery = `INSERT INTO timetable (dataCode, saveCode, sortMethod, studentPriorityCount, shuffle, userId, name, rooms, blocks, scores, colors) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, saveCode = new_data.saveCode, sortMethod = new_data.sortMethod, studentPriorityCount = new_data.studentPriorityCount, shuffle = new_data.shuffle, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores, colors = new_data.colors`;
+    const data = [code, timetable.saveCode, timetable.sortMethod, timetable.studentPriorityCount, timetable.shuffleStudents, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores), JSON.stringify(colors)];
     // console.log(timetableQuery);
 
     db.query(timetableQuery, [data], (e, r) => {
@@ -306,7 +313,7 @@ router.post('/getTimetable', checkAuth, (req, res, next) => {
 
     const query = `
     SELECT
-    timetable.id, timetable.dataCode, timetable.saveCode, timetable.sortMethod, timetable.locked, timetable.name, timetable.rooms, timetable.blocks, timetable.scores, timetable.colors,
+    timetable.id, timetable.dataCode, timetable.saveCode, timetable.sortMethod, timetable.studentPriorityCount, timetable.shuffle, timetable.locked, timetable.name, timetable.rooms, timetable.blocks, timetable.scores, timetable.colors,
     GROUP_CONCAT(DISTINCT CONCAT(timetable__classes.classId, "|", timetable__classes.teacher) SEPARATOR '$') as classes,
     GROUP_CONCAT(DISTINCT CONCAT(timetable__courses.courseId, "|", timetable__courses.name, "|", timetable__courses.classSize, "|", timetable__courses.required, "|", timetable__courses.times) SEPARATOR '$') as courses,
     GROUP_CONCAT(DISTINCT CONCAT(timetable__restrictions.restrictionId, "|", timetable__restrictions.name, "|", timetable__restrictions.description, "|", timetable__restrictions.options, "|", timetable__restrictions.pollInclude) SEPARATOR '$') as restrictions
@@ -348,7 +355,8 @@ router.post('/getTimetable', checkAuth, (req, res, next) => {
                     email: a.email, 
                     name: { forename: a.forename, surname: a.surname },
                     data: a.data,
-                    coursePriorities: a.priorities
+                    coursePriorities: a.priorities,
+                    studentPriorities: a.studentPriorities
                 }
             })
 
@@ -369,9 +377,11 @@ router.post('/getTimetable', checkAuth, (req, res, next) => {
                 students: students,
                 locked: r[0][0].locked, 
                 rooms: rooms,
-                colorPriority: colors
+                colorPriority: colors,
+                studentPriorityCount: r[0][0].studentPriorityCount,
+                studentShuffle: r[0][0].shuffle, 
+                sortMethod: r[0][0].sortMethod
             }
-
             res.status(200).json({ error: false, message: ``, data: foundTimetable })
 
         } else {

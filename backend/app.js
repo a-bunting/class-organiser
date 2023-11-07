@@ -1,6 +1,11 @@
 const express = require('express');
+const Stats = require('./objects/stats');
 const bodyParser = require('body-parser');
 const app = express();
+
+// begin the stats logs
+const stats = new Stats();
+stats.initiateStatistics();
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -17,6 +22,9 @@ const userRoutes = require('./routes/user');
 const exportRoutes = require('./routes/export');
 const processingRoutes = require('./routes/process');
 const surveyRoutes = require('./routes/survey');
+
+// add the stats module to the request so its available to all routes.
+app.use((req, res, next) => { req['stats'] = stats; next(); })
 
 // all the various api calls...
 app.use("/api/user", userRoutes);

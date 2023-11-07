@@ -22,6 +22,7 @@ export class TimetablesComponent {
     private router: Router,
     public authService: AuthenticationService,
     private timetableService: TimetableService,
+    private databaseService: DatabaseService
   ) {
     this.boundRemoveUserMenu = this.removeUserMenu.bind(this);
     this.preloadImages();
@@ -114,7 +115,15 @@ export class TimetablesComponent {
   }
 
   logout(): void {
-    this.authService.logOut();
+
+    this.databaseService.logout().subscribe({
+      next: (result: DatabaseReturn) => {
+        if(!result.error) this.authService.logOut();
+      },
+      error: (e: any) => { console.log(e); }
+    })
+
+    
   }
 
 

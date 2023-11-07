@@ -6,19 +6,20 @@
     align-items: center;
     justify-content: center;
     column-gap: 2rem;
-
+    
     &__button {
-        padding: 2rem 4rem;
+        padding: 1rem 2rem;
         border-radius: 1rem;
-        width: 25rem;
+        width: 22rem;
         height: 20rem;
         font-size: 1.4rem;
         text-align: center;
         line-height: 2rem;
-
+        
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
 
         &:nth-of-type(1) { background-color: lightgoldenrodyellow; }
         &:nth-of-type(2) { background-color: lightblue; }
@@ -32,5 +33,14 @@
             transform: translateY(-.3rem);
             box-shadow: .2rem 0 .4rem rgba(black, .4);
         }
+
+        p {
+            margin-bottom: 2rem;
+        }
+    }
+
+    &__examples {
+        font-style: italic;
+        font-size: 1.2rem;
     }
 }

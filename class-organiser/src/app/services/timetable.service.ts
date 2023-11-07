@@ -15,6 +15,8 @@ export interface Timetable {
   students: SingleStudent[];
   locked: boolean;
   sortMethod: number; // 0 = coursePriority, 1 = studentPriority, 2 = both
+  shuffleStudents: boolean;
+  studentPriorityCount: number;
   rooms: { id: number, name: string }[];
   colorPriority: string[]
 }
@@ -198,6 +200,7 @@ export class TimetableService {
 
   // literally just called by loadTimetableById to load the tmetable into the system
   loadTimetable(timetable: Timetable): void {
+    console.log(timetable);
     this.loaded = timetable;
     this.loadedTimetable.next(timetable);
   }
@@ -310,6 +313,7 @@ export class TimetableService {
 
   createBlank(sortMethod: number): void {
     const timetables: Timetable[] = this.getFromLocalStorage();
+    let courses: SingleCourse[] = sortMethod === 0 ? [] : [{ id: 0, name: 'StudentPriority', classSize: 24, requirement: { required: true, times: 999 }}];
 
     let newTimetable: Timetable = {
       id: undefined!,
@@ -318,12 +322,13 @@ export class TimetableService {
       saveCode: this.generateRandomString(10),
       name: "New Timetable",
       classes: [],
-      courses: [],
+      courses: courses,
       students: [],
+      studentPriorityCount: sortMethod === 0 ? 0 : 3,
+      shuffleStudents: false,
       rooms: [{ id: 0, name: 'New Room' }],
-      restrictions: [
-    ],
-    locked: false,
+      restrictions: [],
+      locked: false,
       schedule: { blocks: [] },
       colorPriority: []
     }

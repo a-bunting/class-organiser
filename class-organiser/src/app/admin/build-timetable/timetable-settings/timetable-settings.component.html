@@ -34,6 +34,7 @@
 </div>
 
 <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+<app-unlock *ngIf="showUnlockScreen" [sortMethod]="loadedTimetable.sortMethod" (closeWindow)="closeUnlockWindow($event)"></app-unlock>
 
 <div class="ttsettings">
 
@@ -47,7 +48,7 @@
 
     <div class="ttsettings__buttons--row">
       <div class="ttsettings__buttons--left">
-        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled">
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" [class.ttsettings__buttons--off]="loadedTimetable.locked" [class.ttsettings__buttons--on]="!loadedTimetable.locked">
           <img src="../../../../assets/icons/unlocked.png" alt="Input UnLocked" (click)="lockTimetable(true)" *ngIf="!loadedTimetable.locked" [tooltip]="'Students can currently input or edit their data, click to lock this.'">
           <img src="../../../../assets/icons/lock.png" alt="Input Locked" (click)="lockTimetable(false)" *ngIf="loadedTimetable.locked" [tooltip]="'Students cannot current add or change data. Click to unlock this.'">
         </div>
@@ -58,9 +59,10 @@
           <img src="../../../../assets/icons/download.png" alt="Export Data" [tooltip]="'Export this data'">
         </div>
         <div class="menu" id="downloadMenu" *ngIf="downloadMenuOpened">
+          <div class="menu__button" (click)="print()">Print</div>
           <div class="menu__button" (click)="googleExport()">Export to Google Sheets</div>
         </div>
-        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" (click)="print()"><img src="../../../../assets/icons/printer.png" alt="Print Timetable" [tooltip]="'Print this timetable'"></div>
+        <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" [class.ttsettings__buttons--off]="!loadedTimetable.shuffleStudents" [class.ttsettings__buttons--on]="loadedTimetable.shuffleStudents" (click)="enableShuffle()"><img src="../../../../assets/icons/shuffle.png" alt="Shuffle Button" [tooltip]="'Enabling Shuffle will try to have students work with different students between time blocks.'"></div>
       </div>
       <div class="ttsettings__buttons--right">
         <div class="ttsettings__buttons--button ttsettings__buttons--button--enabled" *ngIf="timetableSelectionData !== null" (click)="timetableSelectionScreenToggle(true)" ><img src="../../../../assets/icons/list-numbered.png" alt="Show options" [tooltip]="'Show the options given by the processor'"></div>
@@ -75,6 +77,25 @@
     <div class="ttsettings__buttons--row">
       <div class="ttsettings__buttons--left">
         <p>You have prioritised {{ loadedTimetable.sortMethod === 0 ? 'courses only.' : loadedTimetable.sortMethod === 1 ? 'students only.' : 'both courses and students.' }}</p>
+      </div>
+    </div>
+    <div class="ttsettings__buttons--row" *ngIf="loadedTimetable.sortMethod === 1">
+      <div class="ttsettings__buttons--left" [tooltip]="'This is how many people each student may choose they want to work with.'">
+        <p>Number of students to prioritise</p>
+      </div>
+      <div class="ttsettings__buttons--right">
+        <select class="input__select" (change)="setStudentPriorityCount($event)">
+          <option value="0" [selected]="loadedTimetable.studentPriorityCount===0">0</option>
+          <option value="1" [selected]="loadedTimetable.studentPriorityCount===1">1</option>
+          <option value="2" [selected]="loadedTimetable.studentPriorityCount===2">2</option>
+          <option value="3" [selected]="loadedTimetable.studentPriorityCount===3">3</option>
+          <option value="4" [selected]="loadedTimetable.studentPriorityCount===4">4</option>
+          <option value="5" [selected]="loadedTimetable.studentPriorityCount===5">5</option>
+          <option value="6" [selected]="loadedTimetable.studentPriorityCount===6">6</option>
+          <option value="7" [selected]="loadedTimetable.studentPriorityCount===7">7</option>
+          <option value="8" [selected]="loadedTimetable.studentPriorityCount===8">8</option>
+          <option value="9" [selected]="loadedTimetable.studentPriorityCount===9">9</option>
+        </select>
       </div>
     </div>
   </div>
@@ -131,6 +152,7 @@
     </div>
   </div>
 
+  <!-- <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode && loadedTimetable.sortMethod === 0"> -->
   <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode">
     <div class="ttsettings__text">
       <p>Courses</p>
