@@ -1,19 +1,19 @@
 <div class="buildtt">
 
     <!-- <app-loading-spinner *ngIf="loading"></app-loading-spinner> -->
-  
+
     <div class="buildtt__settings">
       <!-- <app-timetable-settings [timetables]="timetables" [selectionData]="timetableSelectionData" (triggerAction)="actionFromSettings($event)" (currentTimetableChange)="timetableSettingsChange($event)" (selectedTimetable)="selectTimetable($event)"></app-timetable-settings> -->
       <app-timetable-settings (triggerAction)="actionFromSettings($event)" *ngIf="loadedTimetable"></app-timetable-settings>
     </div>
-  
+
     <div class="buildtt__display">
       <div class="buildtt__info" *ngIf="copyData">
         <p *ngIf="copyData">Press ESCAPE to quit copy mode</p>
       </div>
-  
+
       <div class="buildtt__tt" *ngIf="loadedTimetable">
-  
+
         <div class="buildtt__col buildtt__col--narrow">
           <div class="buildtt__block buildtt__block--short buildtt__switch" ></div>
           <div class="buildtt__block buildtt__block--missingStudents buildtt__block--students" *ngIf="studentView">Unassigned</div>
@@ -21,10 +21,10 @@
             {{ class.teacher }}
           </div>
         </div>
-  
+
         <!-- and then the blocks -->
         <div cdkDropListGroup class="buildtt__col buildtt__col--normal" *ngFor="let timeBlock of loadedTimetable.schedule.blocks; let g = index">
-  
+
           <!-- title -->
           <div class="buildtt__block buildtt__block--short buildtt__block--tbTitle">
             <input type="text" class="input__text input__text--full input__text--center margin__right--small" [(ngModel)]="timeBlock.name">
@@ -34,36 +34,37 @@
             <button class="input__button input__length--veryshort" (click)="lockTimeblock(g)" [tooltip]="'Lock all students into this timeblock'">L</button>
           </div>
           <div cdkDropList (cdkDropListDropped)="drop($event, g)" class="buildtt__block buildtt__block--missingStudents buildtt__block--students" *ngIf="studentView">
-            <div cdkDrag  [cdkDragData]="student.id" class="buildtt__block--student" *ngFor="let student of getMissingStudentData(timeBlock.order)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" (click)="highlightStudent(student.id)">{{ student.name.forename }} {{ student.name.surname }}</div>
+            <!-- <div cdkDrag  [cdkDragData]="student.id" class="buildtt__block--student" *ngFor="let student of getMissingStudentData(timeBlock.order)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" (click)="highlightStudent(student.id)">{{ student.name.forename }} {{ student.name.surname }}</div> -->
+            <div cdkDrag  [cdkDragData]="student.id" class="buildtt__block--student" *ngFor="let student of getMissingStudentData(timeBlock.order)" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" (click)="highlightStudent(student.id)">Censored Name</div>
           </div>
           <!-- blocks -->
           <div cdkDropList (cdkDropListDropped)="drop($event, g)" id="block__{{ block.id }}" class="buildtt__block buildtt__block--block buildtt__block--normal" *ngFor="let block of timeBlock.blocks">
-  
+
             <div class="buildtt__paste" *ngIf="copyData">
               <img src="../../../assets/icons/paste.png" alt="Paste the data here" (click)="pasteData(block.id)">
             </div>
-  
+
             <div class="buildtt__block--name">
               <p>{{ block.name }} ({{ block.students.length }} students<span *ngIf="studentView"> in '{{ getRoomName(block.room) }}'</span>)</p>
               <img src="../../../assets/icons/copy.png" alt="Copy this blocks data" (click)="toggleCopyDataOn(block.id)" *ngIf="!studentView">
             </div>
-  
+
             <div class="buildtt__block--buttons" *ngIf="!studentView">
               <div class="buildtt__block--button" [class.buildtt__block--button--selected]="block.classOnly" (click)="setClassOnly(block.id)">All students of {{ getTeacherFromClassID(block.classId) }}</div>
-              
+
               <div>
                 <select class="input__select" (change)="selectRoom(block.id, $event)">
                     <option selected disabled>Select Room</option>
                   <option value="{{ room.id }}" *ngFor="let room of loadedTimetable.rooms" [selected]="room.id === block.room">{{ room.name }}</option>
                 </select>
-    
+
                 <input type="text" class="input__text input__length--short" [(ngModel)]="block.maxStudents" [tooltip]="'How many students are maximum in this class/room/group'">
               </div>
             </div>
-  
+
             <div class="buildtt__block--data" *ngIf="!block.classOnly && !studentView">
-  
-  
+
+
               <select class="input__select input__length--full" (change)="selectBlockProperty(block.id, $event)">
                 <option value="" disabled selected>Build Course Requirements</option>
                 <option value="" disabled></option>
@@ -73,14 +74,14 @@
                 <option value="" disabled>Add Restrictions to this block</option>
                 <option value="1,{{ restriction.id }}" *ngFor="let restriction of loadedTimetable.restrictions"> - {{ restriction.name }}</option>
               </select>
-  
+
               <div class="buildtt__block--courses">
                 <div class="buildtt__block--course" *ngFor="let course of block.courses">
                   <div class="buildtt__block--course--name">{{ getCourseNameFromId(course) }}</div>
                   <button class="input__button input__length--veryshort" (click)="removeCourseFromBlock(block.id, course)">X</button>
                 </div>
               </div>
-  
+
               <div class="buildtt__block--restrictions">
                 <div class="buildtt__block--course buildtt__block--restriction" *ngFor="let restriction of block.restrictions">
                   <div class="buildtt__block--course--name">{{ getRestrictionNameFromId(restriction.restrictionId) }}</div>
@@ -90,19 +91,19 @@
                   <button class="input__button input__length--veryshort" (click)="removeRestrictionFromBlock(block.id, restriction.restrictionId)">X</button>
                 </div>
               </div>
-  
+
             </div>
-  
+
             <div class="buildtt__block--students" *ngIf="studentView">
-              <div cdkDrag class="buildtt__block--student" [cdkDragData]="student.id" *ngFor="let student of getStudentData(block.id)" [ngStyle]="{'background-color': getPriorityColor(block, student)}" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" [class.buildtt__block--student--locked]="isStudentLocked(student.id, block.id)" (click)="highlightStudent(student.id)" (dblclick)="lockStudent(student.id, block.id)">{{ student.name.forename }} {{ student.name.surname }}</div>
+              <!-- <div cdkDrag class="buildtt__block--student" [cdkDragData]="student.id" *ngFor="let student of getStudentData(block.id)" [ngStyle]="{'background-color': getPriorityColor(block, student)}" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" [class.buildtt__block--student--locked]="isStudentLocked(student.id, block.id)" (click)="highlightStudent(student.id)" (dblclick)="lockStudent(student.id, block.id)">{{ student.name.forename }} {{ student.name.surname }}</div> -->
+              <div cdkDrag class="buildtt__block--student" [cdkDragData]="student.id" *ngFor="let student of getStudentData(block.id)" [ngStyle]="{'background-color': getPriorityColor(block, student)}" [class.buildtt__block--student--highlight]="highlightedStudent === student.id" [class.buildtt__block--student--locked]="isStudentLocked(student.id, block.id)" (click)="highlightStudent(student.id)" (dblclick)="lockStudent(student.id, block.id)">Censored Name</div>
             </div>
         </div>
       </div>
-  
+
       <div class="buildtt__col buildtt__col--add" (click)="addTimeBlock()">
         <p [tooltip]="'Add new time block'">+</p>
       </div>
-  
+
     </div>
   </div>
-  

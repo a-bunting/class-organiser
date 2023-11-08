@@ -1,4 +1,5 @@
 import { Component, OnInit, provideZoneChangeDetection } from '@angular/core';
+import { NumberValueAccessor } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthenticationService, User } from 'src/app/services/authentication.service';
 import { DatabaseService } from 'src/app/services/database.service';
@@ -26,6 +27,12 @@ export class StudentDataComponent implements OnInit {
   ) {
   }
 
+  generateRandomData(input: any): void {
+    let type: number = +input.target.value;
+    if(type === 0) return;
+    if(type === 1) this.generateRandomDataForStudentPriority();
+  }
+
   generateRandomDataForStudentPriority(): void {
     let studentCount = 40;
     let forenamesMale = ['albus','harry','ron','fred','george','neville','finneus','sirius','remus','lord','arthur','charlie','bill'];
@@ -39,17 +46,17 @@ export class StudentDataComponent implements OnInit {
         {id: 1, value: 'Female'}
       ],
       name: 'Gender',
-      description: 'a desription', 
+      description: 'a desription',
       poll: true
     }
 
-    
+
     for(let i = 0 ; i < studentCount ; i++) {
-      
+
       let gender = Math.floor(Math.random() * 2);
       let forename = gender === 0 ? forenamesMale[Math.floor(Math.random() * forenamesMale.length)] : forenamesFemale[Math.floor(Math.random() * forenamesFemale.length)].toUpperCase();
       let surname = surnames[Math.floor(Math.random() * surnames.length)];
-      
+
       let newStudent: SingleStudent = {
         id: i, classId: -1,
         name: { forename: forename, surname: surname },
@@ -58,7 +65,7 @@ export class StudentDataComponent implements OnInit {
         coursePriorities: [],
         studentPriorities: []
       }
-      
+
       this.loadedTimetable.students.push(newStudent);
     }
 
@@ -66,16 +73,16 @@ export class StudentDataComponent implements OnInit {
       let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === i )!;
       let gender: number = +student.data[0].value;
       let others: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => a.data[0].value === gender && a.id !== i );
-      
+
       for(let m = 0 ; m < 4 ; m++) {
         let random: SingleStudent = others.sort((a: SingleStudent, b:SingleStudent) => Math.random() -0.5 )[0];
         student.studentPriorities.push({ studentId: random.id, priority: m + 1 });
         others = others.filter((a: SingleStudent) => a.id !== random.id);
       }
     }
-    
+
     this.loadedTimetable.restrictions = [genderReestriction];
-    
+
   }
 
   ngOnInit(): void {
@@ -171,16 +178,16 @@ export class StudentDataComponent implements OnInit {
 
     this.asc = !this.asc;
   }
-  
+
   deleteStudent(studentId: number): void {
     this.loadedTimetable.students = this.loadedTimetable.students.filter((a: SingleStudent) => a.id !== studentId);
-    
+
     // remove them from all blocks in the timetable
     for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
      let timeBlock: SingleTimeBlock = this.loadedTimetable.schedule.blocks[i];
 
      timeBlock.missingStudents = timeBlock.missingStudents.filter((a: number) => a !== studentId);
-    
+
       for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
         timeBlock.blocks[o].students = timeBlock.blocks[o].students.filter((a: number) => a !== studentId);
       }
@@ -201,13 +208,16 @@ export class StudentDataComponent implements OnInit {
       id++;
     }
 
+    let courses: { courseId: number, priority: number }[] = this.loadedTimetable.sortMethod === 0 ? [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })] : [];
+    let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: this.getRandomStudentId(), priority: i + 1 }})] : [];
+
     let newStudent: SingleStudent = {
       id,
       name: { forename: '', surname: '' },
-      classId: 0, 
-      data: [...this.loadedTimetable.restrictions.map((a: Restriction) => { return { restrictionId: a.id, value: a.options[0].id }})], 
-      coursePriorities: [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })],
-      studentPriorities: []
+      classId: 0,
+      data: [...this.loadedTimetable.restrictions.map((a: Restriction) => { return { restrictionId: a.id, value: a.options[0].id }})],
+      coursePriorities: courses,
+      studentPriorities: students
     }
 
     console.log(newStudent);
@@ -215,11 +225,16 @@ export class StudentDataComponent implements OnInit {
     this.newStudent = newStudent;
   }
 
+  getRandomStudentId(): number {
+    const random: number = Math.floor(Math.random() * this.loadedTimetable.students.length);
+    return random;
+  }
+
   submitNewStudent(): void {
     this.loadedTimetable.students.push({ ...this.newStudent });
     this.newStudent = null!;
   }
-  
+
   deleteNewStudent(): void {
     this.newStudent = null!;
   }
@@ -245,6 +260,11 @@ export class StudentDataComponent implements OnInit {
     let course = student.coursePriorities!.find((a: { courseId: number, priority: number }) => a.courseId === changeToCourseId)!;
     course.priority = destinationPriority;
     //this.timetableService.updateSavedTimetable(this.loadedTimetable);
+  }
+
+  changeStudentPriority(student: SingleStudent, priority: number, input: any): void {
+    let curPrio: { studentId: number, priority: number } = student.studentPriorities.find((a: { studentId: number, priority: number }) => a.priority === priority)!;
+    if(curPrio) { curPrio.studentId = +input.target.value; }
   }
 
   modifyDataValue(student: SingleStudent, restrictionId: number, input: any): void {
@@ -347,16 +367,16 @@ export class StudentDataComponent implements OnInit {
     let classesLastId: number = 0;
 
     if(!teachers) return;
-    
+
     for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
       if(this.loadedTimetable.classes[i].id >= classesLastId) classesLastId = this.loadedTimetable.classes[i].id + 1;
     }
-    
+
     // makes a list of classes with all teachers, including new ones.
     for(let i = 0 ; i < teachers.length ; i++) {
       this.classes.push({ teacher: teachers[i], id: classesLastId + i });
     }
-    
+
     console.log(this.classes);
     this.loadedTimetable.classes = this.classes;
   }
@@ -458,6 +478,20 @@ export class StudentDataComponent implements OnInit {
     }
 
     return restrictionData;
+  }
+
+  getStudentPriorityList(number: number): number[] {
+    return new Array(number);
+  }
+
+  // returns the student id of prioirty X for this student
+  getStudentStudentPriorityData(student: SingleStudent, priority: number): number {
+    let prio: { studentId: number, priority: number } = student.studentPriorities.find((a: { studentId: number, priority: number }) => a.priority === priority )!;
+    return prio.studentId;
+  }
+
+  alreadySelected(student: SingleStudent, studentIdToCheck: number): boolean {
+    return !!student.studentPriorities.find((a: { studentId: number, priority: number }) => a.studentId === studentIdToCheck);
   }
 
 }

@@ -1,0 +1,13 @@
+A few months ago a member of the PE team at my former school came to me with a problem. Every year the middle school run seven options for their students in PE. Students pick their 1st-7th priorities and then they try and make the best schedule for them as is possible. On top of their students must do atheltics and swim, on top of which some of these sessions must be girls only, or for students who do or dont fast over ramadan.
+
+
+Given the size of the middle school, this problem would take a long time to solve by hand. It also wasn't known how good the solution they came up with was because it was difficult and extremele time ineffective to work that out.
+
+
+What I was able to do was make a program to streamline this, so instead of taking a day to solve, it took minutes. The teachers could also see how many students got their choices and were able to instantly see where there were problems and make small manual changes.
+
+
+In future years when they reuse it the software will also poll students so as to also take that part out of their hands, and they can also use it to schedule ideal rooming situations for week without walls.
+
+
+It was really fun working on a project that had such a impact on student choice (when last I saw, 97%+ of students were getting their first choice) and allowing those teachers to spend their time refining the blocks as opposed to creating them.

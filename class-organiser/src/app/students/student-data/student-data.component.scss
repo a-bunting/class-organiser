@@ -16,7 +16,7 @@
         border-radius: 1rem;
         box-shadow: .2rem 0 .4rem rgba(black, .5);
         color: white;
-        
+
         &:hover {
             cursor: pointer;
             filter: brightness(1.2);
@@ -121,5 +121,18 @@
         tbody tr:last-of-type {
             border-bottom: 2px solid #009879;
         }
+    }
+
+    &__newRow {
+      background-color: lightcoral !important;
+    }
+
+    &__random {
+      padding: .5rem 1rem;
+      border-radius: 1rem;
+      font-size: 1.4rem;
+      width: 30rem;
+      margin-left: 2rem;
+      justify-self: flex-start;
     }
 }
