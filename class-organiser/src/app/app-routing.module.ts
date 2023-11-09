@@ -11,14 +11,16 @@ import { DataCollectionComponent } from './data-collection/data-collection.compo
 import { SelectTimetableTypeComponent } from './timetables/select-timetable-type/select-timetable-type.component';
 import { StudentPriorityComponent } from './views/student-priority/student-priority.component';
 import { ClassPriorityComponent } from './views/class-priority/class-priority.component';
+import { InterestComponent } from './user/interest/interest.component';
 
 
 const routes: Routes = [
+  { path: 'register', component: InterestComponent },
   { path: 'survey', component: DataCollectionComponent },
   { path: 'survey/:code', component: DataCollectionComponent },
   { path: 'start', component: StartComponent, children: [
     { path: '', component: LoginComponent },
-    { path: 'register', component: RegisterComponent }
+    { path: 'register', component: RegisterComponent },
   ] },
   { path: '', component: TimetablesComponent, canActivate: [AuthGuard], children: [
     { path: 'timetables', component: BuildTimetableComponent, children: [

@@ -1,0 +1,86 @@
+<div class="interest">
+
+    <app-small-loader *ngIf="thinking"></app-small-loader>
+
+  
+    <div class="interest__display" *ngIf="!complete">
+        <div class="interest__display--title">Registration Form</div>
+        <div class="interest__display--section--desc">Fill in this form to register your school for ClassCraft. Upon submission I will email you an invoice, and when this is processed I will enable access for all members of your community.</div>
+
+        <div class="interest__errors" *ngIf="error.length > 0">
+            <div class="interest__errors--error" *ngFor="let e of error">{{ e }}</div>
+        </div>
+
+        <div class="interest__display--split">
+            <div class="interest__display--left">
+                <div class="interest__display--section">
+                    <div class="interest__display--section--title">Information about you</div>
+                    <div class="interest__display--section--desc">This is just contact information.</div>
+                    <!-- data here -->
+                    <div class="interest__row">
+                        <div class="interest__row--text">Forename*</div>
+                        <div class="interest__row--input" [class.interest__row--input--highlight]="highlightRequired"><input type="text" [(ngModel)]="data.name.forename" required></div>
+                    </div>
+                    <div class="interest__row">
+                        <div class="interest__row--text">Surname*</div>
+                        <div class="interest__row--input" [class.interest__row--input--highlight]="highlightRequired"><input type="text" [(ngModel)]="data.name.surname" required></div>
+                    </div>
+                    <div class="interest__row">
+                        <div class="interest__row--text">Email*</div>
+                        <div class="interest__row--input" [class.interest__row--input--highlight]="highlightRequired || highlightEmails"><input type="email" [(ngModel)]="data.email" required></div>
+                    </div>
+                    <div class="interest__row">
+                        <div class="interest__row--text">Confirm Email*</div>
+                        <div class="interest__row--input" [class.interest__row--input--highlight]="highlightRequired || highlightEmails"><input type="email" [(ngModel)]="confirmedEmail" required></div>
+                    </div>
+                </div>
+            </div>
+            <div class="interest__display--right">
+                <div class="interest__display--section">
+                    <div class="interest__display--section--title">Your School</div>
+                    <div class="interest__display--section--desc">This is information about your school which will enable me to invoice you correctly and enable all community members to access the software.</div>
+    
+                    <div class="interest__row">
+                        <div class="interest__row--text">
+                            School Name*
+                        </div>
+                        <div class="interest__row--input" [class.interest__row--input--highlight]="highlightRequired"><input type="text" [(ngModel)]="data.institute.name" required></div>
+                    </div>
+                    <div class="interest__row">
+                        <div class="interest__row--text">
+                            Email Suffix*
+                            <div class="interest__help" [tooltip]="'This is what enables your community to register in the app. Anybody with this email suffix will be able to register. Enter this as everything after the @, for example alex.bunting@gmail.com becomes gmail.com'"></div>
+                        </div>
+                        <div class="interest__row--input" [class.interest__row--input--highlight]="highlightRequired || highlightSuffix"><input type="text" [(ngModel)]="data.institute.suffix" required placeholder="ex: gmail.com"></div>
+                    </div>
+                    <div class="interest__row">
+                        <div class="interest__row--text">
+                            School Size*
+                            <div class="interest__help" [tooltip]="'The cost of ClassCraft is based upon the size of your institute, ranging from $100 USD per annum to $995 USD per annum. Please enter the range that matches your approximate internal school community size (excluding parents). Note this does not impact the features you recieve, but reflects the demand on the server of a larger usergroup.'"></div>
+                        </div>
+                        <div class="interest__row--input" [class.interest__row--input--highlight]="highlightRequired">
+                            <select (change)="modifySchoolSize($event)">
+                                <option value="400">1 - 400</option>
+                                <option value="1000">401 - 1000</option>
+                                <option value="2000">1001 - 2000</option>
+                                <option value="4000">2001 - 4000</option>
+                                <option value="9999">4000 and more</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interest__display--section--title margin__top--medium">Submit Data</div>
+                <div class="interest__display--section--desc">Make sure all of the information you have supplied is correct.</div>
+                <button (click)="valid()">Submit</button>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="interest__complete" *ngIf="complete">
+        <div class="interest__complete--title">Thank you, your form has been submitted and I will get back to you soon.</div>
+    </div>
+  
+  </div>
+  

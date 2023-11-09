@@ -29,6 +29,7 @@ import { SelectTimetableTypeComponent } from './timetables/select-timetable-type
 import { ClassPriorityComponent } from './views/class-priority/class-priority.component';
 import { StudentPriorityComponent } from './views/student-priority/student-priority.component';
 import { UnlockComponent } from './timetables/unlock/unlock.component';
+import { InterestComponent } from './user/interest/interest.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,8 @@ import { UnlockComponent } from './timetables/unlock/unlock.component';
     SelectTimetableTypeComponent,
     ClassPriorityComponent,
     StudentPriorityComponent,
-    UnlockComponent
+    UnlockComponent,
+    InterestComponent
   ],
   imports: [
     BrowserModule,

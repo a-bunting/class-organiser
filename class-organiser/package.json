@@ -19,6 +19,7 @@
     "@angular/platform-browser": "^16.2.8",
     "@angular/platform-browser-dynamic": "^16.2.8",
     "@angular/router": "^16.2.8",
+    "@emailjs/browser": "^3.11.0",
     "@melloware/coloris": "^0.21.1",
     "emailjs": "^4.0.3",
     "ngx-color-picker": "^15.0.0",

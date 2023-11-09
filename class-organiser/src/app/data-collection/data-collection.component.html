@@ -82,6 +82,7 @@
                         <div class="survey__row--text">{{ i + 1 | ordinal }} priority</div>
                         <div class="survey__row--input">
                             <select (change)="setStudentPriority(i+1, $event)">
+                                <option value="-1">No Preference</option>
                                 <option value="{{ student.id }}" *ngFor="let student of data.students" [selected]="isStudentSelected(student.id, i+1)" [disabled]="studentAlreadySelected(student.id)">{{ student.name.forename }} {{ student.name.surname }}</option>
                             </select>
                         </div>

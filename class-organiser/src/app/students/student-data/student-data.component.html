@@ -1,28 +1,31 @@
 <div class="studentData">
 
     <div class="studentData__title">
-      <p>Student Data</p>
-      <select class="input__select studentData__random" (change)="generateRandomData($event)" *ngIf="loadedTimetable.students.length === 0" [tooltip]="'This will generate some sample data for you to practice using the timetabler'">
-        <option disabled selected>Generate Random Sample Data</option>
-        <option value="1" *ngIf="loadedTimetable.sortMethod === 1">Student Priority Data (Group of 90, Ex: Rooming)</option>
-        <option value="2" *ngIf="loadedTimetable.sortMethod === 1">Student Priority Data (Class of 21, Ex: Class Group)</option>
-        <option value="0" *ngIf="loadedTimetable.sortMethod === 0">Course Priority Data (Class of 100)</option>
-      </select>
-      <div class="studentData__add" (click)="addStudentToggle()">Add Student</div>
+        <p>Student Data</p>
+        <select class="input__select studentData__random" (change)="generateRandomData($event)" *ngIf="loadedTimetable.students.length === 0" [tooltip]="'This will generate some sample data for you to practice using the timetabler'">
+            <option disabled selected>Generate Random Sample Data</option>
+            <option value="1" *ngIf="loadedTimetable.sortMethod === 1">Student Priority Data (Group of 90, Ex: Rooming)</option>
+            <option value="2" *ngIf="loadedTimetable.sortMethod === 1">Student Priority Data (Class of 21, Ex: Class Group)</option>
+            <option value="0" *ngIf="loadedTimetable.sortMethod === 0">Course Priority Data (Class of 100)</option>
+        </select>
+        <ng-container>
+          <div class="studentData__add" (click)="addStudentToggle()">Add Student</div>
+          <div class="studentData__add" (click)="addStudentToggle()">Upload from TSV</div>
+        </ng-container>
+        
     </div>
 
 
-
-    <!-- <div class="studentData__import" *ngIf="loadedTimetable.students.length === 0">
+    <div class="studentData__import" *ngIf="loadedTimetable.students.length === 0">
         <div class="studentData__import--title">Import from TSV File</div>
         <div class="studentData__import--box">
             <div class="studentData__import--drop" (drop)="onDrop($event)" (dragover)="onDragOver($event)">Drop a TSV file here to import</div>
             <div class="studentData__import--instructions">
-                <img src="../../../assets/howToCsv1.jpg" alt="How to TSV Step 1">
-                <img src="../../../assets/howToCsv2-2.jpg" alt="How to TSV Step 2">
+                <img src="../../../assets/help/tsv/tsv_basic.jpg" alt="How to TSV Step 1">
+                <img src="../../../assets/help/tsv/howToCsv2-2.jpg" alt="How to TSV Step 2">
             </div>
         </div>
-    </div> -->
+    </div>
 
     <div class="studentData__none" *ngIf="loadedTimetable.students.length === 0 && !newStudent">
       <div class="studentData__none--instructions">There is currently no student data - click the 'Add Student' button in the top right to add a new student.</div>
