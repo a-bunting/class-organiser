@@ -368,7 +368,7 @@ function prioritiseByCourse(timetable, iterationStudentList, blockList) {
 function prioritiseByStudent(timetable, iterationStudentList, blockList) {
 // this function will test whether or not this is the most appropriate time for this student to do this class
     // the MOST appropriate block is the one in which the requirements are most rigorously met
-    const appropriatenessTest = (blockList, courseId, student) => {
+    const appropriatenessTest = (blockList, courseId, student, studentPriorityCount) => {
         // get the other blocks this might appear in
         // let blockWithCourse = blockList.filter(a => +a.block.courses[0] === +courseId);
         let blockWithCourse = blockList.filter(a => +a.block.selectedCourse === +courseId);
@@ -394,10 +394,11 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
 
             // // check who else is in the class and if there are people the student want to be with, add them too
             let studentChoices = student.studentPriorities;
+            let choices = studentPriorityCount > studentChoices.length ? studentChoices.length : studentPriorityCount;
             // console.log(student);
             let choiceTotal = 0;
 
-            for(let s = 0 ; s < studentChoices.length ; s++) {
+            for(let s = 0 ; s < choices ; s++) {
                 let friendsInCourse = blockWithCourse[i].block.students.includes(studentChoices[s].studentId);
                 if(friendsInCourse) {
                     choiceTotal += 1 / studentChoices[s].priority;
@@ -445,7 +446,7 @@ function prioritiseByStudent(timetable, iterationStudentList, blockList) {
 
             let list = priorityListed[i].list[o];
             // get the options for this
-            let contendingBlocks = appropriatenessTest(blockList, list.courseId, list.student).filter(a => {
+            let contendingBlocks = appropriatenessTest(blockList, list.courseId, list.student, timetable.studentPriorityCount).filter(a => {
                 // filter out timeBlocks the student is currently in.
                 let finder = list.student.timeBlocksFilled.find(c => +c.timeBlockId === +a.timeBlock);
                 if(finder) return false;
@@ -497,7 +498,7 @@ function getFitnessRatingByStudentPriority(timetable) {
     let shuffleScore = 0;
 
     const PRIORITY_SCORES = Array.from({ length: timetable.students[0].studentPriorities.length }, (_, i) => { return 200 / (i + 1) });
-    const SHUFFLE_POINTS = 50;
+    const SHUFFLE_POINTS = 100;
 
     // get a list of all the blocks, each block has a list of students
     const blocks = [].concat(...timetable.schedule.blocks.map(a => { return a.blocks.map(b => { return b }) }));
@@ -528,7 +529,7 @@ function getFitnessRatingByStudentPriority(timetable) {
         }
 
         //-SHUFFLE_POINTS to eliminate user from list, each unique students they work with gets points.
-        if(shuffle) shuffleScore += new Set(worksWith).size * SHUFFLE_POINTS - SHUFFLE_POINTS;
+        if(shuffle) shuffleScore += ((new Set(worksWith).size * (SHUFFLE_POINTS - 1)) / timetable.schedule.blocks.length);
 
         if(studentPoneOrPtwo) {
             priorityOneOrTwo++;

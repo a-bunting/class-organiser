@@ -6,12 +6,15 @@
         justify-content: space-between;
         align-items: center;
         font-size: 3rem;
+        background-color: rgba(lightgrey, .6);
+        padding: .5rem 1rem;
+        border-radius: 1rem;
     }
 
     &__add {
         padding: 1rem 2rem;
         background-color: #009879;
-        font-size: 2rem;
+        font-size: 1.6rem;
         transition: all .2s;
         border-radius: 1rem;
         box-shadow: .2rem 0 .4rem rgba(black, .5);
@@ -134,5 +137,27 @@
       width: 30rem;
       margin-left: 2rem;
       justify-self: flex-start;
+    }
+
+    &__none {
+      margin-top: 10rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      &--instructions, &--info {
+        text-align: center;
+        width: 50rem;
+      }
+
+      &--instructions {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      &--info {
+        font-size: 1.6rem;
+      }
     }
 }

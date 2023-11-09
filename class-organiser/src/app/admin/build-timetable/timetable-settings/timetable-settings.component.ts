@@ -286,15 +286,18 @@ export class TimetableSettingsComponent implements OnInit {
       // go through and delete the blocks relating tot his class
       let classId: number = this.loadedTimetable.classes[classIndex].id;
 
+      // moving any students into the missing students box for the timeslowt and remoing the block
       for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
         let findId: number = this.loadedTimetable.schedule.blocks[i].blocks.findIndex((a: SingleBlock) => a.classId === classId);
 
         if(findId !== -1) {
+          let students: number[] = [...this.loadedTimetable.schedule.blocks[i].blocks[findId].students];
+          this.loadedTimetable.schedule.blocks[i].missingStudents.push(...students);
           this.loadedTimetable.schedule.blocks[i].blocks.splice(findId, 1);
         }
       }
 
-      // and then remove the class.
+      // and then remove the class
       this.timetableService.setupClassDeletion(classId);
       this.loadedTimetable.classes.splice(classIndex, 1);
     }

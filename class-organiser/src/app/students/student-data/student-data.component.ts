@@ -28,28 +28,24 @@ export class StudentDataComponent implements OnInit {
   }
 
   generateRandomData(input: any): void {
-    let type: number = +input.target.value;
-    if(type === 0) return;
-    if(type === 1) this.generateRandomDataForStudentPriority();
+    let selection: number = +input.target.value;
+    if(selection === 0) this.generateStudentsData(0, 100, true);
+    if(selection === 1) this.generateStudentsData(1, 90);
+    if(selection === 2) this.generateStudentsData(1, 21, false);
   }
 
-  generateRandomDataForStudentPriority(): void {
-    let studentCount = 40;
-    let forenamesMale = ['albus','harry','ron','fred','george','neville','finneus','sirius','remus','lord','arthur','charlie','bill'];
-    let forenamesFemale = ['hermione','molly','fleur','minerva','ginny','cho','lavender','parvata','padma','lilly'];
-    let surnames = ['dumbledore','mcgonagall','weasley','longbottom','sprout','flitwick','black','lupin','voldemort','delacour'];
+  generateStudentsData(sortMethod: number, studentCount: number, genderTest: boolean = true): void {
+    let forenamesMale = ['Albus','Harry','Ron','Fred','George','Neville','Finneus','Sirius','Remus','Lord','Arthur','Charlie','Bill','Rubeus','Severus'];
+    let forenamesFemale = ['HERMIONE','MOLLY','FLEUR','MINERVA','GINNY','CHO','LAVENDER','PARVATI','PADMA','LILLY','LUNA','BELLATRIX','NARCISSA','NYMPHADORA','RITA'];
+    let surnames = ['Dumbledore','McGonagall','Weasley','Longbottom','Sprout','Flitwick','Black','Lupin','Voldemort','Delacour','Tonks','Moody','Shacklebolt','Lovegood','Malfoy','Hagrid'];
 
     let genderReestriction: Restriction = {
       id: 0,
-      options: [
-        {id: 0, value: 'Male'},
-        {id: 1, value: 'Female'}
-      ],
+      options: [ {id: 0, value: 'Male'}, {id: 1, value: 'Female'} ],
       name: 'Gender',
-      description: 'a desription',
+      description: 'This is the gender of the student, useful for rooming situations',
       poll: true
     }
-
 
     for(let i = 0 ; i < studentCount ; i++) {
 
@@ -69,20 +65,44 @@ export class StudentDataComponent implements OnInit {
       this.loadedTimetable.students.push(newStudent);
     }
 
-    for(let i = 0 ; i < studentCount ; i++) {
-      let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === i )!;
-      let gender: number = +student.data[0].value;
-      let others: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => a.data[0].value === gender && a.id !== i );
+    // is gender likely a thing to concern ourselves with?
+    this.loadedTimetable.restrictions = genderTest ? [genderReestriction] : [];
 
-      for(let m = 0 ; m < 4 ; m++) {
-        let random: SingleStudent = others.sort((a: SingleStudent, b:SingleStudent) => Math.random() -0.5 )[0];
-        student.studentPriorities.push({ studentId: random.id, priority: m + 1 });
-        others = others.filter((a: SingleStudent) => a.id !== random.id);
+    if(sortMethod === 0) this.generateRandomDataForCoursePriority();
+    if(sortMethod === 1) this.generateRandomDataForStudentPriority(genderTest);
+
+  }
+
+  generateRandomDataForStudentPriority(genderTest: boolean): void {
+    for(let i = 0 ; i < this.loadedTimetable.students.length ; i++) {
+      let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === i )!;
+      let gender: number = genderTest ? +student.data[0].value : -1;
+      let others: SingleStudent[] = this.loadedTimetable.students.filter((a: SingleStudent) => (gender === -1 || a.data[0].value === gender) && a.id !== i );
+
+      for(let m = 0 ; m < this.loadedTimetable.studentPriorityCount ; m++) {
+        if(others.length <= 1) {
+          student.studentPriorities.push({ studentId: -1, priority: m + 1 });
+        } else {
+          let random: SingleStudent = others.sort((a: SingleStudent, b:SingleStudent) => Math.random() -0.5 )[0];
+          student.studentPriorities.push({ studentId: random.id, priority: m + 1 });
+          others = others.filter((a: SingleStudent) => a.id !== random.id);
+        }
       }
     }
+  }
 
-    this.loadedTimetable.restrictions = [genderReestriction];
+  generateRandomDataForCoursePriority(): void {
+    for(let i = 0 ; i < this.loadedTimetable.students.length ; i++) {
+      let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === i )!;
+      let optionalCourses: SingleCourse[] = this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === false);
+      let numberOfOptionalCourses: number = optionalCourses.length;
 
+      for(let m = 0 ; m < numberOfOptionalCourses ; m++) {
+        let random: SingleCourse = optionalCourses.sort((a: SingleCourse, b: SingleCourse) => Math.random() - 0.5)[0];
+        student.coursePriorities.push({ courseId: random.id, priority: m + 1 });
+        optionalCourses = optionalCourses.filter((a: SingleCourse) => a.id !== random.id );
+      }
+    }
   }
 
   ngOnInit(): void {
@@ -209,7 +229,7 @@ export class StudentDataComponent implements OnInit {
     }
 
     let courses: { courseId: number, priority: number }[] = this.loadedTimetable.sortMethod === 0 ? [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })] : [];
-    let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: this.getRandomStudentId(), priority: i + 1 }})] : [];
+    let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }})] : [];
 
     let newStudent: SingleStudent = {
       id,
