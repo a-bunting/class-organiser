@@ -8,18 +8,22 @@
             <option value="2" *ngIf="loadedTimetable.sortMethod === 1">Student Priority Data (Class of 21, Ex: Class Group)</option>
             <option value="0" *ngIf="loadedTimetable.sortMethod === 0">Course Priority Data (Class of 100)</option>
         </select>
-        <ng-container>
+        <div class="studentData__buttons">
           <div class="studentData__add" (click)="addStudentToggle()">Add Student</div>
-          <div class="studentData__add" (click)="addStudentToggle()">Upload from TSV</div>
-        </ng-container>
-        
+          <div class="studentData__add" (click)="toggleTsvData()">Upload from TSV</div>
+        </div>
+
     </div>
 
 
-    <div class="studentData__import" *ngIf="loadedTimetable.students.length === 0">
-        <div class="studentData__import--title">Import from TSV File</div>
+    <div class="studentData__import" *ngIf="addTsvData">
         <div class="studentData__import--box">
-            <div class="studentData__import--drop" (drop)="onDrop($event)" (dragover)="onDragOver($event)">Drop a TSV file here to import</div>
+            <div class="studentData__import--drop" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+              <p>Drop a TSV file here to import</p>
+              <div class="studentData__import--errors" *ngIf="tsvError.length > 0">
+                <div class="studentData__import--error" *ngFor="let e of tsvError">{{ e }}</div>
+              </div>
+            </div>
             <div class="studentData__import--instructions">
                 <img src="../../../assets/help/tsv/tsv_basic.jpg" alt="How to TSV Step 1">
                 <img src="../../../assets/help/tsv/howToCsv2-2.jpg" alt="How to TSV Step 2">
@@ -50,10 +54,10 @@
                 <th rowspan="1" [attr.colspan]="loadedTimetable.studentPriorityCount" *ngIf="loadedTimetable.sortMethod === 1">Student Priority</th>
             </tr>
             <tr *ngIf="loadedTimetable.sortMethod === 0">
-                <th *ngFor="let course of getOptionalUnits(); let i = index" (click)="sortByPriority(i+1)">{{ i + 1 }}</th>
+                <th *ngFor="let course of getOptionalUnits(); let i = index" (click)="sortByPriority(i+1)">{{ i + 1 | ordinal  }}</th>
             </tr>
             <tr *ngIf="loadedTimetable.sortMethod === 1">
-                <th *ngFor="let stud of getStudentPriorityList(loadedTimetable.studentPriorityCount); let i = index">{{ i + 1 | ordinal }}</th>
+                <th *ngFor="let stud of getStudentPriorityList(loadedTimetable.studentPriorityCount); let i = index" (click)="sortByStudentPriority(i+1)">{{ i + 1 | ordinal }}</th>
             </tr>
         </thead>
 
@@ -62,8 +66,8 @@
         <tbody>
             <tr *ngIf="newStudent" class="studentData__newRow">
                 <td>
-                    <button class="input__button input__length--veryshort" (click)="deleteNewStudent()" [tooltip]="'Delete New Student'">X</button>
-                    <button class="input__button input__length--veryshort" (click)="submitNewStudent()" [tooltip]="'Add New Student'">1</button>
+                    <button class="input__button input__length--veryshort" (click)="deleteNewStudent()" [tooltip]="'Delete New Student'"><img src="../../../assets/icons/cross.png" alt="Delete"></button>
+                    <button class="input__button input__length--veryshort" (click)="submitNewStudent()" [tooltip]="'Add New Student'"><img src="../../../assets/icons/checkmark.png" alt="Insert"></button>
                 </td>
                 <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.name.forename"></td>
                 <td><input type="text" class="input__text input__length--medium" [(ngModel)]="newStudent.name.surname"></td>
@@ -96,7 +100,7 @@
             </tr>
             <tr *ngFor="let student of  loadedTimetable.students">
                 <td>
-                    <button class="input__button input__length--veryshort" (click)="deleteStudent(student.id)" [tooltip]="'Delete ' + student.name.forename">X</button>
+                    <button class="input__button input__length--veryshort" (click)="deleteStudent(student.id)" [tooltip]="'Delete ' + student.name.forename"><img src="../../../assets/icons/cross.png" alt="Delete"></button>
                 </td>
                 <td>{{ student.name.forename }}</td>
                 <td>{{ student.name.surname }}</td>

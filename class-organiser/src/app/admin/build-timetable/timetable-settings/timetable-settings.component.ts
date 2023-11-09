@@ -459,7 +459,22 @@ export class TimetableSettingsComponent implements OnInit {
   }
 
   setStudentPriorityCount(input: any): void {
-    this.loadedTimetable.studentPriorityCount = +input.target.value;
+    const quantity: number = +input.target.value;
+    this.loadedTimetable.studentPriorityCount = quantity;
+
+    // check how many students already have and if its less than the new value add more
+    if(this.loadedTimetable.students.length > 0) {
+      let studentCurrent: number = this.loadedTimetable.students[0].studentPriorities.length;
+
+      if(studentCurrent < quantity) {
+        const difference: number = quantity - studentCurrent;
+        const newPriorities: { studentId: number, priority: number }[] = new Array(difference).fill({ studentId: -1, priority: 0 }).map((a: { studentId: number, priority: number }, i: number) => { return { studentId: -1, priority: a.priority = studentCurrent + i + 1 }});
+
+        for(let i = 0 ; i < this.loadedTimetable.students.length ; i++) {
+          this.loadedTimetable.students[i].studentPriorities.push(...newPriorities);
+        }
+      }
+    }
   }
 
 }
