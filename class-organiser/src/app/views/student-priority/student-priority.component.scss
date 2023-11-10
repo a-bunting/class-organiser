@@ -49,6 +49,7 @@
 
     &__tt {
       display: flex;
+      justify-content: flex-start;
       column-gap: .3rem;
       height: 100%;
     }

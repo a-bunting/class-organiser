@@ -180,32 +180,6 @@
         }
     }
 
-    &__help {
-        position: relative;
-        border-radius: 50%;
-        width: 1.5rem;
-        height: 1.5rem;
-        background-color: #009879;
-        transition: all .2s;
-        margin-left: 1rem;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover {
-            cursor: help;
-            filter: brightness(1.2);
-        }
-
-        &::after {
-            content: '?';
-            font-size: 1rem;
-            color: white;
-        }
-    }
-
-
     &__errors {
         background-color: lightcoral;
         border-radius: .5rem;

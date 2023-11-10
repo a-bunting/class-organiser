@@ -39,6 +39,9 @@ export class StudentDataComponent implements OnInit {
     let forenamesFemale = ['HERMIONE','MOLLY','FLEUR','MINERVA','GINNY','CHO','LAVENDER','PARVATI','PADMA','LILLY','LUNA','BELLATRIX','NARCISSA','NYMPHADORA','RITA'];
     let surnames = ['Dumbledore','McGonagall','Weasley','Longbottom','Sprout','Flitwick','Black','Lupin','Voldemort','Delacour','Tonks','Moody','Shacklebolt','Lovegood','Malfoy','Hagrid'];
 
+    let courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
+    let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }})] : [];
+
     let genderReestriction: Restriction = {
       id: 0,
       options: [ {id: 0, value: 'Male'}, {id: 1, value: 'Female'} ],
@@ -58,8 +61,8 @@ export class StudentDataComponent implements OnInit {
         name: { forename: forename, surname: surname },
         email: `${forename}.${surname}@hogwarts.com`,
         data: [{ restrictionId: 0, value: gender }],
-        coursePriorities: [],
-        studentPriorities: []
+        coursePriorities: [...courses],
+        studentPriorities: [...students]
       }
 
       this.loadedTimetable.students.push(newStudent);
@@ -239,7 +242,7 @@ export class StudentDataComponent implements OnInit {
       id++;
     }
 
-    let courses: { courseId: number, priority: number }[] = this.loadedTimetable.sortMethod === 0 ? [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })] : [];
+    let courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
     let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }})] : [];
 
     let newStudent: SingleStudent = {
@@ -382,6 +385,7 @@ export class StudentDataComponent implements OnInit {
     // build the data needed to make a student list
     this.generateRestrictions(results);
     let studentPrios: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }}) : [];
+    let courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
 
     students = results.map((a: CsvObject, i: number) => {
       return {
@@ -389,8 +393,8 @@ export class StudentDataComponent implements OnInit {
         name: { forename: a['forename'], surname: a['surname'] },
         email: a['email'],
         data: this.getStudentRestrictionDataValues(a),
-        coursePriorities: [],
-        studentPriorities: studentPrios
+        coursePriorities: [...courses],
+        studentPriorities: [...studentPrios]
       }
     })
 

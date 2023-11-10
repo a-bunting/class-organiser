@@ -63,8 +63,8 @@
                 <option value="" disabled>Add Restrictions to this block</option>
                 <option value="1,{{ restriction.id }}" *ngFor="let restriction of loadedTimetable.restrictions"> - {{ restriction.name }}</option>
               </select>
-<!--
-              <div class="buildtt__block--courses">
+
+              <!-- <div class="buildtt__block--courses">
                 <div class="buildtt__block--course" *ngFor="let course of block.courses">
                   <div class="buildtt__block--course--name">{{ getCourseNameFromId(course) }}</div>
                   <button class="input__button input__length--veryshort" (click)="removeCourseFromBlock(block.id, course)">X</button>
