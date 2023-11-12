@@ -39,6 +39,9 @@ export class StudentDataComponent implements OnInit {
     let forenamesFemale = ['HERMIONE','MOLLY','FLEUR','MINERVA','GINNY','CHO','LAVENDER','PARVATI','PADMA','LILLY','LUNA','BELLATRIX','NARCISSA','NYMPHADORA','RITA'];
     let surnames = ['Dumbledore','McGonagall','Weasley','Longbottom','Sprout','Flitwick','Black','Lupin','Voldemort','Delacour','Tonks','Moody','Shacklebolt','Lovegood','Malfoy','Hagrid'];
 
+    let courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
+    let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }})] : [];
+
     let genderReestriction: Restriction = {
       id: 0,
       options: [ {id: 0, value: 'Male'}, {id: 1, value: 'Female'} ],
@@ -58,8 +61,8 @@ export class StudentDataComponent implements OnInit {
         name: { forename: forename, surname: surname },
         email: `${forename}.${surname}@hogwarts.com`,
         data: [{ restrictionId: 0, value: gender }],
-        coursePriorities: [],
-        studentPriorities: []
+        coursePriorities: [...courses],
+        studentPriorities: [...students]
       }
 
       this.loadedTimetable.students.push(newStudent);
@@ -199,6 +202,17 @@ export class StudentDataComponent implements OnInit {
     this.asc = !this.asc;
   }
 
+  sortByStudentPriority(priority: number): void {
+    this.loadedTimetable.students.sort((a: SingleStudent, b: SingleStudent) => {
+      let aD: number = a.studentPriorities!.find((c: { studentId: number, priority: number }) => c.priority === priority)!.studentId;
+      let bD: number = b.studentPriorities!.find((c: { studentId: number, priority: number }) => c.priority === priority)!.studentId;
+      if(this.asc) return aD - bD;
+      else return bD - aD;
+    })
+
+    this.asc = !this.asc;
+  }
+
   deleteStudent(studentId: number): void {
     this.loadedTimetable.students = this.loadedTimetable.students.filter((a: SingleStudent) => a.id !== studentId);
 
@@ -228,7 +242,7 @@ export class StudentDataComponent implements OnInit {
       id++;
     }
 
-    let courses: { courseId: number, priority: number }[] = this.loadedTimetable.sortMethod === 0 ? [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })] : [];
+    let courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
     let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }})] : [];
 
     let newStudent: SingleStudent = {
@@ -301,9 +315,14 @@ export class StudentDataComponent implements OnInit {
   }
 
   content: string = '';
+  addTsvData: boolean = false;
+  tsvError: string[] = [];
+
+  toggleTsvData(): void { this.addTsvData  = !this.addTsvData };
 
   onDrop(event: DragEvent): void {
     event.preventDefault();
+    this.tsvError = [];
     const files = (event.dataTransfer?.files || []) as FileList;
     this.handleFiles(files);
   }
@@ -324,22 +343,25 @@ export class StudentDataComponent implements OnInit {
     reader.onload = (e) => {
       const contents = e.target?.result as string;
       this.content = contents; // Do something with the CSV contents
-      this.parseCsvString(contents);
+      this.parseTsvString(contents);
     };
     reader.readAsText(file);
   }
 
-
   // thanks chatgpt!
-  parseCsvString(csvData: string): void {
+  parseTsvString(csvData: string): void {
 
     const rows = csvData.trim().split('\n');
     const headers = rows[0].split('\t').map(header => header.trim());
+
+    if(headers[0].toLowerCase() !== "forename" || headers[1].toLowerCase() !== 'surname' || headers[2].toLowerCase() !== 'email') {
+      this.tsvError.push(`Your TSV file is incorrectly formatted. You must have three columns only: forename, surname and email.`);
+      return;
+    }
+
     const results: CsvObject[] = [];
     let students: SingleStudent[] = [];
     let exclusions: string[] = ['','timestamp'];
-
-    console.log(headers);
 
     for (let i = 1; i < rows.length; i++) {
       const values = rows[i].split('\t').map(value => value.trim());
@@ -352,7 +374,7 @@ export class StudentDataComponent implements OnInit {
         entry[headers[j].toLowerCase().trim()] = values[j];
 
         // build an exclusion list to filter for the restrictions;
-        if(isNaN(+headers[j].toLowerCase()) && !['email', 'name', 'teacher'].includes(headers[j].toLowerCase()) && !this.restrictionInclusionList.includes(headers[j].toLowerCase())) {
+        if(isNaN(+headers[j].toLowerCase()) && !['email', 'forename', 'surname', 'teacher'].includes(headers[j].toLowerCase()) && !this.restrictionInclusionList.includes(headers[j].toLowerCase())) {
           this.restrictionInclusionList.push(headers[j].toLowerCase());
         }
       }
@@ -362,102 +384,102 @@ export class StudentDataComponent implements OnInit {
 
     // build the data needed to make a student list
     this.generateRestrictions(results);
-    this.generateClasses(results);
-    this.generateCourses(results);
+    let studentPrios: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }}) : [];
+    let courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
 
     students = results.map((a: CsvObject, i: number) => {
       return {
-        id: i, classId: this.getClassId(a['teacher']),
-        name: { forename: a['name'].split(' ')[0], surname: a['name'].split(' ')[1] },
+        id: i, classId: -1,
+        name: { forename: a['forename'], surname: a['surname'] },
         email: a['email'],
         data: this.getStudentRestrictionDataValues(a),
-        coursePriorities: this.getCoursePriorities(a),
-        studentPriorities: []
+        coursePriorities: [...courses],
+        studentPriorities: [...studentPrios]
       }
     })
 
     this.loadedTimetable.students = students;
   }
 
-  classes: SingleClass[] = [];
-  courses: SingleCourse[] = [];
+  // classes: SingleClass[] = [];
+  // courses: SingleCourse[] = [];
 
-  generateClasses(data: CsvObject[]): void {
-    let teachers = Array.from(new Set(data.map(a => { return a['teacher'] }))).concat(this.loadedTimetable.classes.map((a: SingleClass) => { return a.teacher }));
-    let classesLastId: number = 0;
+  // generateClasses(data: CsvObject[]): void {
+  //   let teachers = Array.from(new Set(data.map(a => { return a['teacher'] }))).concat(this.loadedTimetable.classes.map((a: SingleClass) => { return a.teacher }));
+  //   let classesLastId: number = 0;
 
-    if(!teachers) return;
+  //   if(!teachers) return;
 
-    for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
-      if(this.loadedTimetable.classes[i].id >= classesLastId) classesLastId = this.loadedTimetable.classes[i].id + 1;
-    }
+  //   for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
+  //     if(this.loadedTimetable.classes[i].id >= classesLastId) classesLastId = this.loadedTimetable.classes[i].id + 1;
+  //   }
 
-    // makes a list of classes with all teachers, including new ones.
-    for(let i = 0 ; i < teachers.length ; i++) {
-      this.classes.push({ teacher: teachers[i], id: classesLastId + i });
-    }
+  //   // makes a list of classes with all teachers, including new ones.
+  //   for(let i = 0 ; i < teachers.length ; i++) {
+  //     this.classes.push({ teacher: teachers[i], id: classesLastId + i });
+  //   }
 
-    console.log(this.classes);
-    this.loadedTimetable.classes = this.classes;
-  }
+  //   console.log(this.classes);
+  //   this.loadedTimetable.classes = this.classes;
+  // }
 
-  getClassId(teacherName: string): number {
-    return this.classes.find(a => a.teacher === teacherName)!.id;
-  }
+  // getClassId(teacherName: string): number {
+  //   return this.classes.find(a => a.teacher === teacherName)!.id;
+  // }
 
-  getCourseId(name: string): number {
-    let courseIdIndex: number = this.courses.findIndex(a => a.name === name);
+  // getCourseId(name: string): number {
+  //   let courseIdIndex: number = this.courses.findIndex(a => a.name === name);
 
-    if(courseIdIndex !== -1) {
-      return this.courses[courseIdIndex].id;
-    } else {
-      return NaN;
-    }
-  }
+  //   if(courseIdIndex !== -1) {
+  //     return this.courses[courseIdIndex].id;
+  //   } else {
+  //     return NaN;
+  //   }
+  // }
 
-  getCoursePriorities(a: CsvObject): { priority: number, courseId: number }[] {
-    let coursePriorities: { priority: number, courseId: number }[] = [];
+  // getCoursePriorities(a: CsvObject): { priority: number, courseId: number }[] {
+  //   let coursePriorities: { priority: number, courseId: number }[] = [];
 
-    for(let i = 0 ; i < 16 ; i++) {
-      if(!isNaN(this.getCourseId(a[`${i}`]))) coursePriorities.push({ priority: i, courseId: this.getCourseId(a[`${i}`])})
-    }
+  //   for(let i = 0 ; i < 16 ; i++) {
+  //     if(!isNaN(this.getCourseId(a[`${i}`]))) coursePriorities.push({ priority: i, courseId: this.getCourseId(a[`${i}`])})
+  //   }
 
-    // add in the required things.
-    const requiredCourses: SingleCourse[] = this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true );
+  //   // add in the required things.
+  //   const requiredCourses: SingleCourse[] = this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true );
 
-    for(let i = 0 ; i < requiredCourses.length ; i++) {
-      coursePriorities.push({ priority: 0, courseId: this.getCourseId(requiredCourses[i].name)})
-    }
+  //   for(let i = 0 ; i < requiredCourses.length ; i++) {
+  //     coursePriorities.push({ priority: 0, courseId: this.getCourseId(requiredCourses[i].name)})
+  //   }
 
-    return coursePriorities;
-  }
+  //   return coursePriorities;
+  // }
 
-  generateCourses(data: CsvObject[]): void {
-    let dataSet = data[0];
-    let coursesList: SingleCourse[] = this.loadedTimetable.courses;
-    let courses: string[] = this.loadedTimetable.courses.map((a: SingleCourse) => a.name );
-    let lastId: number = 0;
-    let newCourses: number = 0;
+  // generateCourses(data: CsvObject[]): void {
+  //   let dataSet = data[0];
+  //   let coursesList: SingleCourse[] = this.loadedTimetable.courses;
+  //   let courses: string[] = this.loadedTimetable.courses.map((a: SingleCourse) => a.name );
+  //   let lastId: number = 0;
+  //   let newCourses: number = 0;
 
-    for(let i = 0 ; i < coursesList.length ; i++) {
-      if(coursesList[i].id >= lastId) lastId = coursesList[i].id + 1;
-    }
+  //   for(let i = 0 ; i < coursesList.length ; i++) {
+  //     if(coursesList[i].id >= lastId) lastId = coursesList[i].id + 1;
+  //   }
 
-    // ifnd new courses and add them
-    for(let i = 0 ; i < 16 ; i++) {
-      if(!courses.includes(dataSet[`${i+1}`])) {
-        // this is new
-        coursesList.push({ id: lastId + newCourses, name: dataSet[`${i+1}`], classSize: 24, requirement: { required: false, times: 1 } });
-        courses.push(dataSet[`${i}`]);
-        newCourses++;
-      }
-    }
+  //   // ifnd new courses and add them
+  //   for(let i = 0 ; i < 16 ; i++) {
+  //     if(!courses.includes(dataSet[`${i+1}`])) {
+  //       // this is new
+  //       coursesList.push({ id: lastId + newCourses, name: dataSet[`${i+1}`], classSize: 24, requirement: { required: false, times: 1 } });
+  //       courses.push(dataSet[`${i}`]);
+  //       newCourses++;
+  //     }
+  //   }
 
 
-    this.courses = this.courses.concat(...coursesList);
-    console.log(this.courses);
-    this.loadedTimetable.courses = this.courses;
-  }
+  //   this.courses = this.courses.concat(...coursesList);
+  //   console.log(this.courses);
+  //   this.loadedTimetable.courses = this.courses;
+  // }
 
   restrictionInclusionList: string[] = [];
 

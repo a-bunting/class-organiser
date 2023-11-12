@@ -152,10 +152,10 @@
     </div>
   </div>
 
-  <!-- <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode && loadedTimetable.sortMethod === 0"> -->
-  <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode">
+  <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode && loadedTimetable.sortMethod === 0">
+  <!-- <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode"> -->
     <div class="ttsettings__text">
-      <p>Courses</p>
+      <p [tooltip]="'These are the courses you are running that could fill the timetable. Non required courses take student choice into consideration.'">Courses</p>
       <div class="ttsettings__text--minmax" (click)="toggleSection('courses')">
         <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showCourses">
         <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showCourses">
@@ -186,7 +186,7 @@
 
   <div class="ttsettings__select" *ngIf="loadedTimetable && !studentViewMode">
     <div class="ttsettings__text">
-      <p>Data Collection</p>
+      <p [tooltip]="'These are the pieces of data you will collect from students, for example collecting a students gender if you will require single sex blocks or rooms in your schedule.'">Data Collection</p>
       <div class="ttsettings__text--minmax" (click)="toggleSection('restrictions')">
         <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showRestrictions">
         <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showRestrictions">
@@ -257,7 +257,7 @@
 
     <div class="ttsettings__select" *ngIf="loadedTimetable">
       <div class="ttsettings__text">
-        <p>Rooms</p>
+        <p [tooltip]="'These are optional, but allow you to label each block with the location the activity takes place.'">Rooms</p>
         <div class="ttsettings__text--minmax" (click)="toggleSection('rooms')">
           <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showRooms">
           <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showRooms">
@@ -282,7 +282,7 @@
 
     <div class="ttsettings__select" *ngIf="loadedTimetable">
       <div class="ttsettings__text">
-        <p>Groups</p>
+        <p [tooltip]="'Groups could be classes, rooms or student groupings. However you normally group your students is what you might use here.'">Groups</p>
         <div class="ttsettings__text--minmax" (click)="toggleSection('classes')">
           <img src="../../../../assets/icons/circle-up.png" alt="Collapse" *ngIf="showClasses">
           <img src="../../../../assets/icons/circle-down.png" alt="Collapse" *ngIf="!showClasses">
@@ -295,7 +295,7 @@
           <th>Delete</th>
         </tr>
         <tr *ngFor="let class of loadedTimetable.classes">
-          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="class.teacher" placeholder="Name of Teacher"></td>
+          <td><input type="text" class="input__text input__length--medium" [(ngModel)]="class.teacher" placeholder="Group Name"></td>
           <td><button class="input__button input__length--veryshort" (click)="deleteClass(class.id)">X</button></td>
         </tr>
       </table>

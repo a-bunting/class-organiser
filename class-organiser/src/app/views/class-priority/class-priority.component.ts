@@ -113,10 +113,10 @@ export class ClassPriorityComponent implements OnInit {
    */
   selectBlockProperty(blockId: number, input: any) : void {
 
-    
+
     const data: string[] = input.target.value.split(',').map((a: string) => +a );
     console.log(data);
-    
+
     if(+data[0] === 0) {
       this.selectCourse(blockId, null, +data[1]);
       console.log(blockId, data[1]);
@@ -348,6 +348,33 @@ export class ClassPriorityComponent implements OnInit {
     //this.currentTimetableChange.emit(this.loadedTimetable);
   }
 
+  duplicateTimeblock(index: number): void {
+    let toDuplicate: SingleTimeBlock = this.loadedTimetable.schedule.blocks[index];
+    let newTimeBlock: SingleTimeBlock = JSON.parse(JSON.stringify(toDuplicate));
+    newTimeBlock.order = this.loadedTimetable.schedule.blocks.length;
+
+    let highestId: number = 0;
+
+    // get the highest ID already created for a block
+    for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
+      for(let o = 0 ; o < this.loadedTimetable.schedule.blocks[i].blocks.length ; o++) {
+        highestId = highestId > this.loadedTimetable.schedule.blocks[i].blocks[o].id ? highestId : this.loadedTimetable.schedule.blocks[i].blocks[o].id
+      }
+    }
+
+    highestId += 1; // add 1 to make this the new highest
+
+    // create unique ids for each block and move the students into the missing students.
+    for(let i = 0 ; i < newTimeBlock.blocks.length ; i++) {
+      newTimeBlock.blocks[i].id = highestId + i;
+      newTimeBlock.missingStudents.push(...newTimeBlock.blocks[i].students);
+      newTimeBlock.blocks[i].students = [];
+    }
+
+    this.loadedTimetable.schedule.blocks.push(newTimeBlock);
+  }
+
+
   getPriorityColor(block: SingleBlock, student: SingleStudent): string {
     // course sorting
     if(this.loadedTimetable.sortMethod === 0) {
@@ -357,7 +384,7 @@ export class ClassPriorityComponent implements OnInit {
     // student sorting
     if(this.loadedTimetable.sortMethod === 1) {
       student.studentPriorities.sort((a: { studentId: number, priority: number }, b: { studentId: number, priority: number }) => a.priority - b.priority );
-      
+
       for(let i = 0 ; i < student.studentPriorities.length ; i++) {
         if(block.students.includes(student.studentPriorities[i].studentId)) {
           return this.loadedTimetable.colorPriority[student.studentPriorities[i].priority - 1];
