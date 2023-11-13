@@ -7,6 +7,7 @@ interface SurveyData {
   id: number,
   studentPriorityCount: number,
   name: string,
+  sortMethod: number,
   classes: { id: number, teacher: string }[],
   courses: { id: number, name: string }[],
   restrictions: { id: number, name: string, description: string, options: { id: number, value: string }[] }[],
@@ -144,6 +145,7 @@ export class DataCollectionComponent implements OnInit {
 
   }
 
+
   loadNewSurvey(code: string, fromInput?: boolean): void {
 
     this.thinking = true;
@@ -151,15 +153,19 @@ export class DataCollectionComponent implements OnInit {
     this.dbService.getSurvey(fromInput ? this.codeInput : code).subscribe({
       next: (result: DatabaseReturn) => {
 
-        this.data = result.data;
-        this.createStudentObject();
-
-        console.log(this.data);
-
-        if(fromInput) {
-          this.code = this.codeInput;
-          this.codeInput = '';
+        if(result.error) {
+          // error for some reason but queries succeseded
+          if(result.data.locked) { this.locked = true; }
+        } else {
+          this.data = result.data;
+          this.createStudentObject();
+  
+          if(fromInput) {
+            this.code = this.codeInput;
+            this.codeInput = '';
+          }
         }
+
 
         this.thinking = false;
       },

@@ -83,7 +83,7 @@ function geneticProcessor(timetable, req) {
             if(timetable.sortMethod === 0) {
                 scores = getFitnessRating(timetableProcessed, PRIORITY_SCORING, ALL_REQUIRED_SCORE);
             } else {
-                scores = getFitnessRatingByStudentPriority(timetable);
+                scores = getFitnessRatingByStudentPriority(timetableProcessed);
             }
 
             generatedSchedules.push({ scores , blocks: timetableProcessed.schedule.blocks });
@@ -137,7 +137,6 @@ function geneticProcessor(timetable, req) {
             // strip out the data used by the backend but not part of the front end.
             timetable.students.map((b => { return { id: b.id, classId: b.classId, name: b.name, data: b.data, coursePriorities: b.coursePriorities, studentPriorities: b.studentPriorities }}));
             // save the data to be retrieved
-            console.log(a.scores.prioritySatisfied);
             statistics.push({ index: i, stats: a.scores });
             // add to saved data
             savedData.push({ code, token, index: i, data: { ...timetable, schedule: a }});
@@ -519,8 +518,6 @@ function getFitnessRatingByStudentPriority(timetable) {
                     gotAPriority = true;
 
                     if(student.studentPriorities[p].priority <= 2) studentPoneOrPtwo = true;
-                } else {
-                    // they are not in the same block, keep this comment for reference for now
                 }
             }
 

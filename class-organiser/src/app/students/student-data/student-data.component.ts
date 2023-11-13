@@ -61,8 +61,8 @@ export class StudentDataComponent implements OnInit {
         name: { forename: forename, surname: surname },
         email: `${forename}.${surname}@hogwarts.com`,
         data: [{ restrictionId: 0, value: gender }],
-        coursePriorities: [...courses],
-        studentPriorities: [...students]
+        coursePriorities: [],
+        studentPriorities: []
       }
 
       this.loadedTimetable.students.push(newStudent);
@@ -73,6 +73,8 @@ export class StudentDataComponent implements OnInit {
 
     if(sortMethod === 0) this.generateRandomDataForCoursePriority();
     if(sortMethod === 1) this.generateRandomDataForStudentPriority(genderTest);
+
+    console.log(this.loadedTimetable.students);
 
   }
 
@@ -95,6 +97,16 @@ export class StudentDataComponent implements OnInit {
   }
 
   generateRandomDataForCoursePriority(): void {
+    // create a course if none exist
+    if(this.loadedTimetable.courses.length == 0) {
+      this.loadedTimetable.courses.push({
+        id: 0, 
+        name: 'test course',
+        classSize: 25,
+        requirement: { required: false, times: 1 }
+      })
+    }
+
     for(let i = 0 ; i < this.loadedTimetable.students.length ; i++) {
       let student: SingleStudent = this.loadedTimetable.students.find((a: SingleStudent) => a.id === i )!;
       let optionalCourses: SingleCourse[] = this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === false);

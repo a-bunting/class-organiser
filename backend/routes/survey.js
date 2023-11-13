@@ -16,7 +16,7 @@ router.post('/get', (req, res, next) => {
 
     const query = `
         SELECT 
-        timetable.id, timetable.name, timetable.studentPriorityCount,
+        timetable.id, timetable.name, timetable.studentPriorityCount, timetable.locked, timetable.sortMethod,
         GROUP_CONCAT(
             DISTINCT CONCAT(timetable__classes.classId, "|", timetable__classes.teacher) 
             SEPARATOR '$'
@@ -44,35 +44,42 @@ router.post('/get', (req, res, next) => {
 
     db.query(query, (e, r) => {
         if(!e && r.length > 0) {
-            try {
-                let timetableId = r[0].id;
-                let classes = !r[0].classes ? [] : r[0].classes.split('$').map(a => {
-                    let components = a.split('|');
-                    return { id: +components[0], teacher: components[1] }
-                })
-                let courses = !r[0].courses ? [] : r[0].courses.split('$').map(a => {
-                    let components = a.split('|');
-                    return { id: +components[0], name: components[1] }
-                })
-                let restrictions = !r[0].restrictions ? [] : r[0].restrictions.split('$').map(a => {
-                    let components = a.split('|');
-                    return { id: +components[0], name: components[1], description: components[2], options: JSON.parse(components[3]) }
-                })
-                let students = !r[0].students ? [] : r[0].students.split('$').map(a => {
-                    let components = a.split('|');
-                    return { id: +components[0], name: { forename: components[1], surname: components[2] } }
-                })
-                let studentPriorityCount = students.length > 0 ? r[0].studentPriorityCount : 0;
 
-                courses.sort((a, b) => { return a.name.localeCompare(b.name) });
-                students.sort((a, b) => { return a.name.forename.localeCompare(b.name.forename) });
-
-                let survey = { id: +timetableId, studentPriorityCount, name: r[0].name, classes, courses, restrictions, students }
-
-                res.status(200).json({ error: false, message: '', data: survey })
-            } catch(e) {
-                res.status(400).json({ error: true, message: '', data: { codeCorrect: true } })
+            if(r[0].locked === 1) {
+                res.status(200).json({ error: true, message: '', data: { locked: true } });
+            } else {
+                // not locked.
+                try {
+                    let timetableId = r[0].id;
+                    let classes = !r[0].classes ? [] : r[0].classes.split('$').map(a => {
+                        let components = a.split('|');
+                        return { id: +components[0], teacher: components[1] }
+                    })
+                    let courses = !r[0].courses ? [] : r[0].courses.split('$').map(a => {
+                        let components = a.split('|');
+                        return { id: +components[0], name: components[1] }
+                    })
+                    let restrictions = !r[0].restrictions ? [] : r[0].restrictions.split('$').map(a => {
+                        let components = a.split('|');
+                        return { id: +components[0], name: components[1], description: components[2], options: JSON.parse(components[3]) }
+                    })
+                    let students = !r[0].students ? [] : r[0].students.split('$').map(a => {
+                        let components = a.split('|');
+                        return { id: +components[0], name: { forename: components[1], surname: components[2] } }
+                    })
+                    let studentPriorityCount = students.length > 0 ? r[0].studentPriorityCount : 0;
+    
+                    courses.sort((a, b) => { return a.name.localeCompare(b.name) });
+                    students.sort((a, b) => { return a.name.forename.localeCompare(b.name.forename) });
+    
+                    let survey = { id: +timetableId, studentPriorityCount, name: r[0].name, classes, courses, restrictions, students }
+    
+                    res.status(200).json({ error: false, message: '', data: survey })
+                } catch(e) {
+                    res.status(400).json({ error: true, message: '', data: { codeCorrect: true } })
+                }
             }
+
         } else {
             console.log(e);
             res.status(400).json({ error: true, message: '', data: { codeCorrect: false } })

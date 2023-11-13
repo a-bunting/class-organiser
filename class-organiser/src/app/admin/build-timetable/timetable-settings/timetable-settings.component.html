@@ -220,7 +220,7 @@
           </div>
 
           <div class="ttsettings__restrictions--row">
-            <div class="ttsettings__restrictions--row--text" [tooltip]="'Should the students be asked this? If no, you will set it manually in the student data form.'">Poll Students</div>
+            <div class="ttsettings__restrictions--row--text" [tooltip]="'Should the students be asked this? If no it will default to the first option and you can change it manually in the student data form.'">Poll Students</div>
             <div class="ttsettings__restrictions--row--input" style="justify-content: flex-start;">
               <input type="checkbox" [(ngModel)]="editingRestriction.poll">
             </div>
@@ -249,7 +249,7 @@
     </div>
 
     <div class="ttsettings__restrictions--buttons" *ngIf="showRestrictions">
-      <button class="input__button input__length--full" (click)="addRestriction()">Add Data</button>
+      <button class="input__button input__length--full" (click)="addRestriction()">Add Data Collection</button>
     </div>
   </div>
 

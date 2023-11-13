@@ -368,11 +368,6 @@ export class StudentPriorityComponent implements OnInit {
   }
 
   getPriorityColor(block: SingleBlock, student: SingleStudent): string {
-    // course sorting
-    if(this.loadedTimetable.sortMethod === 0) {
-      let priority: number = student.coursePriorities.find((a: { courseId: number, priority: number }) => a.courseId === block.selectedCourse)!.priority;
-      return this.loadedTimetable.colorPriority[priority - 1];
-    }
     // student sorting
     if(this.loadedTimetable.sortMethod === 1) {
       student.studentPriorities.sort((a: { studentId: number, priority: number }, b: { studentId: number, priority: number }) => a.priority - b.priority );

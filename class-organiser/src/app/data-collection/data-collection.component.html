@@ -9,7 +9,7 @@
         <button (click)="submitCode()" [disabled]="codeInput.length !== 5">Complete Survey</button>
     </div>
 
-    <div class="survey__display" *ngIf="data && !complete">
+    <div class="survey__display" *ngIf="data && !complete && !locked">
         <div class="survey__display--title">{{ data.name }}</div>
         <div class="survey__display--section--desc">Fill in as correcly as possible, this will help place you in the courses you are meant to be!</div>
         <div class="survey__error" *ngIf="locked">You are currently updating this form as the email <b>{{ student.email }}</b> has already completed this form.</div>
@@ -36,7 +36,7 @@
                         <div class="survey__row--text">Confirm Email*</div>
                         <div class="survey__row--input" [class.survey__row--input--highlight]="highlightRequired || highlightEmails"><input type="email" [(ngModel)]="confirmedEmail" required></div>
                     </div>
-                    <div class="survey__row" *ngIf="data.classes.length > 0">
+                    <div class="survey__row" *ngIf="data.classes.length > 0 && data.sortMethod === 0">
                         <div class="survey__row--text">Class</div>
                         <div class="survey__row--input">
                             <select (change)="setClass($event)">
@@ -99,6 +99,10 @@
 
     <div class="survey__complete" *ngIf="complete">
       <div class="survey__complete--title">Thank you, your form has been submitted.</div>
+    </div>
+
+    <div class="survey__complete" *ngIf="locked">
+      <div class="survey__complete--title">This survey is currently locked.</div>
     </div>
 
 </div>
