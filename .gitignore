@@ -2,6 +2,7 @@
 .env
 .environment
 class-organiser-google.json
+stats.txt
 
 # Logs
 logs
