@@ -30,6 +30,8 @@ import { ClassPriorityComponent } from './views/class-priority/class-priority.co
 import { StudentPriorityComponent } from './views/student-priority/student-priority.component';
 import { UnlockComponent } from './timetables/unlock/unlock.component';
 import { InterestComponent } from './user/interest/interest.component';
+import { MailingListComponent } from './user/mailing-list/mailing-list.component';
+import { VerifyComponent } from './user/verify/verify.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,9 @@ import { InterestComponent } from './user/interest/interest.component';
     ClassPriorityComponent,
     StudentPriorityComponent,
     UnlockComponent,
-    InterestComponent
+    InterestComponent,
+    MailingListComponent,
+    VerifyComponent
   ],
   imports: [
     BrowserModule,

@@ -11,12 +11,16 @@ import { DataCollectionComponent } from './data-collection/data-collection.compo
 import { StudentPriorityComponent } from './views/student-priority/student-priority.component';
 import { ClassPriorityComponent } from './views/class-priority/class-priority.component';
 import { InterestComponent } from './user/interest/interest.component';
+import { MailingListComponent } from './user/mailing-list/mailing-list.component';
+import { VerifyComponent } from './user/verify/verify.component';
 
 
 const routes: Routes = [
   { path: '', component: StartComponent, children: [
-    { path: '', component: LoginComponent },
+    { path: '', component: MailingListComponent },
     { path: 'register', component: RegisterComponent },
+    { path: 'login', component: LoginComponent },
+    { path: 'verify/:verifyCode', component: VerifyComponent },
   ] },
   { path: 'register', component: InterestComponent },
   { path: 'survey', component: DataCollectionComponent },

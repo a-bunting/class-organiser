@@ -93,6 +93,17 @@ router.get('/logout', (req, res, next) => {
     res.status(200).json({ error: false, message: '', data: {} })
 });
 
+router.post('/joinList', (req, res, next) => {
+    const email = req.body.email;
+    res.status(200).json({ error: false, message: '', data: {} })
+});
+
+router.post('/verifyEmail', (req, res, next) => {
+    const email = req.body.email;
+    const code = req.body.code;
+    res.status(200).json({ error: false, message: '', data: {} })
+});
+
 router.post('/lockTimetable', checkAuth, (req, res, next) => {
     const userData = userMethods.getUserDataFromToken(req);
     const ttId = req.body.ttId;
