@@ -8,24 +8,23 @@ import { TimetablesComponent } from './timetables/timetables.component';
 import { LoginComponent } from './user/login/login.component';
 import { RegisterComponent } from './user/register/register.component';
 import { DataCollectionComponent } from './data-collection/data-collection.component';
-import { SelectTimetableTypeComponent } from './timetables/select-timetable-type/select-timetable-type.component';
 import { StudentPriorityComponent } from './views/student-priority/student-priority.component';
 import { ClassPriorityComponent } from './views/class-priority/class-priority.component';
 import { InterestComponent } from './user/interest/interest.component';
 
 
 const routes: Routes = [
-  { path: 'register', component: InterestComponent },
-  { path: 'survey', component: DataCollectionComponent },
-  { path: 'survey/:code', component: DataCollectionComponent },
-  { path: 'start', component: StartComponent, children: [
+  { path: '', component: StartComponent, children: [
     { path: '', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
   ] },
-  { path: '', component: TimetablesComponent, canActivate: [AuthGuard], children: [
+  { path: 'register', component: InterestComponent },
+  { path: 'survey', component: DataCollectionComponent },
+  { path: 'survey/:code', component: DataCollectionComponent },
+  { path: 'dashboard', component: TimetablesComponent, canActivate: [AuthGuard], children: [
     { path: 'timetables', component: BuildTimetableComponent, children: [
       { path: 'classes', component: ClassPriorityComponent },
-      { path: 'groups', component: StudentPriorityComponent }      
+      { path: 'groups', component: StudentPriorityComponent }
     ] },
     { path: 'students', component: StudentDataComponent }
   ]},

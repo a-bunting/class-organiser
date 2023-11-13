@@ -1,5 +1,18 @@
 const jwt = require('jsonwebtoken');
 
+let invalidTokens = [];
+
+function setInvalidToken(token) {
+    let find = invalidTokens.find(a => a === token);
+    if(!find) {
+        invalidTokens.push(token);
+    }
+}
+
+function hasTokenBeenInvalidated(token) {
+    return invalidTokens.find(a => a === token) ? true : false;
+}
+
 /**
  * Gets the header info from a request and decodes the token to return the user id.
  * @param {*} req
@@ -13,3 +26,5 @@ function getUserDataFromToken(req) {
 }
 
 module.exports.getUserDataFromToken = getUserDataFromToken;
+module.exports.setInvalidToken = setInvalidToken;
+module.exports.hasTokenBeenInvalidated = hasTokenBeenInvalidated;

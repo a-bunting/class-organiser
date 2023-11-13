@@ -34,7 +34,7 @@ export class TimetablesComponent {
       next: (user: User) => {
         if(user) { this.user = user; return }
         // not logged in
-        this.router.navigate(['start']);
+        this.router.navigate(['']);
       },
       error: (e: any) => { console.log(`Error with your login: ${e}`)}
     })
@@ -51,7 +51,7 @@ export class TimetablesComponent {
       next: (tt: Timetable) => {
         if(tt) {
           this.loadedTimetable = tt;
-          this.router.navigate(['timetables']);
+          this.router.navigate(['dashboard', 'timetables']);
         } else {
           this.loadedTimetable = null!;
         }
@@ -123,7 +123,7 @@ export class TimetablesComponent {
       error: (e: any) => { console.log(e); }
     })
 
-    
+
   }
 
 

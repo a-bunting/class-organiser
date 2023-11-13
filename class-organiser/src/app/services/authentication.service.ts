@@ -29,7 +29,7 @@ export class AuthenticationService {
   loginNewUser(user: User): void {
     this.setLocal(user);
     this.user.next(user);
-    this.router.navigate(['']);
+    this.router.navigate(['dashboard']);
   }
 
   setLocal(user: User): void {
@@ -51,15 +51,15 @@ export class AuthenticationService {
       // check the token is still valid
       this.databaseService.checkAuthStatus().subscribe({
         next: (result: DatabaseReturn) => {
-          if(!result.error) this.router.navigate(['']);
+          if(!result.error) this.router.navigate(['dashboard']);
           else {
             this.clearLocal();
-            this.router.navigate(['start']);
+            this.router.navigate(['']);
           }
         },
         error: (e: any) => {
           this.clearLocal();
-          this.router.navigate(['start']);
+          this.router.navigate(['']);
         }
       })
     }
@@ -67,7 +67,7 @@ export class AuthenticationService {
 
   logOut(): void {
     this.clearLocal();
-    this.router.navigate(['start']);
+    this.router.navigate(['']);
   }
 
 }

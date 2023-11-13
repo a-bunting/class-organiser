@@ -89,6 +89,7 @@ router.get('/logout', (req, res, next) => {
     const userData = userMethods.getUserDataFromToken(req);
     let stats = req.stats;
     stats.userLoggedOut(userData.id);
+    userMethods.setInvalidToken(req.headers.authorization.split(" ")[1]);
     res.status(200).json({ error: false, message: '', data: {} })
 });
 
@@ -171,13 +172,10 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
     const scores = timetable.schedule.scores ? timetable.schedule.scores : [];
     const colors = timetable.colorPriority ? timetable.colorPriority : [];
 
-    console.log(timetable.id);
-
     // break up the timetable into segmenets for the database;
     const code = timetable.code === "" ? stringMethods.generateRandomString(5) : timetable.code;
     const timetableQuery = `INSERT INTO timetable (dataCode, saveCode, sortMethod, studentPriorityCount, shuffle, userId, name, rooms, blocks, scores, colors) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, saveCode = new_data.saveCode, sortMethod = new_data.sortMethod, studentPriorityCount = new_data.studentPriorityCount, shuffle = new_data.shuffle, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores, colors = new_data.colors`;
     const data = [code, timetable.saveCode, timetable.sortMethod, timetable.studentPriorityCount, timetable.shuffleStudents ?? 0, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores), JSON.stringify(colors)];
-    // console.log(timetableQuery);
 
     db.query(timetableQuery, [data], (e, r) => {
         if(!e) {

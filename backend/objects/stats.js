@@ -3,7 +3,7 @@ const fs = require('fs');
 class Stats {
 
     MASTER_TIMER = null;
-    MASTER_INTERVAL = 2;
+    MASTER_INTERVAL = 60;
     SAVE_TIME = 2; // days
 
     filename = 'stats.txt';
@@ -21,18 +21,14 @@ class Stats {
     }
 
     loadStatsFromFile() {
-        fs.readFile('stats.txt', (e, r) => {
-            if(!e) {
-                this.stats = JSON.parse(r.toString());
-            }
+        fs.readFile(this.filename, (e, r) => {
+            if(!e) { this.stats = JSON.parse(r.toString()); }
         })
     }
 
     saveStatsToFile() {
-        fs.writeFile('stats.txt', JSON.stringify(this.stats), (e, r) => {
-            if(e) {
-                console.log(`Stats write error: ${e}`)
-            }
+        fs.writeFile(this.filename, JSON.stringify(this.stats), (e, r) => {
+            if(e) { console.log(`Stats write error: ${e}`) }
         })
     }
 

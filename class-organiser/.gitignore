@@ -4,6 +4,7 @@
 /tmp
 /out-tsc
 /bazel-out
+stats.txt
 
 # Node
 /node_modules

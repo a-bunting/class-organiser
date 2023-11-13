@@ -109,12 +109,25 @@ router.post('/save', (req, res, next) => {
                 const nextId = +r[1][0].NextAvailableId + 1;
                 
                 db.query(insertQuery, [[r[0][0].id, newSid ? nextId : req.body.student.id, student.classId, student.name.forename, student.name.surname, student.email, JSON.stringify(student.data), JSON.stringify(student.coursePriorities), JSON.stringify(student.studentPriorities)]], (e2, r2) => {
-                    console.log(r2); // check to see whether to run update or add
+                    
                     
                     if(!e2) {
+                        // do the stats
                         let stats = req.stats;
                         stats.addSurveyData(code);
-                        res.status(200).json({ error: false, message: '', data: { id: nextId } })
+
+                        // update the savecode on the timetable
+                        let newSaveCode = stringMethods.generateRandomString(10);
+                        const updateTtSavecode = `UPDATE timetable SET saveCode = ? WHERE id = ?`;
+
+                        db.query(updateTtSavecode, [newSaveCode, ttId], (e3, r3) => {
+                            console.log(e3);
+                            if(!e3) {
+                                res.status(200).json({ error: false, message: '', data: { id: nextId } })
+                            } else {
+                                res.status(200).json({ error: true, message: 'Failed to update timetable savecode but student data saved correctly.', data: { id: nextId } })
+                            }
+                        })
                     } else {
                         res.status(400).json({ error: true, message: 'Unable to add data.', data: { codeCorrect: true } })
                     }

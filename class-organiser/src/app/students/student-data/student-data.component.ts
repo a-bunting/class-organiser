@@ -114,7 +114,7 @@ export class StudentDataComponent implements OnInit {
       next: (user: User) => {
         if(user) { this.user = user; return }
         // not logged in
-        this.router.navigate(['start']);
+        this.router.navigate(['']);
       },
       error: (e: any) => { console.log(`Error with your login: ${e}`)}
     })

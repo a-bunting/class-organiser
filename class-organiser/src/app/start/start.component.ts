@@ -12,5 +12,6 @@ export class StartComponent {
   ) {}
 
   ngOnInit(): void {
+    this.authService.checkLoggedInStatus();
   }
 }

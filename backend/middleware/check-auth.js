@@ -9,6 +9,7 @@ module.exports = (req, res, next) => {
         const token = req.headers.authorization.split(" ")[1];
         jwt.verify(token, process.env.SALT);
 
+        if(userMethod.hasTokenBeenInvalidated(token)) throw(`Token has been Invalidated`);
         // show activity on this ID
         // const userData = userMethods.getUserDataFromToken(req);
         // let stats = req.stats;
