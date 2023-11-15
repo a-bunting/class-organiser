@@ -10,7 +10,7 @@ export class MailingListComponent {
 
   sending: boolean = false;
   error: string[] = [];
-  email: string = 'alex.bunting@gmail.com';
+  email: string = '';
 
   constructor(
     private databaseService: DatabaseService
