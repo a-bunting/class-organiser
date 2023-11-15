@@ -39,8 +39,12 @@ export class DatabaseService {
     return this.http.get<DatabaseReturn>(`${environment.apiUrl}/user/tokenCheck`).pipe(take(1));
   }
 
-  sendMessage(from: string, message: string): Observable<DatabaseReturn> {
+  sendInterestMessage(from: string, message: string): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/emailEnquiry`, { from, message }).pipe(take(1));
+  }
+
+  sendMessage(from: string, message: string): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/emailMessage`, { from, message }).pipe(take(1));
   }
 
   getTimetablesList(): Observable<DatabaseReturn> {

@@ -95,13 +95,63 @@ router.get('/logout', (req, res, next) => {
 
 router.post('/joinList', (req, res, next) => {
     const email = req.body.email;
-    res.status(200).json({ error: false, message: '', data: {} })
+    const verificationCode = stringMethods.generateRandomString(10);
+    const subject = `ClassCraft Mailing List - Verify your Email`;
+    const htmlMessage = `
+    <p>Dear user,</p> 
+
+    <p>Thank you for signing up to the ClassCraft mailing list. To verify your email address please click on the link below.</p>
+    
+    <a href="http://localhost:4200/#/verify/${email}&${verificationCode}">Verify your email</a>
+    
+    <p>Yours kindly,</p>
+    <p>Alex</p>`;
+    const textMessage = `
+    Dear user, 
+
+    Thank you for signing up to the ClassCraft mailing list. To verify your email address please click on the link below.
+    
+    http://localhost:4200/#/verify/${email}&${verificationCode}
+    
+    Yours kindly,
+    Alex`;
+    
+    
+    const query = `INSERT INTO mailList (email, code) VALUES (?) as new_data ON DUPLICATE KEY UPDATE code = new_data.code`;
+    
+    db.query(query, [[email, verificationCode]], (e, r) => {
+        if(!e) {
+            // send the verification email
+            userMethods.sendEmail(email, subject, textMessage, htmlMessage)
+            .then((result) => { res.status(200).json({ error: false, message: '', data: { emailSent: result} }) })
+            .catch((e) => { res.status(400).json({ error: true, message: e, data: {} }) });
+        } else {
+            console.log(e);
+            res.status(400).json({ error: true, message: '', data: {} })
+        }
+    })
+
 });
 
 router.post('/verifyEmail', (req, res, next) => {
     const email = req.body.email;
     const code = req.body.code;
-    res.status(200).json({ error: false, message: '', data: {} })
+
+    const query = `UPDATE mailList SET code = '', verified = 1 WHERE email = ? AND code = ?`;
+
+    db.query(query, [email, code], (e, r) => {
+        console.log(e, r);
+        if(!e) {
+            if(r.affectedRows === 1) {
+                res.status(200).json({ error: false, message: '', data: { complete: true } });
+            } else {
+                res.status(200).json({ error: false, message: '', data: { complete: false } });
+            }
+        }
+        else res.status(400).json({ error: true, message: '', data: {} })
+    })
+
+    
 });
 
 router.post('/lockTimetable', checkAuth, (req, res, next) => {
@@ -417,40 +467,46 @@ router.get('/getList', checkAuth, (req, res, next) => {
 
 
 router.post('/emailEnquiry', (req, res, next) => {
-    const email = req.body.from;
     const message = req.body.message;
+    const subject = `ClassCraft Interest Submission`;
+    const textMessage = `
+        ClassCraft Interest Submission:
+        ---------------
+        ${message}
+        ---------------
+    `;
+    const htmlMessage = `
+        ClassCraft Interest Submission:
+        ---------------
+        ${message}
+        ---------------
+    `;
     
-    import('emailjs').then(({ SMTPClient }) => {
+    userMethods.sendEmail('alex.bunting@gmail.com', subject, textMessage, htmlMessage)
+    .then((result) => { res.status(200).json({ error: false, message: '', data: { emailSent: result} }) })
+    .catch((e) => { res.status(400).json({ error: true, message: e, data: {} }) });
 
-        try {
-            const client = new SMTPClient({
-                user: process.env.SMTP_USER, 
-                password: process.env.SMTP_PASSWORD, 
-                host: process.env.SMTP_HOST, 
-                port: process.env.SMTP_PORT,
-                ssl: true,
-            })
+});
 
-            client.send({
-                text: message,
-                from: email, 
-                to: process.env.MY_EMAIL, 
-                subject: 'Class Organiser Enquiry'
-            }, 
-            (err, message) => {
-                if(err) {
-                    console.log(err);
-                    res.status(400).json({ error: true, message, data: { } })
-                } else {
-                    console.log(message);
-                    res.status(200).json({ error: false, message, data: { } })
-                }
-            })
-        } catch (e) {
-            console.log(`email could not be sent due to ssl stuff probs`);
-        }
+router.post('/emailMessage', (req, res, next) => {
+    const message = req.body.message;
+    const subject = `ClassCraft Message`;
+    const textMessage = `
+        ClassCraft Message from ${req.body.from}:
+        ---------------
+        ${message}
+        ---------------
+    `;
+    const htmlMessage = `
+        ClassCraft Message from ${req.body.from}:
+        ---------------
+        ${message}
+        ---------------
+    `;
     
-    })
+    userMethods.sendEmail('alex.bunting@gmail.com', subject, textMessage, htmlMessage)
+    .then((result) => { res.status(200).json({ error: false, message: '', data: { emailSent: result} }) })
+    .catch((e) => { res.status(400).json({ error: true, message: e, data: {} }) });
 
 });
 

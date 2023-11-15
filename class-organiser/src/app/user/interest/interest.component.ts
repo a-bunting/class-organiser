@@ -13,11 +13,11 @@ export class InterestComponent {
   thinking: boolean = false;
   complete: boolean = false;
 
-  data: { 
+  data: {
     name: { forename: string, surname: string },
     email: string,
     institute: {
-      name: string, suffix: string, size: number 
+      name: string, suffix: string, size: number
     }
   } = {
     name: { forename: '', surname: '' },
@@ -100,39 +100,17 @@ export class InterestComponent {
       Size: ${this.data.institute.size}
     `;
 
-    // this.dbService.sendMessage(this.data.email, message).subscribe({
-    //   next: (result: DatabaseReturn) => {
-    //     this.thinking = false;
-    //     this.complete = true;
-    //   },
-    //   error: (err: any) => {
-    //     this.error = [];
-    //     this.error.push(`Apologies but your email could not be sent at this time, please try again later or directly email me at alex.bunting@gmail.com`);
-    //     this.thinking = false;
-    //   }
-    // })
-
-    const data = {
-        service_id: 'service_1tfvcqe',
-        template_id: 'template_y652eg4',
-        user_id: 'user_1ystzLQ4lPxmWtXLAH0Op',
-        template_params: {
-            'email': this.data.email,
-            'message': message
-        }
-    };
-    
-    emailjs
-    .send(data.service_id, data.template_id, data.template_params, data.user_id)
-    .then((response: any) => {
-        if(response.status === 200) {
-          this.complete = true;
-          this.thinking = false;
-        }
+    this.dbService.sendInterestMessage(this.data.email, message).subscribe({
+      next: (result: DatabaseReturn) => {
+        this.thinking = false;
+        this.complete = true;
+      },
+      error: (err: any) => {
+        this.error = [];
+        this.error.push(`Apologies but your email could not be sent at this time, please try again later or directly email me at alex.bunting@gmail.com`);
+        this.thinking = false;
+      }
     })
-    .catch((e: any) => {
-        const message = "Your message was not sent. Please try again or email me directly at <a href='mailto:alex.bunting@gmail.com'>alex.bunting@gmail.com</a>.";
-    });
 
   }
 

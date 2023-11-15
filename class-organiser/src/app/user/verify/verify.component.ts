@@ -11,6 +11,8 @@ export class VerifyComponent implements OnInit {
 
   code: string = '';
   success: boolean = false;
+  error: boolean = false;
+  already: boolean = false;
   verificationInProgress: boolean = false;
 
   constructor(
@@ -32,10 +34,15 @@ export class VerifyComponent implements OnInit {
 
     this.databaseService.verifyEmail(email, code).subscribe({
       next: (result: DatabaseReturn) => {
+        if(result.data.complete) {
+          this.success = true;
+        } else {
+          this.already = true;
+        }
+
         this.verificationInProgress = false;
-        this.success = true;
       },
-      error: (e: any) => { console.log(e); this.verificationInProgress = false; }
+      error: (e: any) => { console.log(e); this.error = true; this.verificationInProgress = false; }
     })
   }
 

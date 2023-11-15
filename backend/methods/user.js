@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 let invalidTokens = [];
 
@@ -25,6 +26,42 @@ function getUserDataFromToken(req) {
   return userData;
 }
 
+async function sendEmail(to, subject, textMessage, htmlMessage) {
+    const ret = await send(to, subject, textMessage, htmlMessage);
+    return ret;
+}
+
+async function send(to, subject, textMessage, htmlMessage) {
+
+    // nodemailer: https://nodemailer.com/message/addresses/
+
+    return new Promise((resolve) => {
+        let transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: true,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASSWORD
+            }
+        });
+    
+        let mailOptions = {
+            from: `ClassCraft <${process.env.SMTP_USER}>`,
+            to: to,
+            subject: subject,
+            text: textMessage,
+            html: htmlMessage
+        };
+    
+        transporter.sendMail(mailOptions, (e, r) => {
+            if(e) resolve(false);
+            resolve(true);
+        });
+    })
+}
+
 module.exports.getUserDataFromToken = getUserDataFromToken;
 module.exports.setInvalidToken = setInvalidToken;
 module.exports.hasTokenBeenInvalidated = hasTokenBeenInvalidated;
+module.exports.sendEmail = sendEmail;
