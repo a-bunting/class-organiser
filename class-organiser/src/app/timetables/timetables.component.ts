@@ -128,15 +128,27 @@ export class TimetablesComponent {
 
 
   preloadImages(): void {
-    const preload = (src: string) => {
+    const preload = (folder: string, src: string) => {
       let img: HTMLImageElement = new Image();
-      img.src = `../../assets/icons/${src}.png`;
+      img.src = `../../assets/${folder}/${src}`;
     }
 
-    const fileNames: string[] = [
-      'bin2', 'circle-down','link','circle-up','cogs','copy','download','file-empty','floppy-disk','hammer','list-numbered','lock','paste','printer','unlocked','user','users'
-    ]
+    const fileNames: { folder: string, names: string[] }[] = [{
+      folder: 'icons',
+      names: [
+        'bin2.png', 'checkmark.png', 'circle-down.png','circle-up.png','cogs.png','copy.png','cross.png','download.png','file-empty.png','floppy-disk.png','hammer.png','link.png','list-numbered.png','lock.png','paste.png','printer.png','shuffle.png','unlocked.png','user.png','users.png'
+      ]
+    },
+    {
+      folder: 'help/tsv',
+      names: [
+        'tsv_basic.jpg','howToCsv2-2.jpg'
+      ]
+    }
+  ]
 
-    for(let i = 0 ; i < fileNames.length ; i++) preload(fileNames[i]);
+    for(let i = 0 ; i < fileNames.length ; i++) {
+      for(let o = 0 ; o < fileNames[i].names.length ; o++) preload(fileNames[i].folder, fileNames[i].names[o]);
+    }
   }
 }

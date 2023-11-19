@@ -63,7 +63,7 @@
                 <option value="" disabled>Add Courses</option>
                 <option value="0,{{ course.id }}" *ngFor="let course of loadedTimetable.courses" [disabled]="hasCourseBeenAdded(block.id, course.id, g)"> - {{ course.name }} {{ hasCourseBeenAdded(block.id, course.id, g) ? '(added)' : '' }}</option>
                 <option value="" disabled></option> -->
-                <option value="" disabled>Add Filters to this block</option>
+                <option value="" disabled selected>Add Filters to this block</option>
                 <option value="1,{{ restriction.id }}" *ngFor="let restriction of loadedTimetable.restrictions"> - {{ restriction.name }}</option>
               </select>
 

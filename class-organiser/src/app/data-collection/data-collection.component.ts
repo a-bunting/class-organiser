@@ -197,6 +197,8 @@ export class DataCollectionComponent implements OnInit {
         ...this.data.restrictions.map((a: { id: number, name: string, description: string, options: { id: number, value: string }[] }) => { return { restrictionId: +a.id, value: 0 }})
       ]
     }
+
+    console.log(this.student);
   }
 
   setClass(classId: any): void {

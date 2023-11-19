@@ -11,7 +11,7 @@
 
   header {
     flex-basis: 5rem;
-    background-color: rgba(gray, .4);
+    background-color: rgba(gray, .7);
 
     display: flex;
     justify-content: space-between;
@@ -55,9 +55,11 @@
     }
 
     .dashboard__logo {
-      font-size: 3rem;
-      font-weight: bold;
       margin-left: 3rem;
+
+      img {
+        height: 3rem;
+      }
     }
   }
 

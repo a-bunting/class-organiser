@@ -17,9 +17,10 @@ import { VerifyComponent } from './user/verify/verify.component';
 
 const routes: Routes = [
   { path: '', component: StartComponent, children: [
-    { path: '', component: MailingListComponent },
+    { path: '', component: LoginComponent },
     { path: 'message', component: RegisterComponent },
     { path: 'login', component: LoginComponent },
+    { path: 'mailinglist', component: MailingListComponent },
     { path: 'verify/:verifyCode', component: VerifyComponent },
   ] },
   { path: 'register', component: InterestComponent },
