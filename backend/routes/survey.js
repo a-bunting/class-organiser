@@ -95,7 +95,7 @@ router.post('/save', (req, res, next) => {
     const newSid = req.body.student.id === -1 ? true : false;
 
     const query = `
-        SELECT id, locked FROM timetable WHERE dataCode = '${code}';
+        SELECT id, locked, sortMethod FROM timetable WHERE dataCode = '${code}';
         SELECT COALESCE(max(studentId), maxid + 1) AS NextAvailableId
         FROM timetable__students CROSS JOIN
             (SELECT MAX(id) AS maxid FROM timetable__students) x
@@ -104,18 +104,24 @@ router.post('/save', (req, res, next) => {
     db.query(query, (e, r) => {
         if(!e && r[0][0].id === ttId) {
             if(r[0][0].locked === 0) {
+                const prioUpdateINTOQuery = r[0][0].sortMethod === 0 ? 'priorities' : 'studentPriorities';
+                const prioUpdateVALUESQuery = r[0][0].sortMethod === 0 ? 'priorities = new_data.priorities' : 'studentPriorities = new_data.studentPriorities';
+                const prioUpdateDATA = r[0][0].sortMethod === 0 ? JSON.stringify(student.coursePriorities) : JSON.stringify(student.studentPriorities);
+
                 const insertQuery = `
                     INSERT INTO timetable__students
-                    (ttId, studentId, classId, forename, surname, email, data, priorities, studentPriorities)
+                    (ttId, studentId, classId, forename, surname, email, data, ${prioUpdateINTOQuery})
                     VALUES
                     (?) as new_data
                     ON DUPLICATE KEY UPDATE
-                    forename = new_data.forename, surname = new_data.surname, data = new_data.data, priorities = new_data.priorities, studentPriorities = new_data.studentPriorities
+                    forename = new_data.forename, surname = new_data.surname, data = new_data.data, ${prioUpdateVALUESQuery} 
                 `;
+
+                console.log(insertQuery);
 
                 const nextId = +r[1][0].NextAvailableId + 1;
                 
-                db.query(insertQuery, [[r[0][0].id, newSid ? nextId : req.body.student.id, student.classId, student.name.forename, student.name.surname, student.email, JSON.stringify(student.data), JSON.stringify(student.coursePriorities), JSON.stringify(student.studentPriorities)]], (e2, r2) => {
+                db.query(insertQuery, [[r[0][0].id, newSid ? nextId : req.body.student.id, student.classId, student.name.forename, student.name.surname, student.email, JSON.stringify(student.data), prioUpdateDATA]], (e2, r2) => {
                     
                     
                     if(!e2) {
