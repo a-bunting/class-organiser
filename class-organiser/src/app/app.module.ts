@@ -32,6 +32,7 @@ import { UnlockComponent } from './timetables/unlock/unlock.component';
 import { InterestComponent } from './user/interest/interest.component';
 import { MailingListComponent } from './user/mailing-list/mailing-list.component';
 import { VerifyComponent } from './user/verify/verify.component';
+import { AttributionComponent } from './utilities/attribution/attribution.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import { VerifyComponent } from './user/verify/verify.component';
     UnlockComponent,
     InterestComponent,
     MailingListComponent,
-    VerifyComponent
+    VerifyComponent,
+    AttributionComponent
   ],
   imports: [
     BrowserModule,

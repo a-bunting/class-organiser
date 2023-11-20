@@ -5,6 +5,7 @@
 /out-tsc
 /bazel-out
 stats.txt
+*.mp4
 
 # Node
 /node_modules

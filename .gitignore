@@ -3,6 +3,7 @@
 .environment
 class-organiser-google.json
 backend/stats.txt
+*.mp4
 
 # Logs
 logs
