@@ -1,8 +1,8 @@
 <div class="mailing">
   <app-small-loader *ngIf="sending"></app-small-loader>
-  <div class="mailing__text">Keep in Touch</div>
-  <div class="mailing__desc">If you are interested but maybe not ready to ask a question or commit, join the mailing list (low frequency newsletter!) and keep in touch.</div>
-  <div class="mailing__error" *ngIf="error.length > 0">There was an error logging you in, please try again.</div>
+  <!-- <div class="mailing__text">Keep in Touch</div> -->
+  <!-- <div class="mailing__desc">If you are interested but maybe not ready to ask a question or commit, join the mailing list (low frequency newsletter!) and keep in touch.</div> -->
+  <div class="mailing__error" *ngIf="error.length > 0">There was an error adding you to the mailing list, please try again.</div>
   <input type="text" class="mailing__input--text" [(ngModel)]="email" placeholder="Email Address">
   <button class="mailing__input--button" (click)="join()">Join</button>
 </div>

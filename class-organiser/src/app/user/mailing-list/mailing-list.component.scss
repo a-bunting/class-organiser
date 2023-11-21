@@ -5,8 +5,7 @@
   align-items: flex-end;
   justify-content: flex-end;
   row-gap: 1rem;
-  padding: 2rem;
-  width: 50rem;
+  width: min-content;
 
   &__error {
     text-align: center;
@@ -27,11 +26,11 @@
     text-align: right;
   }
 
-  @media screen and (max-width: 1300px) {
-    flex-direction: row;
-    align-items: center;
-    column-gap: 1rem;
-  }
+  // @media screen and (max-width: 1300px) {
+  //   flex-direction: row;
+  //   align-items: center;
+  //   column-gap: 1rem;
+  // }
 
   &__text {
     font-size: 2rem;
@@ -42,16 +41,20 @@
 
     &--text, &--button {
       padding: 1rem 2rem;
-      font-size: 1.2rem;
+      font-size: 1.6rem;
       border-radius: 1rem;
-      width: 25rem;
+      width: 40rem;
+      transition: all .2s;
     }
 
     &--text {
     }
 
     &--button {
-
+      &:hover {
+        cursor: pointer;
+        background-color: lightcoral;
+      }
     }
   }
 }

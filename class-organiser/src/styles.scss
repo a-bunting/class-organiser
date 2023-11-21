@@ -21,7 +21,7 @@ html {
 }
 
 body {
-  overflow: hidden;
+  // overflow: hidden;
 
   @media print { overflow: auto; }
   @media screen and (max-width: 600px) { overflow: auto; } // for the survey data on mobile...

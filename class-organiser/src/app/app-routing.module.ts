@@ -13,16 +13,18 @@ import { ClassPriorityComponent } from './views/class-priority/class-priority.co
 import { InterestComponent } from './user/interest/interest.component';
 import { MailingListComponent } from './user/mailing-list/mailing-list.component';
 import { VerifyComponent } from './user/verify/verify.component';
+import { WelcomeComponent } from './welcome/welcome.component';
 
 
 const routes: Routes = [
-  { path: '', component: StartComponent, children: [
-    { path: '', component: LoginComponent },
-    { path: 'message', component: RegisterComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'mailinglist', component: MailingListComponent },
-    { path: 'verify/:verifyCode', component: VerifyComponent },
-  ] },
+  { path: '', component: WelcomeComponent },
+  // { path: '', component: StartComponent, children: [
+  //   { path: '', component: LoginComponent },
+  //   { path: 'message', component: RegisterComponent },
+  //   { path: 'login', component: LoginComponent },
+  //   { path: 'mailinglist', component: MailingListComponent },
+  //   { path: 'verify/:verifyCode', component: VerifyComponent },
+  // ] },
   { path: 'register', component: InterestComponent },
   { path: 'survey', component: DataCollectionComponent },
   { path: 'survey/:code', component: DataCollectionComponent },

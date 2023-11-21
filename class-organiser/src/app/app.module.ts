@@ -33,6 +33,7 @@ import { InterestComponent } from './user/interest/interest.component';
 import { MailingListComponent } from './user/mailing-list/mailing-list.component';
 import { VerifyComponent } from './user/verify/verify.component';
 import { AttributionComponent } from './utilities/attribution/attribution.component';
+import { WelcomeComponent } from './welcome/welcome.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,8 @@ import { AttributionComponent } from './utilities/attribution/attribution.compon
     InterestComponent,
     MailingListComponent,
     VerifyComponent,
-    AttributionComponent
+    AttributionComponent,
+    WelcomeComponent
   ],
   imports: [
     BrowserModule,
