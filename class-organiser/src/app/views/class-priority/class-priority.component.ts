@@ -112,17 +112,12 @@ export class ClassPriorityComponent implements OnInit {
    * select for concatenation of dropdowns
    */
   selectBlockProperty(blockId: number, input: any) : void {
-
-
     const data: string[] = input.target.value.split(',').map((a: string) => +a );
-    console.log(data);
 
     if(+data[0] === 0) {
       this.selectCourse(blockId, null, +data[1]);
-      console.log(blockId, data[1]);
     } else {
       this.selectRestriction(blockId, null, +data[1]);
-      console.log(blockId, data[1]);
     }
 
     //this.timetableService.updateSavedTimetable(this.loadedTimetable);
@@ -182,8 +177,6 @@ export class ClassPriorityComponent implements OnInit {
     let block: SingleBlock = this.findBlockFromId(blockId);
     let restriction: { restrictionId: number, optionId: number } = block.restrictions.find((a: { restrictionId: number, optionId: number }) => a.restrictionId === restrictionId)!;
     let value = +input.target.value;
-
-    console.log(blockId, restrictionId, value);
 
     restriction.optionId = value;
     //this.timetableService.updateSavedTimetable(this.loadedTimetable);

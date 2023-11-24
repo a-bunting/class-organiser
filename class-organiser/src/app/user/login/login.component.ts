@@ -27,7 +27,6 @@ export class LoginComponent {
 
     this.databaseService.login(this.email, this.password).subscribe({
       next: (result: DatabaseReturn) => {
-        console.log(result);
         this.loggingIn = false;
         this.authService.loginNewUser(result.data);
       },

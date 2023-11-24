@@ -3,6 +3,7 @@ import { DatabaseReturn, DatabaseService } from 'src/app/services/database.servi
 import { DataValues, Restriction, SingleBlock, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 import { SelectionData } from '../build-timetable.component';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from 'src/environments/environment.development';
 
 @Component({
   selector: 'app-timetable-settings',
@@ -51,7 +52,6 @@ export class TimetableSettingsComponent implements OnInit {
 
   run(): void {
 
-    console.log(this.loadedTimetable);
     this.loading = true;
 
     // run the last unedited version if available - when saved this disappears.
@@ -78,7 +78,6 @@ export class TimetableSettingsComponent implements OnInit {
 
     this.databaseService.retrieveSelectedTimetable(this.timetableSelectionData.code, index).subscribe({
       next: (result: DatabaseReturn) => {
-        console.log(result.data);
         this.selectedTimetableLoading = false;
         this.studentViewMode = true;
         this.timetableService.newTimetableData(result.data);
@@ -97,7 +96,6 @@ export class TimetableSettingsComponent implements OnInit {
 
   changeRequired(courseId: number, input: any) : void {
     let status: boolean = input.target.checked;
-    console.log(status, input.target.checked);
 
     this.loadedTimetable.students.map((a: SingleStudent) => {
       let priority: { courseId: number, priority: number } = a.coursePriorities!.find((b: { courseId: number, priority: number }) => b.courseId === courseId)!;
@@ -445,8 +443,7 @@ export class TimetableSettingsComponent implements OnInit {
   }
 
   copyLink(): void {
-    console.log(this.loadedTimetable);
-    navigator.clipboard.writeText(`http://localhost:4200/#/survey/${this.loadedTimetable.code}`)
+    navigator.clipboard.writeText(`${environment.links}/#/survey/${this.loadedTimetable.code}`)
   }
 
   changeSortingMethod(input: any): void {

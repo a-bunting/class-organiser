@@ -74,8 +74,6 @@ export class StudentDataComponent implements OnInit {
     if(sortMethod === 0) this.generateRandomDataForCoursePriority();
     if(sortMethod === 1) this.generateRandomDataForStudentPriority(genderTest);
 
-    console.log(this.loadedTimetable.students);
-
   }
 
   generateRandomDataForStudentPriority(genderTest: boolean): void {
@@ -100,7 +98,7 @@ export class StudentDataComponent implements OnInit {
     // create a course if none exist
     if(this.loadedTimetable.courses.length == 0) {
       this.loadedTimetable.courses.push({
-        id: 0, 
+        id: 0,
         name: 'test course',
         classSize: 25,
         requirement: { required: false, times: 1 }
@@ -265,8 +263,6 @@ export class StudentDataComponent implements OnInit {
       coursePriorities: courses,
       studentPriorities: students
     }
-
-    console.log(newStudent);
 
     this.newStudent = newStudent;
   }

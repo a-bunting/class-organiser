@@ -10,6 +10,14 @@
         </div>
     </label>
 
+    <div class="welcome__links welcome__links--mobile">
+      <a href="#one" class="welcome__link">Top</a>
+      <a href="#two" class="welcome__link">What is it?</a>
+      <a href="#three" class="welcome__link">Stay in Touch</a>
+      <a href="#four" class="welcome__link">Register</a>
+      <a href="#footer" class="welcome__link">Details</a>
+    </div>
+
     <div class="welcome__one" id="one">
 
         <div class="welcome__one--bg"></div>
@@ -23,7 +31,7 @@
         </div>
 
         <div class="welcome__links welcome__links--one">
-          <a href="#two" class="welcome__link">Video</a>
+          <a href="#two" class="welcome__link">What is it?</a>
           <a href="#three" class="welcome__link">Stay in Touch</a>
           <a href="#four" class="welcome__link">Register</a>
           <a href="#footer" class="welcome__link">Details</a>
@@ -68,7 +76,7 @@
 
       <div class="welcome__links welcome__links--three">
         <a href="#one" class="welcome__link">Top!</a>
-        <a href="#two" class="welcome__link">Video</a>
+        <a href="#two" class="welcome__link">What is it?</a>
         <a href="#four" class="welcome__link">Register</a>
         <a href="#footer" class="welcome__link">Details</a>
       </div>
@@ -88,7 +96,7 @@
 
             <div class="welcome__links welcome__links--four">
               <a href="#one" class="welcome__link">Top!</a>
-              <a href="#two" class="welcome__link">Video</a>
+              <a href="#two" class="welcome__link">What is it?</a>
               <a href="#three" class="welcome__link">Stay in Touch</a>
               <a href="#footer" class="welcome__link">Details</a>
             </div>
@@ -103,8 +111,8 @@
         </div>
 
         <div class="welcome__footer--links">
-            <a href="">Privacy Policy</a>
-            <a href="">Terms and Conditions</a>
+            <a [routerLink]="['/privacy']" routerLinkActive="router-link-active" >Privacy Policy</a>
+            <a [routerLink]="['/terms']" routerLinkActive="router-link-active" >Terms and Conditions</a>
             <a href="#three">Contact Me</a>
         </div>
 

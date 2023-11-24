@@ -46,8 +46,6 @@ export class InterestComponent {
     this.highlightSuffix = false;
     this.error = [];
 
-    console.log(this.data);
-
     if(!this.data.name.forename || !this.data.name.surname || !this.data.email || !this.confirmedEmail || !this.data.institute.size || !this.data.institute.name || !this.data.institute.suffix) {
       this.error.push("Please ensure you enter all required (*) data");
       this.highlightRequired = true;

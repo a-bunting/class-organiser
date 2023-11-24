@@ -14,16 +14,20 @@ import { InterestComponent } from './user/interest/interest.component';
 import { MailingListComponent } from './user/mailing-list/mailing-list.component';
 import { VerifyComponent } from './user/verify/verify.component';
 import { WelcomeComponent } from './welcome/welcome.component';
+import { PrivacyComponent } from './welcome/privacy/privacy.component';
+import { TermsComponent } from './welcome/terms/terms.component';
 
 
 const routes: Routes = [
   { path: '', component: WelcomeComponent },
+  { path: 'privacy', component: PrivacyComponent },
+  { path: 'terms', component: TermsComponent },
+  { path: 'verify/:verifyCode', component: VerifyComponent },
   // { path: '', component: StartComponent, children: [
   //   { path: '', component: LoginComponent },
   //   { path: 'message', component: RegisterComponent },
   //   { path: 'login', component: LoginComponent },
   //   { path: 'mailinglist', component: MailingListComponent },
-  //   { path: 'verify/:verifyCode', component: VerifyComponent },
   // ] },
   { path: 'register', component: InterestComponent },
   { path: 'survey', component: DataCollectionComponent },

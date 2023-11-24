@@ -81,8 +81,6 @@ export class TooltipDirective {
       // this.componentRef.location.nativeElement.classList.remove('fadeInTooltip');
       // this.componentRef.location.nativeElement.classList.add('fadeOutTooltip');
 
-      // console.log(this.componentRef.location.nativeElement.classList);
-
       setTimeout(() => {
         document.body.removeChild(this.componentRef.location.nativeElement);
         this.viewContainerRef.clear();

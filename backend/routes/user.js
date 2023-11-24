@@ -96,22 +96,22 @@ router.get('/logout', (req, res, next) => {
 router.post('/joinList', (req, res, next) => {
     const email = req.body.email;
     const verificationCode = stringMethods.generateRandomString(10);
-    const subject = `ClassCraft Mailing List - Verify your Email`;
+    const subject = `SmartSort Mailing List - Verify your Email`;
     const htmlMessage = `
     <p>Dear user,</p> 
 
-    <p>Thank you for signing up to the ClassCraft mailing list. To verify your email address please click on the link below.</p>
+    <p>Thank you for signing up to the SmartSort mailing list. To verify your email address please click on the link below.</p>
     
-    <a href="http://localhost:4200/#/verify/${email}&${verificationCode}">Verify your email</a>
+    <a href="https://www.smartsort.org/#/verify/${email}&${verificationCode}">Verify your email</a>
     
     <p>Yours kindly,</p>
     <p>Alex</p>`;
     const textMessage = `
     Dear user, 
 
-    Thank you for signing up to the ClassCraft mailing list. To verify your email address please click on the link below.
+    Thank you for signing up to the SmartSort mailing list. To verify your email address please click on the link below.
     
-    http://localhost:4200/#/verify/${email}&${verificationCode}
+    https://www.smartsort.org/#/verify/${email}&${verificationCode}
     
     Yours kindly,
     Alex`;
@@ -119,6 +119,8 @@ router.post('/joinList', (req, res, next) => {
     
     const query = `INSERT INTO mailList (email, code) VALUES (?) as new_data ON DUPLICATE KEY UPDATE code = new_data.code`;
     
+    console.log(email, verificationCode, query);
+
     db.query(query, [[email, verificationCode]], (e, r) => {
         if(!e) {
             // send the verification email
@@ -468,15 +470,15 @@ router.get('/getList', checkAuth, (req, res, next) => {
 
 router.post('/emailEnquiry', (req, res, next) => {
     const message = req.body.message;
-    const subject = `ClassCraft Interest Submission`;
+    const subject = `SmartSort Interest Submission`;
     const textMessage = `
-        ClassCraft Interest Submission:
+        SmartSort Interest Submission:
         ---------------
         ${message}
         ---------------
     `;
     const htmlMessage = `
-        ClassCraft Interest Submission:
+        SmartSort Interest Submission:
         ---------------
         ${message}
         ---------------
@@ -490,15 +492,15 @@ router.post('/emailEnquiry', (req, res, next) => {
 
 router.post('/emailMessage', (req, res, next) => {
     const message = req.body.message;
-    const subject = `ClassCraft Message`;
+    const subject = `SmartSort Message`;
     const textMessage = `
-        ClassCraft Message from ${req.body.from}:
+        SmartSort Message from ${req.body.from}:
         ---------------
         ${message}
         ---------------
     `;
     const htmlMessage = `
-        ClassCraft Message from ${req.body.from}:
+        SmartSort Message from ${req.body.from}:
         ---------------
         ${message}
         ---------------

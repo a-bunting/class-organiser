@@ -200,7 +200,6 @@ export class TimetableService {
 
   // literally just called by loadTimetableById to load the tmetable into the system
   loadTimetable(timetable: Timetable): void {
-    console.log(timetable);
     this.loaded = timetable;
     this.loadedTimetable.next(timetable);
   }
@@ -258,7 +257,6 @@ export class TimetableService {
 
     this.databaseService.saveTimetable(newTimetable, deletedArray).subscribe({
       next: (result: DatabaseReturn) => {
-        console.log(result);
         if(!result.error) {
           this.clearTemporaryChanges();
         }

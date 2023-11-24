@@ -47,7 +47,7 @@ async function send(to, subject, textMessage, htmlMessage) {
         });
     
         let mailOptions = {
-            from: `ClassCraft <${process.env.SMTP_USER}>`,
+            from: `SmartSort <${process.env.SMTP_USER}>`,
             to: to,
             subject: subject,
             text: textMessage,

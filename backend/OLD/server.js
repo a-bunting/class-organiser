@@ -2,22 +2,21 @@ require('dotenv').config({ path: `${__dirname}/process.env` });
 const app = require("./app");
 const http = require("http");
 
-// const winston = require('winston');
-
-// const logger = winston.createLogger({
-//   level: 'info',
-//   format: winston.format.json(),
-//   defaultMeta: { service: 'user-service' },
-//   transports: [
-//     new winston.transports.File({ filename: 'error.log', level: 'error' }),
-//     new winston.transports.File({ filename: 'combined.log' }),
-//   ],
-// });
+console.clear();
 
 const normalizePort = val => {
   var port = parseInt(val, 10);
-  if (isNaN(port)) { return val; }
-  if (port >= 0) { return port; }
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
   return false;
 };
 
@@ -46,10 +45,11 @@ const onListening = () => {
   console.log("Listening on " + bind);
 };
 
-const port = normalizePort(process.env.PORT || "4040");
+const port = normalizePort(process.env.PORT || "80");
 app.set("port", port);
 
 const server = http.createServer(app);
 server.on("error", onError);
 server.on("listening", onListening);
 server.listen(port);
+

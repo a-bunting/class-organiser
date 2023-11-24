@@ -75,9 +75,6 @@ export class DataCollectionComponent implements OnInit {
     this.highlightEmails = false;
     this.highlightRequired = false;
 
-    console.log(this.student.email);
-    console.log(this.confirmedEmail);
-
     if(!this.student.name.forename || !this.student.name.surname || !this.student.email || !this.confirmedEmail) {
       this.error = "Please ensure you enter all required (*) data";
       this.highlightRequired = true;
@@ -134,7 +131,7 @@ export class DataCollectionComponent implements OnInit {
           this.locked = true;
           this.loadNewSurvey(this.codeInput, true);
         } else {
-          this.loadNewSurvey(this.codeInput, true);          
+          this.loadNewSurvey(this.codeInput, true);
         }
       } else {
         this.error = '';
@@ -159,7 +156,7 @@ export class DataCollectionComponent implements OnInit {
         } else {
           this.data = result.data;
           this.createStudentObject();
-  
+
           if(fromInput) {
             this.code = this.codeInput;
             this.codeInput = '';
@@ -198,7 +195,6 @@ export class DataCollectionComponent implements OnInit {
       ]
     }
 
-    console.log(this.student);
   }
 
   setClass(classId: any): void {
@@ -208,7 +204,6 @@ export class DataCollectionComponent implements OnInit {
   setDataValue(restrictionId: number, option: any): void {
 
     let data: { restrictionId: number, value: number } = this.student.data.find((a: { restrictionId: number, value: number }) => a.restrictionId === +restrictionId)!;
-    console.log(data, +restrictionId, +option.target.value);
     data.value = +option.target.value;
   }
 
@@ -242,7 +237,7 @@ export class DataCollectionComponent implements OnInit {
   studentAlreadySelected(studentId: number): boolean {
     return this.student.studentPriorities?.map((a: { studentId: number, priority: number }) => { return a.studentId }).includes(studentId) ?? false;
   }
-  
+
   isStudentSelected(studentId: number, priority: number): boolean {
     return this.student.studentPriorities?.find((a: { studentId: number, priority: number }) => a.priority === priority)?.studentId === studentId ?? false;
   }

@@ -63,7 +63,7 @@
                 <div class="survey__display--section" *ngIf="data.courses.length > 0">
                     <div class="survey__display--section--title">Courses</div>
                     <div class="survey__display--section--desc">Select the courses you most want to take here.</div>
-    
+
                     <div class="survey__row" *ngFor="let course of data.courses; let i = index">
                         <div class="survey__row--text">{{ i + 1 | ordinal }} priority</div>
                         <div class="survey__row--input">
@@ -73,11 +73,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="survey__display--section" *ngIf="student.studentPriorities && student.studentPriorities.length > 0">
                     <div class="survey__display--section--title">Students</div>
                     <div class="survey__display--section--desc">Select the people you would most like to be with.</div>
-    
+
                     <div class="survey__row" *ngFor="let studPrio of student.studentPriorities; let i = index">
                         <div class="survey__row--text">{{ i + 1 | ordinal }} priority</div>
                         <div class="survey__row--input">

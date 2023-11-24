@@ -34,6 +34,8 @@ import { MailingListComponent } from './user/mailing-list/mailing-list.component
 import { VerifyComponent } from './user/verify/verify.component';
 import { AttributionComponent } from './utilities/attribution/attribution.component';
 import { WelcomeComponent } from './welcome/welcome.component';
+import { PrivacyComponent } from './welcome/privacy/privacy.component';
+import { TermsComponent } from './welcome/terms/terms.component';
 
 @NgModule({
   declarations: [
@@ -58,7 +60,9 @@ import { WelcomeComponent } from './welcome/welcome.component';
     MailingListComponent,
     VerifyComponent,
     AttributionComponent,
-    WelcomeComponent
+    WelcomeComponent,
+    PrivacyComponent,
+    TermsComponent
   ],
   imports: [
     BrowserModule,

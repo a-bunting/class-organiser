@@ -36,8 +36,6 @@ export class BuildTimetableComponent implements OnInit {
       next: (tt: Timetable) => {
         this.loadedTimetable = tt;
 
-        console.log(tt);
-
         switch(this.loadedTimetable.sortMethod) {
           case 0: this.router.navigate(['dashboard', 'timetables', 'classes']); break;
           case 1: this.router.navigate(['dashboard', 'timetables', 'groups']); break;

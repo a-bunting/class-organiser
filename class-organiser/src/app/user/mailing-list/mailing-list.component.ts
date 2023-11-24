@@ -11,6 +11,7 @@ export class MailingListComponent {
   sending: boolean = false;
   error: string[] = [];
   email: string = '';
+  message: string[] = [];
 
   constructor(
     private databaseService: DatabaseService
@@ -18,11 +19,14 @@ export class MailingListComponent {
 
   join(): void {
 
+    this.sending = true;
+
     this.databaseService.joinMailingList(this.email).subscribe({
       next: (result: DatabaseReturn) => {
-        console.log(result);
+        this.sending = false;
+        this.message.push("Verification Sent to your Email Address");
       },
-      error: (e: any) => { console.log(e) }
+      error: (e: any) => { console.log(e); this.sending = false; }
     })
 
   }

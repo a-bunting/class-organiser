@@ -7,17 +7,21 @@
   row-gap: 1rem;
   width: min-content;
 
-  &__error {
+  &__error, &__message {
     text-align: center;
     padding: 1rem 2rem;
     font-size: 1.4rem;
     border-radius: 1rem;
-    width: 100%;
+    width: 40rem;
     border-radius: .1rem solid black;
   }
 
   &__error {
     background-color: lightcoral;
+  }
+
+  &__message {
+    background-color: #009879;
   }
 
   &__desc {
@@ -51,9 +55,12 @@
     }
 
     &--button {
-      &:hover {
-        cursor: pointer;
-        background-color: #009879;
+
+      &--enabled {
+        &:hover {
+          cursor: pointer;
+          background-color: #009879;
+        }
       }
     }
   }

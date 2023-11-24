@@ -33,7 +33,6 @@ export class StudentPriorityComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(`lo`);
   }
 
   // action 0 is to trigger student/edit modes
@@ -112,17 +111,12 @@ export class StudentPriorityComponent implements OnInit {
    * select for concatenation of dropdowns
    */
   selectBlockProperty(blockId: number, input: any) : void {
-
-    
     const data: string[] = input.target.value.split(',').map((a: string) => +a );
-    console.log(data);
-    
+
     if(+data[0] === 0) {
       this.selectCourse(blockId, null, +data[1]);
-      console.log(blockId, data[1]);
     } else {
       this.selectRestriction(blockId, null, +data[1]);
-      console.log(blockId, data[1]);
     }
 
   }
@@ -177,8 +171,6 @@ export class StudentPriorityComponent implements OnInit {
     let block: SingleBlock = this.findBlockFromId(blockId);
     let restriction: { restrictionId: number, optionId: number } = block.restrictions.find((a: { restrictionId: number, optionId: number }) => a.restrictionId === restrictionId)!;
     let value = +input.target.value;
-
-    console.log(blockId, restrictionId, value);
 
     restriction.optionId = value;
   }
@@ -371,7 +363,7 @@ export class StudentPriorityComponent implements OnInit {
     // student sorting
     if(this.loadedTimetable.sortMethod === 1) {
       student.studentPriorities.sort((a: { studentId: number, priority: number }, b: { studentId: number, priority: number }) => a.priority - b.priority );
-      
+
       for(let i = 0 ; i < student.studentPriorities.length ; i++) {
         if(block.students.includes(student.studentPriorities[i].studentId)) {
           return this.loadedTimetable.colorPriority[student.studentPriorities[i].priority - 1];

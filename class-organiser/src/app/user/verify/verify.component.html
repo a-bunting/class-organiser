@@ -1,5 +1,10 @@
 <app-small-loader *ngIf="verificationInProgress"></app-small-loader>
 
-<p *ngIf="success">Your email has been successfully verified - you are now on the mailing list.</p>
-<p *ngIf="error">There was an issue verifying your email address, please try again.</p>
-<p *ngIf="already">You are already comfirmed on the mailing list.</p>
+<div class="verify">
+  <p *ngIf="success">Your email has been successfully verified - you are now on the mailing list.</p>
+  <p *ngIf="error">There was an issue verifying your email address, please try again.</p>
+  <p *ngIf="already">You are already confirmed on the mailing list.</p>
+  <div class="verify__back">
+    <a [routerLink]="['/']">Back to the front page</a>
+  </div>
+</div>
