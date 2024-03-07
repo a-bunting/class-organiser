@@ -4,6 +4,10 @@
 
 SmartSort is a lightweight school centered scheduler, used for helping quickly create ideal class configurations, rooming choices or class groupings based entirely upon student preference. 
 
+## Tech Usage
+
+MsartSort is a Angular frontend with a NodeJS REST API backend creation. It uses a MySQL database to store all data.
+
 # Intro Video
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=BS6_vDfA_Ec" target="_blank">
