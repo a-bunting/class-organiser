@@ -6,7 +6,7 @@ SmartSort is a lightweight school centered scheduler, used for helping quickly c
 
 ## Tech Usage
 
-MsartSort is a Angular frontend with a NodeJS REST API backend creation. It uses a MySQL database to store all data.
+SmartSort is a Angular frontend with a NodeJS REST API backend creation. It uses a MySQL database to store all data.
 
 # Intro Video
 
