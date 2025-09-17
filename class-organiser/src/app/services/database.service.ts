@@ -18,6 +18,11 @@ export class DatabaseService {
     private http: HttpClient
   ) { }
 
+  // savecode
+  getSaveCode(ttId: number): Observable<DatabaseReturn> {
+    return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/getSaveCode`, { ttId }).pipe(take(1));
+  }
+
   // user stuff
   login(email: string, password: string): Observable<DatabaseReturn> {
     return this.http.post<DatabaseReturn>(`${environment.apiUrl}/user/login`, { email, password }).pipe(take(1));

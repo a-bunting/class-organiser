@@ -12,9 +12,13 @@ router.post('/gSheet', checkAuth, (req, res, next) => {
 
 async function googleSheetExport(res, req) {
     // run the processor then return the results.
-    const timetable = req.body.timetable;
-    const newSpreadsheet = await googleExport.createNewSpreadsheet(timetable);
-    res.status(200).json({ error: false, message: '', data: newSpreadsheet })
+    try {
+        const timetable = req.body.timetable;
+        const newSpreadsheet = await googleExport.createNewSpreadsheet(timetable);
+        res.status(200).json({ error: false, message: '', data: newSpreadsheet })
+    } catch (error) {
+        res.status(200).json({ error: true, message: 'Error exporting: ' + e, data: {} })
+    }
 }
 
 

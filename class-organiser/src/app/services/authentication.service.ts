@@ -37,6 +37,7 @@ export class AuthenticationService {
   }
 
   clearLocal(): void {
+    window.localStorage.removeItem('classOrganiser');
     window.localStorage.removeItem('classOrganiser-user');
   }
 

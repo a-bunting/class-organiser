@@ -33,23 +33,25 @@ router.post('/login', (req, res, next) => {
   const password = req.body.password;
   const remainLoggedIn = req.body.remainLoggedIn ? req.body.remainLoggedIn : req.body.remainLoggedIn ? req.body.remainLoggedIn : '7d';
 
+  
   const query = `SELECT
-    users.id, users.instituteId, users.forename, users.surname, users.email, users.joined, users.password,
-    institutions.name AS instituteName
-    FROM users
-    INNER JOIN institutions ON users.instituteId = institutions.id
-    WHERE users.email='${email}'`;
-
-    // bcrypt stuff
+  users.id, users.instituteId, users.forename, users.surname, users.email, users.joined, users.password,
+  institutions.name AS instituteName
+  FROM users
+  INNER JOIN institutions ON users.instituteId = institutions.id
+  WHERE users.email='${email}'`;
+  
+  console.log(email, password, query);
+  // bcrypt stuff
     const saltRounds = 10;
 
   // hash the password to see what it matches in the db
   // get the user data to test if the password is true, and also get the admin details...
   db.query(query, (err, userDetails) => {
-    console.log(userDetails);
     if(err || userDetails.length === 0) {
       // return 401, issue logging them in
-      res.status(401).json({ error: true, message: `There was an issue logging you in. Please check the credentials you supplied.` })
+      console.log(err);
+      res.status(401).json({ error: true, message: `There was an issue logging you in. Please check the credentials you supplied.`, data: err })
     } else {
       // test the password
       bcrypt.compare(password, userDetails[0].password).then(correctPassword => {
@@ -117,7 +119,7 @@ router.post('/joinList', (req, res, next) => {
     Alex`;
     
     
-    const query = `INSERT INTO mailList (email, code) VALUES (?) as new_data ON DUPLICATE KEY UPDATE code = new_data.code`;
+    const query = `INSERT INTO mailList (email, code) VALUES (?) ON DUPLICATE KEY UPDATE code = VALUES(code)`;
     
     console.log(email, verificationCode, query);
 
@@ -237,7 +239,7 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
 
     // break up the timetable into segmenets for the database;
     const code = timetable.code === "" ? stringMethods.generateRandomString(5) : timetable.code;
-    const timetableQuery = `INSERT INTO timetable (dataCode, saveCode, sortMethod, studentPriorityCount, shuffle, userId, name, rooms, blocks, scores, colors) VALUES (?) AS new_data ON DUPLICATE KEY UPDATE name = new_data.name, saveCode = new_data.saveCode, sortMethod = new_data.sortMethod, studentPriorityCount = new_data.studentPriorityCount, shuffle = new_data.shuffle, rooms = new_data.rooms, blocks = new_data.blocks, scores = new_data.scores, colors = new_data.colors`;
+    const timetableQuery = `INSERT INTO timetable (dataCode, saveCode, sortMethod, studentPriorityCount, shuffle, userId, name, rooms, blocks, scores, colors) VALUES (?) ON DUPLICATE KEY UPDATE name = VALUES(name), saveCode = VALUES(saveCode), sortMethod = VALUES(sortMethod), studentPriorityCount = VALUES(studentPriorityCount), shuffle = VALUES(shuffle), rooms = VALUES(rooms), blocks = VALUES(blocks), scores = VALUES(scores), colors = VALUES(colors)`;
     const data = [code, timetable.saveCode, timetable.sortMethod, timetable.studentPriorityCount, timetable.shuffleStudents ?? 0, userData.id, timetable.name, JSON.stringify(timetable.rooms), JSON.stringify(timetable.schedule.blocks), JSON.stringify(scores), JSON.stringify(colors)];
 
     db.query(timetableQuery, [data], (e, r) => {
@@ -319,10 +321,10 @@ router.post('/saveTimetable', checkAuth, (req, res, next) => {
 
             let argArray = [];
 
-            if(clDb.length > 0) { compoundQuery += `INSERT INTO timetable__classes (ttId, classId, teacher) VALUES ? as new_data ON DUPLICATE KEY UPDATE teacher = new_data.teacher;`; argArray.push(clDb); }
-            if(coDb.length > 0) { compoundQuery += `INSERT INTO timetable__courses (ttId, courseId, name, classSize, required, times) VALUES ? as new_data ON DUPLICATE KEY UPDATE name = new_data.name, classSize = new_data.classSize, required = new_data.required, times = new_data.times;`; argArray.push(coDb); }
-            if(reDb.length > 0) { compoundQuery += `INSERT INTO timetable__restrictions (ttId, restrictionId, name, description, options, pollInclude) VALUES ? as new_data ON DUPLICATE KEY UPDATE name = new_data.name, description = new_data.description, options = new_data.options, pollInclude = new_data.pollInclude; `; argArray.push(reDb); }
-            if(stDb.length > 0) { compoundQuery += `INSERT INTO timetable__students (ttId, studentId, classId, forename, surname, email, data, priorities, studentPriorities) VALUES ? as new_data ON DUPLICATE KEY UPDATE classId = new_data.classId, forename = new_data.forename, surname = new_data.surname, email = new_data.email, data = new_data.data, priorities = new_data.priorities, studentPriorities = new_data.studentPriorities; `; argArray.push(stDb); }
+            if(clDb.length > 0) { compoundQuery += `INSERT INTO timetable__classes (ttId, classId, teacher) VALUES ? ON DUPLICATE KEY UPDATE teacher = VALUES(teacher);`; argArray.push(clDb); }
+            if(coDb.length > 0) { compoundQuery += `INSERT INTO timetable__courses (ttId, courseId, name, classSize, required, times) VALUES ? ON DUPLICATE KEY UPDATE name = VALUES(name), classSize = VALUES(classSize), required = VALUES(required), times = VALUES(times);`; argArray.push(coDb); }
+            if(reDb.length > 0) { compoundQuery += `INSERT INTO timetable__restrictions (ttId, restrictionId, name, description, options, pollInclude) VALUES ? ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description), options = VALUES(options), pollInclude = VALUES(pollInclude); `; argArray.push(reDb); }
+            if(stDb.length > 0) { compoundQuery += `INSERT INTO timetable__students (ttId, studentId, classId, forename, surname, email, data, priorities, studentPriorities) VALUES ? ON DUPLICATE KEY UPDATE classId = VALUES(classId), forename = VALUES(forename), surname = VALUES(surname), email = VALUES(email), data = VALUES(data), priorities = VALUES(priorities), studentPriorities = VALUES(studentPriorities); `; argArray.push(stDb); }
 
             if(compoundQuery !== '') {
                 db.query(compoundQuery, argArray, (e, rAll) => {
@@ -415,16 +417,16 @@ router.post('/getTimetable', checkAuth, (req, res, next) => {
                     classId: a.classId, 
                     email: a.email, 
                     name: { forename: a.forename, surname: a.surname },
-                    data: a.data,
-                    coursePriorities: a.priorities,
-                    studentPriorities: a.studentPriorities
+                    data: JSON.parse(a.data),
+                    coursePriorities: JSON.parse(a.priorities),
+                    studentPriorities: JSON.parse(a.studentPriorities)
                 }
             })
 
-            let blocks = r[0][0].blocks ?? [];
-            let scores = r[0][0].scores ?? [];
-            let colors = r[0][0].colors ?? [];
-            let rooms = r[0][0].rooms ?? [];
+            let blocks = JSON.parse(r[0][0].blocks) ?? [];
+            let scores = JSON.parse(r[0][0].scores) ?? [];
+            let colors = JSON.parse(r[0][0].colors) ?? [];
+            let rooms = JSON.parse(r[0][0].rooms) ?? [];
 
             let foundTimetable = {
                 id: r[0][0].id,
@@ -510,6 +512,21 @@ router.post('/emailMessage', (req, res, next) => {
     .then((result) => { res.status(200).json({ error: false, message: '', data: { emailSent: result} }) })
     .catch((e) => { res.status(400).json({ error: true, message: e, data: {} }) });
 
+});
+
+
+router.post('/getSaveCode', checkAuth, (req, res, next) => {
+    const ttId = req.body.ttId;
+    const query = `SELECT saveCode FROM timetable WHERE id = ?`;
+
+    db.query(query, [ttId], (e, r) => {
+        if(!e) {
+            res.status(200).json({ error: false, message: ``, data: { code: r[0].saveCode } })
+        } else {
+            console.log(e);
+            res.status(400).json({ error: true, message: `Unable to get new savecode`, data: {} })  
+        }
+    }) 
 });
 
 module.exports = router;

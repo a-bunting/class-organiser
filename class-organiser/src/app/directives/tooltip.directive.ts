@@ -82,16 +82,16 @@ export class TooltipDirective {
       // this.componentRef.location.nativeElement.classList.add('fadeOutTooltip');
 
       setTimeout(() => {
-        document.body.removeChild(this.componentRef.location.nativeElement);
-        this.viewContainerRef.clear();
-        this.componentRef.destroy();
-        this.componentRef = null!;
+        try {
+          document.body.removeChild(this.componentRef.location.nativeElement);
+          this.viewContainerRef.clear();
+          this.componentRef.destroy();
+          this.componentRef = null!;
+        } catch (e: unknown) {
+          //
+        }
       }, 50);
     }
-  }
-
-  createToolTipElement(): void {
-
   }
 
 }

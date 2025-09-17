@@ -1,8 +1,9 @@
 import { Component, OnInit, provideZoneChangeDetection } from '@angular/core';
 import { NumberValueAccessor } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, Observable } from 'rxjs';
 import { AuthenticationService, User } from 'src/app/services/authentication.service';
-import { DatabaseService } from 'src/app/services/database.service';
+import { DatabaseReturn, DatabaseService } from 'src/app/services/database.service';
 import { DataValues, Restriction, SingleClass, SingleCourse, SingleStudent, SingleTimeBlock, Timetable, TimetableService } from 'src/app/services/timetable.service';
 
 interface CsvObject {
@@ -23,26 +24,27 @@ export class StudentDataComponent implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthenticationService,
-    private timetableService: TimetableService
+    private timetableService: TimetableService,
+    private databaseService: DatabaseService
   ) {
   }
 
   generateRandomData(input: any): void {
-    let selection: number = +input.target.value;
+    const selection: number = +input.target.value;
     if(selection === 0) this.generateStudentsData(0, 100, true);
     if(selection === 1) this.generateStudentsData(1, 90);
     if(selection === 2) this.generateStudentsData(1, 21, false);
   }
 
   generateStudentsData(sortMethod: number, studentCount: number, genderTest: boolean = true): void {
-    let forenamesMale = ['Albus','Harry','Ron','Fred','George','Neville','Finneus','Sirius','Remus','Lord','Arthur','Charlie','Bill','Rubeus','Severus'];
-    let forenamesFemale = ['HERMIONE','MOLLY','FLEUR','MINERVA','GINNY','CHO','LAVENDER','PARVATI','PADMA','LILLY','LUNA','BELLATRIX','NARCISSA','NYMPHADORA','RITA'];
-    let surnames = ['Dumbledore','McGonagall','Weasley','Longbottom','Sprout','Flitwick','Black','Lupin','Voldemort','Delacour','Tonks','Moody','Shacklebolt','Lovegood','Malfoy','Hagrid'];
+    const forenamesMale = ['Albus','Harry','Ron','Fred','George','Neville','Finneus','Sirius','Remus','Lord','Arthur','Charlie','Bill','Rubeus','Severus'];
+    const forenamesFemale = ['HERMIONE','MOLLY','FLEUR','MINERVA','GINNY','CHO','LAVENDER','PARVATI','PADMA','LILLY','LUNA','BELLATRIX','NARCISSA','NYMPHADORA','RITA'];
+    const surnames = ['Dumbledore','McGonagall','Weasley','Longbottom','Sprout','Flitwick','Black','Lupin','Voldemort','Delacour','Tonks','Moody','Shacklebolt','Lovegood','Malfoy','Hagrid'];
 
-    let courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
-    let students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }})] : [];
+    const courses: { courseId: number, priority: number }[] = [...this.loadedTimetable.courses.filter((a: SingleCourse) => !a.requirement.required ).map((a: SingleCourse, i: number) => { return { courseId: a.id, priority: i + 1 }}), ...this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true ).map((a: SingleCourse) => { return { courseId: a.id, priority: 0 } })];
+    const students: { studentId: number, priority: number }[] = this.loadedTimetable.sortMethod === 1 ? [...new Array(this.loadedTimetable.studentPriorityCount).fill(0).map((a: number, i: number) => { return { studentId: -1, priority: i + 1 }})] : [];
 
-    let genderReestriction: Restriction = {
+    const genderReestriction: Restriction = {
       id: 0,
       options: [ {id: 0, value: 'Male'}, {id: 1, value: 'Female'} ],
       name: 'Gender',
@@ -52,11 +54,11 @@ export class StudentDataComponent implements OnInit {
 
     for(let i = 0 ; i < studentCount ; i++) {
 
-      let gender = Math.floor(Math.random() * 2);
-      let forename = gender === 0 ? forenamesMale[Math.floor(Math.random() * forenamesMale.length)] : forenamesFemale[Math.floor(Math.random() * forenamesFemale.length)].toUpperCase();
-      let surname = surnames[Math.floor(Math.random() * surnames.length)];
+      const gender = Math.floor(Math.random() * 2);
+      const forename = gender === 0 ? forenamesMale[Math.floor(Math.random() * forenamesMale.length)] : forenamesFemale[Math.floor(Math.random() * forenamesFemale.length)].toUpperCase();
+      const surname = surnames[Math.floor(Math.random() * surnames.length)];
 
-      let newStudent: SingleStudent = {
+      const newStudent: SingleStudent = {
         id: i, classId: -1,
         name: { forename: forename, surname: surname },
         email: `${forename}.${surname}@hogwarts.com`,
@@ -126,15 +128,30 @@ export class StudentDataComponent implements OnInit {
         // not logged in
         this.router.navigate(['']);
       },
-      error: (e: any) => { console.log(`Error with your login: ${e}`)}
+      error: (e: unknown) => { console.log(`Error with your login: ${e}`)}
     })
 
+    // load the timetable and update if the savecode has chnaged...
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => {
         this.loadedTimetable = tt;
+
+        // get the current savecode and compare to the loadedone
+        this.databaseService.getSaveCode(this.loadedTimetable.id).subscribe({
+          next: (result: DatabaseReturn) => {    
+            if(this.loadedTimetable.saveCode !== result.data.code) {
+              // savecode has changed thus reload the data.
+              this.timetableService.loadTimetableById(this.loadedTimetable.id, true);
+            }
+          }, 
+          error: (e: unknown) => { console.log(`Error: ${e}`)} 
+        })
+
       },
-      error: (e: any) => { console.log(`Error: ${e}`)}
+      error: (e: unknown) => { console.log(`Error: ${e}`)}
     })
+
+
   }
 
   getOptionalUnits(): SingleCourse[] {
@@ -227,13 +244,15 @@ export class StudentDataComponent implements OnInit {
     this.loadedTimetable.students = this.loadedTimetable.students.filter((a: SingleStudent) => a.id !== studentId);
 
     // remove them from all blocks in the timetable
-    for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
-     let timeBlock: SingleTimeBlock = this.loadedTimetable.schedule.blocks[i];
-
-     timeBlock.missingStudents = timeBlock.missingStudents.filter((a: number) => a !== studentId);
-
-      for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
-        timeBlock.blocks[o].students = timeBlock.blocks[o].students.filter((a: number) => a !== studentId);
+    if(this.loadedTimetable.schedule.blocks.length > 0) {
+      for(let i = 0 ; i < this.loadedTimetable.schedule.blocks.length ; i++) {
+       const timeBlock: SingleTimeBlock = this.loadedTimetable.schedule.blocks[i];
+  
+       timeBlock.missingStudents = timeBlock.missingStudents.filter((a: number) => a !== studentId);
+  
+        for(let o = 0 ; o < timeBlock.blocks.length ; o++) {
+          timeBlock.blocks[o].students = timeBlock.blocks[o].students.filter((a: number) => a !== studentId);
+        }
       }
     }
 
@@ -241,7 +260,7 @@ export class StudentDataComponent implements OnInit {
   }
 
   newStudent: SingleStudent = null!;
-  lockNewStudent: boolean = false;
+  lockNewStudent = false;
 
   addStudentToggle(): void {
 
@@ -273,7 +292,17 @@ export class StudentDataComponent implements OnInit {
   }
 
   submitNewStudent(): void {
-    this.loadedTimetable.students.push({ ...this.newStudent });
+    // add them to the students array
+    const studentListLength: number = this.loadedTimetable.students.push({ ...this.newStudent });
+
+    // get the student id...
+    const studentId: number = this.loadedTimetable.students[studentListLength - 1].id;
+
+    // now add them to the unassigned for all the classes
+    this.loadedTimetable.schedule.blocks.forEach((a: SingleTimeBlock) => {
+      a.missingStudents.push(studentId);
+    })
+
     this.newStudent = null!;
   }
 
@@ -376,7 +405,7 @@ export class StudentDataComponent implements OnInit {
       const entry: CsvObject = {};
 
       for (let j = 0; j < headers.length; j++) {
-        // exclude particlar columns
+        // exclude particular columns
         if(exclusions.includes(headers[j].toLowerCase())) continue;
         // add if its proper to
         entry[headers[j].toLowerCase().trim()] = values[j];
@@ -409,90 +438,10 @@ export class StudentDataComponent implements OnInit {
     this.loadedTimetable.students = students;
   }
 
-  // classes: SingleClass[] = [];
-  // courses: SingleCourse[] = [];
-
-  // generateClasses(data: CsvObject[]): void {
-  //   let teachers = Array.from(new Set(data.map(a => { return a['teacher'] }))).concat(this.loadedTimetable.classes.map((a: SingleClass) => { return a.teacher }));
-  //   let classesLastId: number = 0;
-
-  //   if(!teachers) return;
-
-  //   for(let i = 0 ; i < this.loadedTimetable.classes.length ; i++) {
-  //     if(this.loadedTimetable.classes[i].id >= classesLastId) classesLastId = this.loadedTimetable.classes[i].id + 1;
-  //   }
-
-  //   // makes a list of classes with all teachers, including new ones.
-  //   for(let i = 0 ; i < teachers.length ; i++) {
-  //     this.classes.push({ teacher: teachers[i], id: classesLastId + i });
-  //   }
-
-  //   console.log(this.classes);
-  //   this.loadedTimetable.classes = this.classes;
-  // }
-
-  // getClassId(teacherName: string): number {
-  //   return this.classes.find(a => a.teacher === teacherName)!.id;
-  // }
-
-  // getCourseId(name: string): number {
-  //   let courseIdIndex: number = this.courses.findIndex(a => a.name === name);
-
-  //   if(courseIdIndex !== -1) {
-  //     return this.courses[courseIdIndex].id;
-  //   } else {
-  //     return NaN;
-  //   }
-  // }
-
-  // getCoursePriorities(a: CsvObject): { priority: number, courseId: number }[] {
-  //   let coursePriorities: { priority: number, courseId: number }[] = [];
-
-  //   for(let i = 0 ; i < 16 ; i++) {
-  //     if(!isNaN(this.getCourseId(a[`${i}`]))) coursePriorities.push({ priority: i, courseId: this.getCourseId(a[`${i}`])})
-  //   }
-
-  //   // add in the required things.
-  //   const requiredCourses: SingleCourse[] = this.loadedTimetable.courses.filter((a: SingleCourse) => a.requirement.required === true );
-
-  //   for(let i = 0 ; i < requiredCourses.length ; i++) {
-  //     coursePriorities.push({ priority: 0, courseId: this.getCourseId(requiredCourses[i].name)})
-  //   }
-
-  //   return coursePriorities;
-  // }
-
-  // generateCourses(data: CsvObject[]): void {
-  //   let dataSet = data[0];
-  //   let coursesList: SingleCourse[] = this.loadedTimetable.courses;
-  //   let courses: string[] = this.loadedTimetable.courses.map((a: SingleCourse) => a.name );
-  //   let lastId: number = 0;
-  //   let newCourses: number = 0;
-
-  //   for(let i = 0 ; i < coursesList.length ; i++) {
-  //     if(coursesList[i].id >= lastId) lastId = coursesList[i].id + 1;
-  //   }
-
-  //   // ifnd new courses and add them
-  //   for(let i = 0 ; i < 16 ; i++) {
-  //     if(!courses.includes(dataSet[`${i+1}`])) {
-  //       // this is new
-  //       coursesList.push({ id: lastId + newCourses, name: dataSet[`${i+1}`], classSize: 24, requirement: { required: false, times: 1 } });
-  //       courses.push(dataSet[`${i}`]);
-  //       newCourses++;
-  //     }
-  //   }
-
-
-  //   this.courses = this.courses.concat(...coursesList);
-  //   console.log(this.courses);
-  //   this.loadedTimetable.courses = this.courses;
-  // }
-
   restrictionInclusionList: string[] = [];
 
   generateRestrictions(data: CsvObject[]): void {
-    let restrictionLists: string[] = this.loadedTimetable.restrictions.map((a: Restriction) => { return a.name });
+    const restrictionLists: string[] = this.loadedTimetable.restrictions.map((a: Restriction) => { return a.name });
     let lastRestrictionId: number = 0;
 
     for(let i = 0 ; i < this.loadedTimetable.restrictions.length ; i++) {
@@ -506,9 +455,9 @@ export class StudentDataComponent implements OnInit {
 
       if(!restrictionLists.includes(this.restrictionInclusionList[i])) {
         // this is a new one, get all the options
-        let optionsSet = Array.from(new Set(data.map(a => { return a[this.restrictionInclusionList[i]] }))).map((a: string, i: number) => { return { id: i, value: a}});
+        const optionsSet = Array.from(new Set(data.map(a => { return a[this.restrictionInclusionList[i]] }))).map((a: string, i: number) => { return { id: i, value: a}});
 
-        let newRestriction: Restriction = {
+        const newRestriction: Restriction = {
           id: lastRestrictionId + addedRestrictions, name: this.restrictionInclusionList[i], description: '', poll: true, options: optionsSet
         }
 
@@ -519,11 +468,11 @@ export class StudentDataComponent implements OnInit {
   }
 
   getStudentRestrictionDataValues(data: CsvObject): DataValues[] {
-    let restrictionData: DataValues[] = [];
+    const restrictionData: DataValues[] = [];
 
     for(let i = 0 ; i < this.loadedTimetable.restrictions.length ; i++) {
-      let restriction: Restriction = this.loadedTimetable.restrictions[i];
-      let studentData: string = data[restriction.name];
+      const restriction: Restriction = this.loadedTimetable.restrictions[i];
+      const studentData: string = data[restriction.name];
       restrictionData.push({ restrictionId: restriction.id, value: restriction.options.find((a: { id: number, value: string }) => a.value === studentData )!.id });
     }
 
@@ -536,7 +485,7 @@ export class StudentDataComponent implements OnInit {
 
   // returns the student id of prioirty X for this student
   getStudentStudentPriorityData(student: SingleStudent, priority: number): number {
-    let prio: { studentId: number, priority: number } = student.studentPriorities.find((a: { studentId: number, priority: number }) => a.priority === priority )!;
+    const prio: { studentId: number, priority: number } = student.studentPriorities.find((a: { studentId: number, priority: number }) => a.priority === priority )!;
     return prio.studentId;
   }
 

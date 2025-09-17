@@ -10,13 +10,14 @@
         <option value="{{ timetable.id }}" *ngFor="let timetable of timetables" [selected]="loadedTimetable ? loadedTimetable.id === timetable.id : false">{{ timetable.name }}</option>
       </select>
       <div class="controls__icon" (click)="createNewTimetable()" [tooltip]="'Create blank timetable'"><img src="../assets/icons/file-empty.png" alt="Create Blank Timetable"></div>
-      <div class="controls__icon" (click)="createDuplicateTimetable()" *ngIf="loadedTimetable" [tooltip]="'Create duplicate of this timetable'"><img src="../assets/icons/copy.png" alt="Duplicate Current Timetable"></div>
-      <div class="controls__icon" (click)="deleteTimetable()" *ngIf="loadedTimetable" [tooltip]="'Delete this timetable'"><img src="../assets/icons/bin2.png" alt="Delete Current Timetable"></div>
+      <div class="controls__icon" (click)="createDuplicateNotification()" *ngIf="loadedTimetable" [tooltip]="'Create duplicate of this timetable'"><img src="../assets/icons/copy.png" alt="Duplicate Current Timetable"></div>
+      <div class="controls__icon" (click)="deleteNotification()" *ngIf="loadedTimetable" [tooltip]="'Delete this timetable'"><img src="../assets/icons/bin2.png" alt="Delete Current Timetable"></div>
       <div class="controls__icon" (click)="saveTimetable()" *ngIf="loadedTimetable" [tooltip]="'Save this timetable'"><img src="../assets/icons/floppy-disk.png" alt="Save Current Timetable"></div>
     </div>
 
-    <nav>
-      <a routerLink="timetables" routerLinkActive="link__active" *ngIf="loadedTimetable">Timetable</a>
+    <nav *ngIf="loadedTimetable">
+      <a [routerLink]="['timetables','classes']" routerLinkActive="link__active" *ngIf="loadedTimetable.sortMethod === 0">Timetable</a>
+      <a [routerLink]="['timetables','groups']" routerLinkActive="link__active" *ngIf="loadedTimetable.sortMethod === 1">Timetable</a>
       <a routerLink="students" routerLinkActive="link__active" *ngIf="loadedTimetable">Student Data</a>
     </nav>
     <div class="controls__right">

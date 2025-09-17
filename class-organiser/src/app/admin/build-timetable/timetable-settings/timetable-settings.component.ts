@@ -118,6 +118,7 @@ export class TimetableSettingsComponent implements OnInit {
     let dataValue: DataValues = { restrictionId: newRestriction.id, value: 0 };
     this.loadedTimetable.students.map((a: SingleStudent) => a.data.push({...dataValue}));
 
+    
     this.loadedTimetable.restrictions.push(newRestriction);
   }
 
@@ -448,7 +449,6 @@ export class TimetableSettingsComponent implements OnInit {
 
   changeSortingMethod(input: any): void {
     this.loadedTimetable.sortMethod = +input.target.value;
-    console.log(this.loadedTimetable.sortMethod);
   }
 
   enableShuffle(): void {

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DatabaseReturn, DatabaseService } from '../services/database.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { SingleCourse, SingleStudent } from '../services/timetable.service';
+import { SingleStudent } from '../services/timetable.service';
 
 interface SurveyData {
   id: number,
@@ -128,7 +128,7 @@ export class DataCollectionComponent implements OnInit {
         if(foundObject) {
           this.student = foundObject.object;
           this.confirmedEmail = this.student.email!;
-          this.locked = true;
+          // this.locked = true;
           this.loadNewSurvey(this.codeInput, true);
         } else {
           this.loadNewSurvey(this.codeInput, true);
@@ -194,7 +194,6 @@ export class DataCollectionComponent implements OnInit {
         ...this.data.restrictions.map((a: { id: number, name: string, description: string, options: { id: number, value: string }[] }) => { return { restrictionId: +a.id, value: 0 }})
       ]
     }
-
   }
 
   setClass(classId: any): void {

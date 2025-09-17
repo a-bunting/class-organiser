@@ -26,6 +26,7 @@ export class ClassPriorityComponent implements OnInit {
     this.timetableService.loadedTimetable.subscribe({
       next: (tt: Timetable) => {
         this.loadedTimetable = tt;
+        console.log(tt);
       },
       error: (e: any) => { console.log(`Error: ${e}`)}
     })

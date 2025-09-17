@@ -101,29 +101,41 @@ router.post('/save', (req, res, next) => {
             (SELECT MAX(id) AS maxid FROM timetable__students) x
         WHERE ttId = ${ttId}
     `
-    db.query(query, (e, r) => {
+    // also retrieve data for the restrictions and courses which are NOT optional...
+    const nonVisibleOptionsQuery = `
+        SELECT restrictionId, options FROM timetable__restrictions WHERE ttId = ${ttId} AND pollInclude = 0;
+        SELECT courseId FROM timetable__courses WHERE ttId = ${ttId} AND required = 1
+    `;
+
+    db.query(`${query};${nonVisibleOptionsQuery}`, (e, r) => {
         if(!e && r[0][0].id === ttId) {
             if(r[0][0].locked === 0) {
-                const prioUpdateINTOQuery = r[0][0].sortMethod === 0 ? 'priorities' : 'studentPriorities';
-                const prioUpdateVALUESQuery = r[0][0].sortMethod === 0 ? 'priorities = new_data.priorities' : 'studentPriorities = new_data.studentPriorities';
-                const prioUpdateDATA = r[0][0].sortMethod === 0 ? JSON.stringify(student.coursePriorities) : JSON.stringify(student.studentPriorities);
+                // get student data
+                const prioUpdateDATA = r[0][0].sortMethod === 0 ? student.coursePriorities : [];
+                
+                // get non option data to concat to above data
+                const nonOptionCourses = r[3].map(a => { return { "courseId": a.courseId, "priority": 0 }});
+                const restrictionOptions = JSON.parse(r[2][0].options);
+                const nonOptionRestrictions = r[2].map(a => { return { "restrictionId": a.restrictionId, "value": restrictionOptions[0].id }});
+                
+                // concat and stringify
+                const allRestrictionData = JSON.stringify(student.data.concat(nonOptionRestrictions));
+                const allCourseData = JSON.stringify(prioUpdateDATA.concat(nonOptionCourses));
+                const studentPrioUpdateDATA = r[0][0].sortMethod === 0 ? JSON.stringify([]) : JSON.stringify(student.studentPriorities);
 
                 const insertQuery = `
                     INSERT INTO timetable__students
-                    (ttId, studentId, classId, forename, surname, email, data, ${prioUpdateINTOQuery})
+                    (ttId, studentId, classId, forename, surname, email, data, priorities, studentPriorities)
                     VALUES
-                    (?) as new_data
+                    (?)
                     ON DUPLICATE KEY UPDATE
-                    forename = new_data.forename, surname = new_data.surname, data = new_data.data, ${prioUpdateVALUESQuery} 
+                    forename = VALUES(forename), surname = VALUES(surname), data = VALUES(data), priorities = VALUES(priorities), studentPriorities = VALUES(studentPriorities) 
                 `;
 
-                console.log(insertQuery);
-
                 const nextId = +r[1][0].NextAvailableId + 1;
-                
-                db.query(insertQuery, [[r[0][0].id, newSid ? nextId : req.body.student.id, student.classId, student.name.forename, student.name.surname, student.email, JSON.stringify(student.data), prioUpdateDATA]], (e2, r2) => {
-                    
-                    
+
+                db.query(insertQuery, [[r[0][0].id, newSid ? nextId : req.body.student.id, student.classId, student.name.forename, student.name.surname, student.email, allRestrictionData, allCourseData, studentPrioUpdateDATA]], (e2, r2) => {
+
                     if(!e2) {
                         // do the stats
                         let stats = req.stats;
@@ -134,7 +146,6 @@ router.post('/save', (req, res, next) => {
                         const updateTtSavecode = `UPDATE timetable SET saveCode = ? WHERE id = ?`;
 
                         db.query(updateTtSavecode, [newSaveCode, ttId], (e3, r3) => {
-                            console.log(e3);
                             if(!e3) {
                                 res.status(200).json({ error: false, message: '', data: { id: nextId } })
                             } else {
@@ -142,7 +153,7 @@ router.post('/save', (req, res, next) => {
                             }
                         })
                     } else {
-                        res.status(400).json({ error: true, message: 'Unable to add data.', data: { codeCorrect: true } })
+                        res.status(400).json({ error: true, message: 'Unable to add data.', data: { codeCorrect: true, error: e2 } })
                     }
                 })
             } else {

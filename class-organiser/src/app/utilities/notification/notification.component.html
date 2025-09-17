@@ -1,0 +1,47 @@
+<div class="notification__background">
+    <div class="notification">
+
+        <a tabindex="0" class="notification__close" (click)="executeCommand(null)" (keydown)="executeCommand(null)">
+            X
+        </a>
+
+        <div class="notification__title">
+            {{ title }}
+        </div>
+        <div class="notification__body">
+
+            <ng-container *ngIf="body.type === 'text'">
+                <p *ngIf="body.text">{{ body.text }}</p>
+                <p *ngFor="let value of body.values">{{ value.text }}</p>
+            </ng-container>
+            
+            <ng-container *ngIf="body.type === 'list'">
+                <p *ngIf="body.text">{{ body.text }}</p>
+                <ul>
+                    <li *ngFor="let value of body.values">{{ value.text }}</li>
+                </ul>
+            </ng-container>
+            
+            <ng-container *ngIf="body.type === 'checkbox'">
+                <p *ngIf="body.text">{{ body.text }}</p>
+                <div class="notification__checkbox" *ngFor="let value of body.values; let i = index">
+                    <input id="checkbox{{i}}" class="checkbox" type="checkbox" [checked]="value.selected ?? false" (change)="checkDisabled()">
+                    <label for="checkbox{{i}}">{{ value.text }}</label>
+                </div>
+            </ng-container>
+            
+            <ng-container *ngIf="body.type === 'radio'">
+                <p *ngIf="body.text">{{ body.text }}</p>
+                <div class="notification__radio" *ngFor="let value of body.values; let i = index">
+                    <input id="radio{{i}}" type="radio" name="radioGroup" [checked]="value.default ?? false" (change)="checkDisabled()">
+                    <label for="radio{{i}}">{{ value.text }}</label>
+                </div>
+            </ng-container>
+        </div>
+        <div class="notification__options">
+            <button class="notification__button" *ngFor="let option of options; let i = index" (click)="executeCommand(option.returnValue)" [disabled]="optionsButtonStatus[i]">
+                {{ option.text }}
+            </button>
+        </div>
+    </div>
+</div>

@@ -18,7 +18,6 @@ import { OrdinalPipe } from './utilities/ordinal.pipe';
 import { LoginComponent } from './user/login/login.component';
 import { RegisterComponent } from './user/register/register.component';
 import { TimetablesComponent } from './timetables/timetables.component';
-import { StartComponent } from './start/start.component';
 import { AuthInterceptor } from './interceptors/auth-interceptor';
 import { AuthGuard } from './guards/auth.guard';
 import { SmallLoaderComponent } from './utilities/small-loader/small-loader.component';
@@ -36,6 +35,8 @@ import { AttributionComponent } from './utilities/attribution/attribution.compon
 import { WelcomeComponent } from './welcome/welcome.component';
 import { PrivacyComponent } from './welcome/privacy/privacy.component';
 import { TermsComponent } from './welcome/terms/terms.component';
+import { NotificationComponent } from './utilities/notification/notification.component';
+import { NotificationService } from './services/notification.service';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,6 @@ import { TermsComponent } from './welcome/terms/terms.component';
     LoginComponent,
     RegisterComponent,
     TimetablesComponent,
-    StartComponent,
     SmallLoaderComponent,
     DataCollectionComponent,
     SelectTimetableTypeComponent,
@@ -62,7 +62,8 @@ import { TermsComponent } from './welcome/terms/terms.component';
     AttributionComponent,
     WelcomeComponent,
     PrivacyComponent,
-    TermsComponent
+    TermsComponent,
+    NotificationComponent
   ],
   imports: [
     BrowserModule,
@@ -76,6 +77,7 @@ import { TermsComponent } from './welcome/terms/terms.component';
   providers: [
     Title,
     AuthGuard,
+    NotificationService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     {provide: LocationStrategy, useClass: HashLocationStrategy}
   ],

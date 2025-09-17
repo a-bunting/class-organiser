@@ -134,7 +134,7 @@ export class TimetableService {
         let local: Timetable[] = this.getFromLocalStorage().filter((a: Timetable) => ids.includes(a.id) );
         window.localStorage.setItem('classOrganiser', JSON.stringify(local));
       },
-      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      error: (e: unknown) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
   }
@@ -144,11 +144,11 @@ export class TimetableService {
    * @param ttId
    * @returns
    */
-  loadTimetableById(ttId: number): void {
+  loadTimetableById(ttId: number, force = false): void {
     const timetable: Timetable = this.timetables.find((a: Timetable) => a.id === ttId)!;
     const timetableLoad: TimetableList = this.timetableList.value.find((a: TimetableList) => a.id === ttId)!;
 
-    if(timetable && timetableLoad) {
+    if(timetable && timetableLoad && !force) {
       // this is in the timetable array already, but it MIGHT have just come from a local copy
       // compare the loaded savecode to the downloaded database savecode
       if(timetable.saveCode === timetableLoad.saveCode) {
@@ -173,15 +173,16 @@ export class TimetableService {
           this.updateLocalStorage(result.data.id, result.data);
         }
 
+        console.log(result.data);
         this.loadTimetable(result.data);
       },
-      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      error: (e: unknown) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
 
   }
 
-  errorThrown(e: any): void {
+  errorThrown(e: unknown): void {
 
   }
 
@@ -193,7 +194,7 @@ export class TimetableService {
         // lock it locally too
         this.loaded.locked = value;
       },
-      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      error: (e: unknown) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
   }
@@ -261,7 +262,7 @@ export class TimetableService {
           this.clearTemporaryChanges();
         }
       },
-      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      error: (e: unknown) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
   }
@@ -295,7 +296,7 @@ export class TimetableService {
         this.loaded = null!;
         this.loadedTimetable.next(null!);
       },
-      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      error: (e: unknown) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
 
@@ -337,7 +338,7 @@ export class TimetableService {
       next: (result: DatabaseReturn) => {
         this.timeTableCreated(result, newTimetable);
       },
-      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      error: (e: unknown) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
 
@@ -359,9 +360,29 @@ export class TimetableService {
     this.fullSave(timetable);
   }
 
-  createDuplicate(): void {
+  createDuplicate(scheduleDataCopy = true, studentDataCopy = true): void {
     // duplicate the loaded timetable
     const timetable: Timetable = JSON.parse(JSON.stringify(this.loaded));
+    
+    // if required remove stuent data
+    if(!studentDataCopy) {
+      timetable.students = [];
+      timetable.schedule.blocks.forEach((a: SingleTimeBlock) => {
+        a.missingStudents = [];
+
+        a.blocks.forEach((b: SingleBlock) => {
+          b.lockedStudents = [];
+          b.students = [];
+        })
+      })
+    }
+
+    // if schedule data is not requireed
+    if(!scheduleDataCopy) {
+      timetable.schedule.blocks = [];
+      delete timetable.schedule.scores;
+    }
+
     timetable.code = ""; // force a new entry in the db
     timetable.name = timetable.name + ' (Copy)';
     timetable.id = undefined!;
@@ -370,7 +391,7 @@ export class TimetableService {
 
     this.databaseService.saveTimetable(timetable).subscribe({
       next: (result: DatabaseReturn) => { this.timeTableCreated(result, timetable);  },
-      error: (e: any) => { this.errorThrown(e); this.loading.next(false); },
+      error: (e: unknown) => { this.errorThrown(e); this.loading.next(false); },
       complete: () => { this.loading.next(false); }
     })
   }

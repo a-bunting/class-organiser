@@ -1,15 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService, User } from '../services/authentication.service';
 import { DatabaseReturn, DatabaseService } from '../services/database.service';
 import { Timetable, TimetableList, TimetableService } from '../services/timetable.service';
+import { NotificationReturnData, NotificationService } from '../services/notification.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-timetables',
   templateUrl: './timetables.component.html',
   styleUrls: ['./timetables.component.scss']
 })
-export class TimetablesComponent {
+export class TimetablesComponent implements OnInit ,OnDestroy {
 
   timetables: TimetableList[] = [];
   loadedTimetable: Timetable = null!;
@@ -22,8 +24,11 @@ export class TimetablesComponent {
     private router: Router,
     public authService: AuthenticationService,
     private timetableService: TimetableService,
-    private databaseService: DatabaseService
+    private databaseService: DatabaseService,
+    private notificationService: NotificationService,
+    private viewContainerRef: ViewContainerRef
   ) {
+    notificationService.setViewContainerRef = viewContainerRef;
     this.boundRemoveUserMenu = this.removeUserMenu.bind(this);
     this.preloadImages();
   }
@@ -51,7 +56,7 @@ export class TimetablesComponent {
       next: (tt: Timetable) => {
         if(tt) {
           this.loadedTimetable = tt;
-          this.router.navigate(['dashboard', 'timetables']);
+          // this.router.navigate(['dashboard', 'timetables']);
         } else {
           this.loadedTimetable = null!;
         }
@@ -64,6 +69,10 @@ export class TimetablesComponent {
     })
 
     this.timetableService.getTimetableList();
+  }
+
+  ngOnDestroy(): void {
+    this.notificationSubscriptions?.unsubscribe();
   }
 
   loadTimetable(input: any): void {
@@ -83,12 +92,51 @@ export class TimetablesComponent {
     this.createNew = value;
   }
 
-  createDuplicateTimetable(): void {
-    this.timetableService.createDuplicate();
+  createDuplicateNotification(): void {
+    this.notificationSubscriptions = this.notificationService.createNewNotification(
+      `Create a duplicte of ${this.loadedTimetable.name}`,
+      {
+        type: 'checkbox',
+        text: 'This will create a duplicate of the currently loaded timetable. Which data would you also like to transfer?',
+        values: [
+          { text: 'Scheduling Data', selected: true },
+          { text: 'Student Data', selected: true },
+        ]
+      },
+      [
+        { text: 'Duplicate timetable', returnValue: true },
+        { text: 'Cancel', returnValue: null },
+      ]
+     ).subscribe({
+      next: (data: NotificationReturnData) => {
+        if(data[0] === true && Array.isArray(data[1])) {
+          this.timetableService.createDuplicate(data[1][0], data[1][1]);
+        }
+      }
+     })
   }
 
-  deleteTimetable(): void {
-    this.timetableService.deleteTimetable();
+  deleteNotification(): void {
+    this.notificationSubscriptions = this.notificationService.createNewNotification(
+      `Delete Timetable: ${this.loadedTimetable.name}`,
+      {
+        type: 'checkbox',
+        text: 'Are you sure you want to delete this timetable? This will delete all data, including student data and scheduling data.',
+        values: [
+          { text: 'Yes, I understand this will delete all data.', selected: false },
+        ]
+      },
+      [
+        { text: 'Delete timetable', returnValue: true, conditions: [true] },
+        { text: 'Cancel Deletion', returnValue: null },
+      ]
+     ).subscribe({
+      next: (data: NotificationReturnData) => {
+        if(data[0] === true && Array.isArray(data[1]) && data[1][0] === true) {
+          this.timetableService.deleteTimetable();
+        }
+      }
+     })
   }
 
   private boundRemoveUserMenu: (event: Event) => void;
@@ -106,7 +154,7 @@ export class TimetablesComponent {
   removeUserMenu(): void {
     window.removeEventListener('click', this.boundRemoveUserMenu);
 
-    let usermenuElement: HTMLElement = document.getElementById('usermenu')!;
+    const usermenuElement: HTMLElement = document.getElementById('usermenu')!;
     usermenuElement.classList.add('usermenu__unload');
 
     setTimeout(() => {
@@ -129,7 +177,7 @@ export class TimetablesComponent {
 
   preloadImages(): void {
     const preload = (folder: string, src: string) => {
-      let img: HTMLImageElement = new Image();
+      const img: HTMLImageElement = new Image();
       img.src = `../../assets/${folder}/${src}`;
     }
 
@@ -151,4 +199,32 @@ export class TimetablesComponent {
       for(let o = 0 ; o < fileNames[i].names.length ; o++) preload(fileNames[i].folder, fileNames[i].names[o]);
     }
   }
+
+  notificationSubscriptions: Subscription | null = null;
+
+  testNotification2(): void {
+   this.notificationSubscriptions = this.notificationService.createNewNotification(
+    'test notififcation',
+    {
+      type: 'checkbox',
+      text: 'This is to test out whether checkboxes work in the notification: ',
+      values: [
+        { text: 'do lists work?', selected: true },
+        { text: 'if not, why not?', selected: true }
+      ]
+    },
+    [
+      { text: 'I understand', returnValue: 1, conditions: [true, true] },
+      { text: 'I do NOT understand', returnValue: 0 },
+    ]
+   ).subscribe({
+    next: (data: NotificationReturnData) => {
+      console.log(data);
+      if(data[0] === 0) {
+        this.notificationService.destroyNotification();
+      }
+    }
+   })
+  }
+
 }
